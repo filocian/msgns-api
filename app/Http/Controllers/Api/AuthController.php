@@ -19,10 +19,10 @@ final class AuthController extends Controller
     }
 
     final public function signUp(Request $request): JsonResponse
-    {+
-        try {,
+    {
+        try {
             $this->signUpValidation($request);
-
+            
             $user = $this->authService->signUp(
                 $request->get('email'),
                 $request->get('name'),
@@ -68,6 +68,10 @@ final class AuthController extends Controller
         } catch (\Exception $e) {
             return HttpJson::KO($e->getMessage());
         }
+    }
+
+    final public function currentUser(Request $request) {
+        return $request->user();
     }
 
     private function loginValidation(Request $request): array

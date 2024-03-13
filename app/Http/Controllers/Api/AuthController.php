@@ -71,7 +71,7 @@ final class AuthController extends Controller
     }
 
     final public function currentUser(Request $request) {
-        return $request->user();
+        return HttpJson::OK($request->user());
     }
 
     private function loginValidation(Request $request): array
@@ -87,7 +87,7 @@ final class AuthController extends Controller
         return $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|unique:users,email',
-            'password' => 'required|string',
+            'password' => 'required|string:min:6|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
             'repeat_password' => 'required|string|same:password'
         ]);
     }

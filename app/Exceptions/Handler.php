@@ -2,14 +2,13 @@
 
 namespace App\Exceptions;
 
-use http\Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Contracts\HttpJson;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    /**
+    /**w
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
      * @var array<int, string>
@@ -22,8 +21,8 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
-        return response()->json(['message' => $e->getMessage()], 500);
-        return parent::render($request, $e);
+        return HttpJson::KO($e->getMessage());
+//        return parent::render($request, $e);
     }
 
     /**

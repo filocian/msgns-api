@@ -11,10 +11,6 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AuthService
 {
-    public static function isDeferred() {
-        return false;
-    }
-
     public function signUp(string $email, string $name, string $password)
     {
         $user = User::create([
@@ -41,7 +37,7 @@ class AuthService
         }
         Request::session()->regenerate();
 
-        $user = User::where('email', $email)->first();
+        $user = User::query()->where('email', $email)->first();
 
         return $user;
     }
@@ -52,6 +48,17 @@ class AuthService
         Auth::guard('web')->logout();
 
         return true;
+    }
+
+    public function user()
+    {
+        return Auth::user();
+    }
+
+
+    public function id(): int
+    {
+        return $this->user()->getAuthIdentifier();
     }
 
     private function buildUserToken(User $user): string

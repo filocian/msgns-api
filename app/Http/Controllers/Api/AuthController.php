@@ -58,12 +58,14 @@ final class AuthController extends Controller
 
     }
 
-    final public function logout(): JsonResponse
+    final public function logout(Request $request): JsonResponse
     {
         try {
-            auth()->user()->tokens()->delete();
-
-            return HttpJson::OK(true);
+            $bye = $this->authService->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+    
+            return HttpJson::OK($bye);
 
         } catch (\Exception $e) {
             return HttpJson::KO($e->getMessage());

@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -33,27 +33,25 @@ class AuthService
 
     public function login(string $email, string $password)
     {
-        $user = User::where('email', $email)->first();
 
-        if (!$user || !Hash::check($password, $user->password)) {
+        if (!Auth::attempt(['email' => $email, 'password' => $password])) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
+        Request::session()->regenerate();
 
-        $token = $this->buildUserToken($user);
+        $user = User::where('email', $email)->first();
 
-        return $token;
+        return $user;
     }
 
 
-    final public function logout(): JsonResponse
+    public function logout()
     {
-        auth()->user()->tokens()->delete();
+        Auth::guard('web')->logout();
 
-        return response()->json([
-            'message' => 'Logged out'
-        ]);
+        return true;
     }
 
     private function buildUserToken(User $user): string

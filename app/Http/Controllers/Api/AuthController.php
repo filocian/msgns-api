@@ -4,93 +4,63 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Contracts\HttpJson;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\SignupRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Validation\ValidationException;
 
-final class AuthController extends Controller
+class AuthController extends Controller
 {
     private AuthService $authService;
 
-    public function __construct(AuthService $authService) {
+    public function __construct(AuthService $authService)
+    {
         $this->authService = $authService;
     }
 
-    final public function signUp(Request $request): JsonResponse
+    public function signUp(SignupRequest $request): JsonResponse
     {
-        try {
-            $this->signUpValidation($request);
-            
-            $user = $this->authService->signUp(
-                $request->get('email'),
-                $request->get('name'),
-                $request->get('password'),
-            );
+        $user = $this->authService->signUp(
+            $request->get('email'),
+            $request->get('name'),
+            $request->get('password'),
+        );
 
-            return HttpJson::OK(
-                [ 'user' => $user ],
-                Response::HTTP_CREATED
-            );
-
-        } catch (\Exception $e) {
-            return HttpJson::KO($e->getMessage());
-        }
+        return HttpJson::OK(
+            ['user' => $user],
+            Response::HTTP_CREATED
+        );
     }
 
 
-    final public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        try {
-            $this->loginValidation($request);
+        $user = $this->authService->login(
+            $request->get('email'),
+            $request->get('password')
+        );
 
-            $token = $this->authService->login(
-                $request->get('email'),
-                $request->get('password')
-            );
-
-            return HttpJson::OK( [ 'token' => $token ]);
-
-        } catch (ValidationException $exception) {
-            throw $exception;
-        }
-
+        return HttpJson::OK(['user' => $user]);
     }
 
     final public function logout(Request $request): JsonResponse
     {
-        try {
-            $bye = $this->authService->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-    
-            return HttpJson::OK($bye);
+        $bye = $this->authService->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        } catch (\Exception $e) {
-            return HttpJson::KO($e->getMessage());
-        }
+        return HttpJson::OK($bye);
     }
 
-    final public function currentUser(Request $request) {
+    public function currentUser(Request $request): JsonResponse
+    {
         return HttpJson::OK($request->user());
     }
 
-    private function loginValidation(Request $request): array
+    public function hello(): JsonResponse
     {
-        return $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-    }
-
-    private function signUpValidation(Request $request): array
-    {
-        return $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users,email',
-            'password' => 'required|string:min:6|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
-            'repeat_password' => 'required|string|same:password'
-        ]);
+        return HttpJson::OK('hello');
     }
 }

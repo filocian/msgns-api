@@ -6,11 +6,11 @@ interface RepositoryContract
 {
     public function getAll();
 
-    public function findOne($id);
+    public function findOne(string $id, ?array $opts = null);
 
-    public function create($data);
+    public function create(array $data, ?array $opts = null);
 
-    public function update($id, $data);
+    public function update(string $id, array $data, ?array $opts = null);
 
-    public function delete($id);
+    public function delete(string $id);
 }

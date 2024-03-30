@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\NFC;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreNFCRequest extends FormRequest
+class UpdateNFCRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

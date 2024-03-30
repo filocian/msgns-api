@@ -55,10 +55,15 @@ class AuthService
         return Auth::user();
     }
 
-
-    public function id(): int
+    public function id(): ?int
     {
+        if (!$this->user()) return null;
         return $this->user()->getAuthIdentifier();
+    }
+
+    public function isAuthenticated(): bool
+    {
+        return Auth::check();
     }
 
     private function buildUserToken(User $user): string

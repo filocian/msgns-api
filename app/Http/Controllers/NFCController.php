@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\NFC\NFCNotFoundException;
+use App\Exceptions\NFC\NFCNotOwnedException;
 use App\Http\Contracts\HttpJson;
-use App\Http\Requests\StoreNFCRequest;
-use App\Http\Requests\UpdateNFCRequest;
+use App\Http\Requests\NFC\ActivateNFCRequest;
+use App\Http\Requests\NFC\StoreNFCRequest;
+use App\Http\Requests\NFC\UpdateNFCRequest;
 use App\Usecases\NFC\ActivateNFCUseCase;
 use App\Usecases\NFC\FindNFCByIdCUseCase;
 use App\Usecases\NFC\FindNFCsCUseCase;
+use App\Usecases\NFC\LoggedUserNFCUseCase;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,10 +21,10 @@ class NFCController extends Controller
 {
 
     public function __construct(
-        private readonly ActivateNFCUseCase  $activateNFCUseCase,
-        private readonly FindNFCByIdCUseCase $findNFCByIdCUseCase,
-        private readonly FindNFCsCUseCase    $findNFCsCUseCase,
-
+        private readonly ActivateNFCUseCase   $activateNFCUseCase,
+        private readonly FindNFCByIdCUseCase  $findNFCByIdCUseCase,
+        private readonly FindNFCsCUseCase     $findNFCsCUseCase,
+        private readonly LoggedUserNFCUseCase $loggedUserNFCUseCase
     )
     {
     }
@@ -32,13 +36,14 @@ class NFCController extends Controller
 
     /**
      * Activate NFC. Set owner
-     * @throws AuthenticationException
      */
-    public function activate(Request $request, int $id): JsonResponse
+    public function activate(ActivateNFCRequest $request, int $id): JsonResponse
     {
         $response = $this->activateNFCUseCase->run([
-            'nfcId' => $id
+            'nfcId' => $id,
+            'password' => $request->input('password')
         ]);
+
         return HttpJson::OK($response, Response::HTTP_CREATED);
     }
 
@@ -47,12 +52,26 @@ class NFCController extends Controller
      * Display a listing of the resource.
      * @throws AuthenticationException
      */
-    public function findById(int $id): JsonResponse
+    public function findById(Request $request, string $id): JsonResponse
     {
         $response = $this->findNFCByIdCUseCase->run([
             'nfcId' => $id
+        ], [
+            'include' => $request->input('include', [])
         ]);
 
+        return HttpJson::OK($response);
+    }
+
+
+    /**
+     * Display a listing of current user's NFCs.
+     * @throws NFCNotFoundException
+     * @throws NFCNotOwnedException
+     */
+    public function mine(): JsonResponse
+    {
+        $response = $this->loggedUserNFCUseCase->run();
         return HttpJson::OK($response);
     }
 
@@ -61,7 +80,12 @@ class NFCController extends Controller
      */
     public function find(Request $request): JsonResponse
     {
-        $response = $this->findNFCsCUseCase->run($request->toArray());
+        $response = $this->findNFCsCUseCase->run(
+            $request->toArray(),
+            [
+                'include' => $request->input('include')
+            ]);
+
         return HttpJson::OK($response);
     }
 

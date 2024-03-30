@@ -11,6 +11,7 @@ Route::get('/hello', function () {
     return HttpJson::OK('hi');
 });
 
+
 /**
  * AUTH ROUTES
  */
@@ -28,14 +29,19 @@ Route::prefix('auth')->group(function () {
 
 
 /**
- * PRODUCT ROUTES
+ * NFC ROUTES
  */
-Route::get('nfc/{id}', [NFCController::class, 'findById']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('nfc', [NFCController::class, 'find']);
-    Route::post('nfc', [NFCController::class, 'store']);
-    Route::post('nfc/{id}/activate', [NFCController::class, 'activate']);
-    Route::put('nfc/{id}', [NFCController::class, 'update']);
+Route::prefix('nfc')->group(function () {
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/mine', [NFCController::class, 'mine']);
+        Route::post('/', [NFCController::class, 'store']);
+        Route::post('/{id}/activate', [NFCController::class, 'activate']);
+        Route::put('/{id}', [NFCController::class, 'update']);
+        Route::get('/find', [NFCController::class, 'find']);
+    });
+    
+    Route::post('/hello', [NFCController::class, 'hello']);
+    Route::get('/{id}', [NFCController::class, 'findById']);
 });
-

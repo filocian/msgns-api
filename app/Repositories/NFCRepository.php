@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\DTO\NFCDto;
+use App\Exceptions\NFC\NFCNotFoundException;
 use App\Infrastructure\Contracts\RepositoryContract;
 use App\Models\NFC;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -19,30 +21,75 @@ class NFCRepository implements RepositoryContract
         return $customQuery(NFC::query());
     }
 
-    public function findOne($id)
+    /**
+     * @throws NFCNotFoundException
+     */
+    public function findOne(string $id, ?array $opts = null): NFCDto
     {
-        $found = NFC::query()->where('id', $id)->first();
-        if (!boolval($found)) {
-            throw new ModelNotFoundException('nfc_not_found');
+        try {
+            $found = NFC::query()->with($opts['include'] ?? [])->findOrFail($id);
+
+            return NFCDto::fromModel($found, $opts);
+        } catch (ModelNotFoundException $e) {
+            throw new NFCNotFoundException();
         }
-
-        return $found;
     }
 
-    public function create($data)
+    /**
+     * @throws NFCNotFoundException
+     */
+    public function findOneBy(array $attributes, ?array $opts = null): NFCDto
     {
-        return NFC::query()
-            ->create($data);
+        try {
+            $found = NFC::query()->where($attributes)->first();
+
+            if (!($found instanceof NFC)) {
+                throw new NFCNotFoundException();
+            }
+
+            return NFCDto::fromModel($found, $opts);
+        } catch (ModelNotFoundException $e) {
+            throw new NFCNotFoundException();
+        }
     }
 
-    public function update($id, $data)
+    /**
+     * @param array<string, mixed> $attributes
+     * @return NFCDto[]
+     */
+    public function findBy(array $attributes, ?array $opts = null): array
     {
-        $id = NFC::query()
-            ->where('id', $id)
-            ->update($data);
+        $found = NFC::query()->with(['type'])->where($attributes)->get();
+        return NFCDto::fromModelCollection($found, $opts);
+    }
 
 
-        return $this->findOne($id);
+    public function create(array $data, ?array $opts = null): NFCDto
+    {
+        return NFCDto::fromModel(
+            NFC::query()
+                ->create($data)
+                ->firstOrFail(),
+            $opts
+        );
+    }
+
+    /**
+     * @throws NFCNotFoundException
+     */
+    public function update(string $id, $data, ?array $opts = null): NFCDto
+    {
+        try {
+
+            NFC::query()
+                ->where('id', $id)
+                ->update($data);
+
+            return $this->findOne($id, $opts);
+
+        } catch (ModelNotFoundException $e) {
+            throw new NFCNotFoundException();
+        }
     }
 
     public function delete($id)

@@ -35,7 +35,7 @@ class NFCSeeder extends Seeder
         return [
             'product_type_id' => $productTypeIds->random()->id,
             'created_at' => $now,
-            'password' => fake()->password(),
+            'password' => '1234567890',
             'qty' => fake()->numberBetween([1, 10])
         ];
     }

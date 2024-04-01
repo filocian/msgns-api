@@ -14,7 +14,7 @@ class FindNFCsCUseCase implements UseCaseContract
     {
     }
 
-    public function run(array $data, mixed $opts = null): \Illuminate\Database\Eloquent\Collection
+    public function run(?array $data = null, array $opts = null): \Illuminate\Database\Eloquent\Collection
     {
         return $this->NFCRepository
             ->getAll();

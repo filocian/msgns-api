@@ -20,10 +20,16 @@ class NFCService
         return boolval($nfc->target_url) && !$this->isVirgin($nfc);
     }
 
+    public function isOwnedBy(NFCDto $nfc, int $userId): bool
+    {
+        return $nfc->user_id === $userId;
+    }
+
     public function isMine(NFCDto $nfc): bool
     {
         $userId = $this->authService->id();
-        if (!$userId) return false;
-        return $nfc->user_id === $userId;
+        return $this->isOwnedBy($nfc, $userId);
     }
+
+
 }

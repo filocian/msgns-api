@@ -2,10 +2,13 @@
 
 namespace App\Usecases\NFC;
 
+use App\Exceptions\NFC\NFCNotFoundException;
+use App\Exceptions\NFC\NFCNotOwnedException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Repositories\NFCRepository;
 use App\Services\AuthService;
-use Illuminate\Auth\AuthenticationException;
+use App\Services\NFCService;
+
 
 class ActivateNFCUseCase implements UseCaseContract
 {
@@ -14,30 +17,33 @@ class ActivateNFCUseCase implements UseCaseContract
     public function __construct(
         private readonly NFCRepository $NFCRepository,
         private readonly AuthService   $authService,
+        private readonly NFCService    $NFCService,
+
     )
     {
         $this->hello = 'hello';
     }
 
     /**
-     * @throws AuthenticationException
+     * @throws NFCNotOwnedException
+     * @throws NFCNotFoundException
+     * @var array{nfcId: int, password: string} $data
      */
-    public function run(array $data, mixed $opts = null)
+    public function run(?array $data = null, ?array $opts = null)
     {
         $userId = $this->authService->id();
-        if (!$userId) {
-            throw new AuthenticationException();
-        }
+        $nfcId = $data['nfcId'];
+        $password = $data['password'];
 
-        if (!isset($data['nfcId'])) {
-            throw new \Exception('invalid_nfc_id');
-        }
+        $nfc = $this->NFCRepository->findOneBy([
+            'id' => $nfcId,
+            'password' => $password
+        ]);
 
         return $this->NFCRepository
             ->update($data['nfcId'], [
                 'user_id' => $userId,
                 'active' => true
             ]);
-
     }
 }

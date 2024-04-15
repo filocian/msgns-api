@@ -2,7 +2,7 @@
 
 use App\Http\Contracts\HttpJson;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\NFCController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -35,13 +35,25 @@ Route::prefix('auth')->group(function () {
 Route::prefix('nfc')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/mine', [NFCController::class, 'mine']);
-        Route::post('/', [NFCController::class, 'store']);
-        Route::post('/{id}/activate', [NFCController::class, 'activate']);
-        Route::put('/{id}', [NFCController::class, 'update']);
-        Route::get('/find', [NFCController::class, 'find']);
+        Route::get('/mine', [ProductController::class, 'mine']);
+        Route::post('/', [ProductController::class, 'store']);
+        Route::post('/{id}/activate', [ProductController::class, 'activate']);
+        Route::put('/{id}', [ProductController::class, 'update']);
+        //Route::get('/find', [ProductController::class, 'find']);
     });
-    
-    Route::post('/hello', [NFCController::class, 'hello']);
-    Route::get('/{id}', [NFCController::class, 'findById']);
+
+    Route::post('/hello', [ProductController::class, 'hello']);
+    Route::get('/{id}', [ProductController::class, 'findById']);
+});
+
+Route::prefix('product')->group(function () {
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/{id}', [ProductController::class, 'findById']);
+        Route::get('/{id}/activate/{password}', [ProductController::class, 'assignToCurrentUser']);
+
+    });
+
+    Route::post('/hello', [ProductController::class, 'hello']);
+    Route::get('/{id}', [ProductController::class, 'findById']);
 });

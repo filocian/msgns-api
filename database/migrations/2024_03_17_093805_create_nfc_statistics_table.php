@@ -12,16 +12,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create($this->table, function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('nfc_id')->constrained();
-            $table->string('os', length: 20);
-            $table->string('browser', length: 100);
-            $table->string('locale', length: 5);
-            $table->text('user_agent');
-            $table->string('action', length: 20);
-            $table->timestamps();
-        });
+//        Schema::create($this->table, function (Blueprint $table) {
+//            $table->id();
+//            $table->foreignId('nfc_id')->constrained();
+//            $table->string('os', length: 20);
+//            $table->string('browser', length: 100);
+//            $table->string('locale', length: 5);
+//            $table->text('user_agent');
+//            $table->string('action', length: 20);
+//            $table->timestamps();
+//        });
     }
 
     /**

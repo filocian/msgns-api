@@ -12,14 +12,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create($this->table, function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->string('family')->index();
-            $table->foreignId('product_type_id')->constrained();
-            $table->foreignId('product_id');
-            $table->timestamps();
-        });
+//        Schema::create($this->table, function (Blueprint $table) {
+//            $table->id();
+//            $table->foreignId('user_id')->constrained();
+//            $table->string('family')->index();
+//            $table->foreignId('product_type_id')->constrained();
+//            $table->foreignId('product_id');
+//            $table->timestamps();
+//        });
     }
 
     /**

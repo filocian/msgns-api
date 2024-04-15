@@ -8,11 +8,11 @@ use Illuminate\Support\Collection;
 interface DTO
 {
     /**
-     * @param Model $models
-     * @param array $opts
+     * @param Model $model
+     * @param array|null $opts
      * @return DTO
      */
-    public static function fromModel($model, ?array $opts = null): DTO;
+    public static function fromModel(Model $model, ?array $opts = null): DTO;
 
 
     /**

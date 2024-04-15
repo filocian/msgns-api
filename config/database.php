@@ -1,5 +1,6 @@
 <?php
 
+use App\Static\Database\DBConfig;
 use Illuminate\Support\Str;
 
 return [
@@ -52,8 +53,8 @@ return [
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
+            'charset' => DBConfig::DB_CHARSET,
+            'collation' => DBConfig::DB_COLLATION,
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,

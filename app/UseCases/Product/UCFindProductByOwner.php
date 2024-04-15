@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Usecases\NFC;
+namespace App\UseCases\Product;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Repositories\NFCRepository;
 
-class FindNFCsCUseCase implements UseCaseContract
+class UCFindProductByOwner implements UseCaseContract
 {
 
     public function __construct(

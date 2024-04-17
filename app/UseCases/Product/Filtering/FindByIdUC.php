@@ -1,25 +1,18 @@
 <?php
 
-namespace App\Usecases\Product;
+namespace App\UseCases\Product\Filtering;
 
-use App\DTO\NFCDto;
 use App\DTO\ProductDto;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Models\Product;
-use App\Repositories\ProductRepository;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class UCFindProductById implements UseCaseContract
+readonly class FindByIdUC implements UseCaseContract
 {
-    public string $hello = 'fck';
-
-    public function __construct(
-        private readonly ProductRepository $productRepository,
-    )
+    public function __construct()
     {
-        $this->hello = 'hello';
     }
 
     /**

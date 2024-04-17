@@ -1,31 +1,31 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Product;
 
 use App\Exceptions\Product\ProductNotFoundException;
+use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
-use App\UseCases\Product\UCActivateProduct;
-use App\UseCases\Product\UCAssignToCurrentUser;
-use App\UseCases\Product\UCAssignToUser;
-use App\UseCases\Product\UCDeactivateProduct;
-use App\UseCases\Product\UCFindProductByLoggedUser;
-use App\UseCases\Product\UCFindProductById;
+use App\UseCases\Product\Activation\ActivateUC;
+use App\UseCases\Product\Activation\DeactivateUC;
+use App\UseCases\Product\Assignment\AssignToCurrentUserUC;
+use App\UseCases\Product\Assignment\AssignToUserUC;
+use App\UseCases\Product\Filtering\FindByCurrentUserUC;
+use App\UseCases\Product\Filtering\FindByIdUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class ProductController extends Controller
+class AdminProductController extends Controller
 {
-
     public function __construct(
-        private readonly UCActivateProduct         $UCActivateProduct,
-        private readonly UCDeactivateProduct       $UCDeactivateProduct,
-        private readonly UCAssignToUser            $UCAssignToUser,
-        private readonly UCAssignToCurrentUser     $UCAssignToCurrentUser,
-        private readonly UCFindProductById         $UCFindProductById,
-        private readonly UCFindProductByLoggedUser $UCFindProductByLoggedUser
+        private readonly ActivateUC            $ActivateProductUC,
+        private readonly DeactivateUC          $DeactivateProductUC,
+        private readonly AssignToUserUC        $AssignToUserUc,
+        private readonly AssignToCurrentUserUC $AssignToCurrentUserUC,
+        private readonly FindByIdUC            $FindProductByIdUC,
+        private readonly FindByCurrentUserUC   $FindProductByLoggedUserUC
     )
     {
     }
@@ -37,7 +37,7 @@ class ProductController extends Controller
 
     public function activate(int $id): JsonResponse
     {
-        $response = $this->UCActivateProduct->run([
+        $response = $this->ActivateProductUC->run([
             'id' => $id,
         ]);
 
@@ -46,7 +46,7 @@ class ProductController extends Controller
 
     public function deactivate(int $id): JsonResponse
     {
-        $response = $this->UCDeactivateProduct->run([
+        $response = $this->DeactivateProductUC->run([
             'id' => $id,
         ]);
 
@@ -55,7 +55,7 @@ class ProductController extends Controller
 
     public function assign(int $id, int $userId): JsonResponse
     {
-        $response = $this->UCAssignToUser->run([
+        $response = $this->AssignToUserUc->run([
             'id' => $id,
         ]);
 
@@ -64,7 +64,7 @@ class ProductController extends Controller
 
     public function assignToCurrentUser(int $id, string $password): JsonResponse
     {
-        $response = $this->UCAssignToCurrentUser->run([
+        $response = $this->AssignToCurrentUserUC->run([
             'id' => $id,
             'password' => $password
         ]);
@@ -74,7 +74,7 @@ class ProductController extends Controller
 
     public function findById(Request $request, int $id): JsonResponse
     {
-        $response = $this->UCFindProductById->run([
+        $response = $this->FindProductByIdUC->run([
             'id' => $id
         ]);
 
@@ -89,7 +89,8 @@ class ProductController extends Controller
      */
     public function mine(): JsonResponse
     {
-        $response = $this->UCFindProductByLoggedUser->run();
+        $response = $this->FindProductByLoggedUserUC->run();
+
         return HttpJson::OK($response);
     }
 

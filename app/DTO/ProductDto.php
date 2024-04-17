@@ -13,6 +13,7 @@ class ProductDto implements DTO
     public array $config;
     public ProductTypeDto|null $type;
     public UserDto|null $user = null;
+    public bool $active;
 
     /**
      * @param array $data (id:int, user_id:int, qr_url:string, target_url:string, user: UserDto, type: ProductTypeDto)
@@ -23,6 +24,7 @@ class ProductDto implements DTO
         $this->config = $data['config'];
         $this->type = $data['type'] ?? null;
         $this->user = $data['user'] ?? null;
+        $this->active = $data['active'];
     }
 
     /**
@@ -35,14 +37,12 @@ class ProductDto implements DTO
         $user = $model->user ? UserDto::fromModel($model->user) : null;
         $type = ProductTypeDto::fromModel($model->productType);
 
-        $user = null;
-//        $type = null;
-
         $data = [
             'id' => $model->id,
             'config' => $model->config,
             'type' => $type,
-            'user' => $user
+            'user' => $user,
+            'active' => $model->active,
         ];
 
         return new ProductDto($data);

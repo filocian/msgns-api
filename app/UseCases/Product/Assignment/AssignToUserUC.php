@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCases\Product;
+namespace App\UseCases\Product\Assignment;
 
 use App\DTO\ProductDto;
 use App\Exceptions\Product\ProductNotFoundException;
@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
-class UCAssignToUser implements UseCaseContract
+readonly class AssignToUserUC implements UseCaseContract
 {
     public function __construct()
     {
@@ -51,6 +51,8 @@ class UCAssignToUser implements UseCaseContract
             $product->update([
                 'user_id' => $userId,
             ]);
+
+            $product->refresh();
 
             return ProductDto::fromModel($product);
         } catch (ModelNotFoundException $e) {

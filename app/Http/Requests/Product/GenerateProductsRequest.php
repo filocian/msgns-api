@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Requests\NFC;
+namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateNFCRequest extends FormRequest
+class GenerateProductsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+//        dd('req', $this->request->all());
+        return true;
     }
 
     /**

@@ -11,7 +11,8 @@ class UpdateProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+//        dd('req', $this->request->all());
+        return true;
     }
 
     /**

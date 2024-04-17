@@ -10,6 +10,7 @@
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.8",
+        "ramsey/uuid": "^4.7",
         "spatie/laravel-permission": "^6.4"
     },
     "require-dev": {
@@ -27,7 +28,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/StringHelpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

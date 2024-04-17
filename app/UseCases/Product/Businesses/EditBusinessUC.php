@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCases\Product;
+namespace App\UseCases\Product\Businesses;
 
 use App\DTO\ProductDto;
 use App\Exceptions\Product\ProductNotFoundException;
@@ -11,20 +11,16 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
-class UCDeactivateProduct implements UseCaseContract
+readonly class EditBusinessUC implements UseCaseContract
 {
-    public string $hello = 'fck';
-
     public function __construct(
-        private readonly AuthService $authService,
-
+        private AuthService $authService,
     )
     {
-        $this->hello = 'hello';
     }
 
     /**
-     * Deactivate a product based on product id
+     * UseCase: Activate a product based on product id and its password
      *
      * @param array{id: int}|null $data
      * @param array|null $opts
@@ -35,19 +31,19 @@ class UCDeactivateProduct implements UseCaseContract
     {
         $productId = $data['id'];
 
-        return $this->deactivateProduct($productId);
+        return $this->activateProduct($productId);
 
     }
 
     /**
-     * Deactivates a product
+     * Activates a product
      *
-     * @param int $id
+     * @param int $productId
      * @return ProductDto
      * @throws ProductNotFoundException
      * @throws Exception
      */
-    private function deactivateProduct(int $id): ProductDto
+    private function activateProduct(int $productId): ProductDto
     {
         $userId = $this->authService->id();
 
@@ -57,12 +53,14 @@ class UCDeactivateProduct implements UseCaseContract
 
         try {
             $product = Product::findById(
-                $id,
+                $productId,
             );
 
             $product->update([
-                'active' => false
+                'active' => true
             ]);
+
+            $product->refresh();
 
             return ProductDto::fromModel($product);
         } catch (ModelNotFoundException $e) {

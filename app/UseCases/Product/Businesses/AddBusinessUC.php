@@ -1,64 +1,58 @@
 <?php
 
-namespace App\UseCases\Product;
+namespace App\UseCases\Product\Businesses;
 
 use App\DTO\ProductDto;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Models\Product;
-use App\Services\AuthService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
-class UCActivateProduct implements UseCaseContract
+readonly class AddBusinessUC implements UseCaseContract
 {
-    public function __construct(
-        private readonly AuthService $authService,
-    )
+    public function __construct()
     {
     }
 
     /**
-     * Activate a product based on product id and its password
+     * UseCase: Assign a product to given user
      *
-     * @param array{id: int}|null $data
+     * @param array{productId: int, userId: int}|null $data
      * @param array|null $opts
      * @return ProductDto
      * @throws ProductNotFoundException
      */
     public function run(array $data = null, ?array $opts = null): ProductDto
     {
-        $productId = $data['id'];
+        $productId = $data['productId'];
+        $userId = $data['userId'];
 
-        return $this->activateProduct($productId);
-
+        return $this->assignToCurrentUser($productId, $userId);
     }
 
     /**
-     * Activates a product
+     * Assign a product to given user
      *
      * @param int $productId
+     * @param string $userId
      * @return ProductDto
      * @throws ProductNotFoundException
      * @throws Exception
      */
-    private function activateProduct(int $productId): ProductDto
+    private function assignToCurrentUser(int $productId, string $userId): ProductDto
     {
-        $userId = $this->authService->id();
-
-        if ($userId == null) {
-            throw new Exception('invalid_user');
-        }
-
         try {
             $product = Product::findById(
                 $productId,
             );
 
             $product->update([
-                'active' => true
+                'user_id' => $userId,
             ]);
+
+            $product->refresh();
 
             return ProductDto::fromModel($product);
         } catch (ModelNotFoundException $e) {

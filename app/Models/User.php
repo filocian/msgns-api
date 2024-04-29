@@ -1,47 +1,66 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+final class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+	use HasRoles, HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+	/**
+	 * The attributes that are mass assignable.
+	 *
+	 * @var array<int, string>
+	 */
+	protected $fillable = ['name', 'email', 'password', 'google_id',];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+	protected $hidden = ['password', 'remember_token',];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+	protected $casts = [
+		'email_verified_at' => 'datetime',
+		'password' => 'hashed',
+	];
+
+	protected static function boot()
+	{
+		parent::boot();
+
+		static::creating(function ($model) {
+			$model->uuid = (string) Str::uuid();
+		});
+	}
+
+	public function products()
+	{
+		return $this->hasMany(Product::class);
+	}
+
+	public function metadata()
+	{
+		return $this->hasMany(UserMetadata::class);
+	}
+
+	/**
+	 * Get specific metadata by key[].
+	 *
+	 * @param array $keys
+	 * @return \Illuminate\Database\Eloquent\Collection
+	 */
+	public function getMetadataByKeys(array $keys): \Illuminate\Database\Eloquent\Collection
+	{
+		return $this->metadata()->whereIn('key', $keys)->get();
+	}
+
+	public static function findByGoogleId(string $googleId): self|null
+	{
+		return self::where('google_id', $googleId)->first();
+	}
 }

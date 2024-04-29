@@ -7,9 +7,13 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.0",
-        "laravel/tinker": "^2.9"
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^2.9",
+        "spatie/laravel-data": "^4.5",
+        "spatie/laravel-permission": "^6.7"
     },
     "require-dev": {
+        "codelytv/coding-style": "^1.2",
         "fakerphp/faker": "^1.23",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.26",

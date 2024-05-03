@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\Product;
 
 use App\Exceptions\Permissions\ActionNotAllowedException;
+use App\Infrastructure\Services\Auth\AuthService;
 use App\Models\User;
-use App\Services\Auth\AuthService;
 use App\Static\Permissions\StaticPermissions;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -35,6 +35,7 @@ final class GenerateProductsRequest extends FormRequest
 	public function rules(): array
 	{
 		return [
+			'types' => 'required|array',
 			'types.*' => 'required|array',
 			'types.*.typeId' => 'required|integer|min:1',
 			'types.*.quantity' => 'required|integer|min:1',

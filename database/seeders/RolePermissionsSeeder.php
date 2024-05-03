@@ -30,10 +30,10 @@ final class RolePermissionsSeeder extends Seeder
 		foreach ($roleMethods as $method) {
 			$roleData = StaticRolePermissions::$method();
 
-			$role = Role::findOrCreate($roleData['role'], 'api');
+			$role = Role::findOrCreate($roleData['role'], 'stateful-api');
 
 			foreach ($roleData['permissions'] as $permName) {
-				$permission = Permission::findOrCreate($permName, 'api');
+				$permission = Permission::findOrCreate($permName, 'stateful-api');
 				$role->givePermissionTo($permission);
 			}
 		}

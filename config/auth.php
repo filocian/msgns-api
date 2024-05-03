@@ -16,7 +16,7 @@ return [
 	*/
 
 	'defaults' => [
-		'guard' => env('AUTH_GUARD', 'web'),
+		'guard' => env('AUTH_GUARD', 'stateful-api'),
 		'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
 	],
 
@@ -38,8 +38,16 @@ return [
 	*/
 
 	'guards' => [
-		'web' => [
+		//		'web' => [
+		//			'driver' => 'session',
+		//			'provider' => 'users',
+		//		],
+		'stateful-api' => [
 			'driver' => 'session',
+			'provider' => 'users',
+		],
+		'api' => [
+			'driver' => 'sanctum',
 			'provider' => 'users',
 		],
 	],

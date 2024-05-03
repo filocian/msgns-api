@@ -33,7 +33,7 @@ final class AuthService
 			throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
 		}
 
-		return UserDto::from($user);
+		return UserDto::fromModel($user);
 	}
 
 	/**
@@ -54,7 +54,7 @@ final class AuthService
 			throw new UnauthorizedException();
 		}
 
-		return UserDto::from($user);
+		return UserDto::fromModel($user);
 	}
 
 	/**
@@ -91,11 +91,12 @@ final class AuthService
 	}
 
 
-	public function logout()
+	public function logout(): bool
 	{
 		Auth::guard('web')->logout();
 		Request::session()->invalidate();
 		Request::session()->regenerateToken();
+
 		return true;
 	}
 

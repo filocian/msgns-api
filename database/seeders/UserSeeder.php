@@ -31,8 +31,8 @@ final class UserSeeder extends Seeder
 			'password' => Hash::make('daPassword123!'),
 		]);
 
-		if (Role::where('name', StaticRoles::DEV_ROLE)->exists()) {
-			$user->assignRole(StaticRoles::DEV_ROLE);
+		if ($role = Role::findByName(StaticRoles::DEV_ROLE, 'stateful-api')) {
+			$user->assignRole($role);
 		}
 
 		$user = User::create([
@@ -44,8 +44,8 @@ final class UserSeeder extends Seeder
 			'password' => Hash::make('daPassword123!'),
 		]);
 
-		if (Role::where('name', StaticRoles::BACKOFFICE_ROLE)->exists()) {
-			$user->assignRole(StaticRoles::BACKOFFICE_ROLE);
+		if ($role = Role::findByName(StaticRoles::BACKOFFICE_ROLE, 'stateful-api')) {
+			$user->assignRole($role);
 		}
 
 		$user = User::create([
@@ -57,8 +57,8 @@ final class UserSeeder extends Seeder
 			'password' => Hash::make('daPassword123!'),
 		]);
 
-		if (Role::where('name', StaticRoles::MARKETING_ROLE)->exists()) {
-			$user->assignRole(StaticRoles::MARKETING_ROLE);
+		if ($role = Role::findByName(StaticRoles::MARKETING_ROLE, 'stateful-api')) {
+			$user->assignRole($role);
 		}
 
 		$user = User::create([
@@ -70,8 +70,8 @@ final class UserSeeder extends Seeder
 			'password' => Hash::make('daPassword123!'),
 		]);
 
-		if (Role::where('name', StaticRoles::DESIGNER_ROLE)->exists()) {
-			$user->assignRole(StaticRoles::DESIGNER_ROLE);
+		if ($role = Role::findByName(StaticRoles::DESIGNER_ROLE, 'stateful-api')) {
+			$user->assignRole($role);
 		}
 
 		$user = User::create([
@@ -83,8 +83,8 @@ final class UserSeeder extends Seeder
 			'password' => Hash::make('daPassword123!'),
 		]);
 
-		if (Role::where('name', StaticRoles::USER_ROLE)->exists()) {
-			$user->assignRole(StaticRoles::USER_ROLE);
+		if ($role = Role::findByName(StaticRoles::USER_ROLE, 'stateful-api')) {
+			$user->assignRole($role);
 		}
 	}
 }

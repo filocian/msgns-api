@@ -15,7 +15,7 @@ use Spatie\Permission\Models\Role;
 abstract class TestCase extends BaseTestCase
 {
 	/**
-	 * Sends a post request using required auth headers
+	 * Sends a POST request using required auth headers
 	 *
 	 * @param string $uri
 	 * @param array $data
@@ -32,6 +32,23 @@ abstract class TestCase extends BaseTestCase
 	}
 
 	/**
+	 * Sends a PUT request using required auth headers
+	 *
+	 * @param string $uri
+	 * @param array $data
+	 * @return TestResponse
+	 */
+	public function putWithHeaders(string $uri, array $data = []): TestResponse
+	{
+		$headers = [
+			'Origin' => env('HTTP_REFERER'),
+			'Referer' => env('HTTP_REFERER'),
+			'Accept' => 'application/json',
+		];
+		return $this->put($uri, $data, $headers);
+	}
+
+	/**
 	 * Creates a Test user with default information:
 	 *
 	 * name: Test User
@@ -45,7 +62,7 @@ abstract class TestCase extends BaseTestCase
 	 * @param array{name: ?string, email:string, password:string, googleId: ?string} $userData
 	 * @return User|Collection|Model
 	 */
-	public function createUser(array $userData): Collection|Model|User
+	public function create_user(array $userData): Collection|Model|User
 	{
 		$defaultUserData = [
 			'name' => 'Test User',

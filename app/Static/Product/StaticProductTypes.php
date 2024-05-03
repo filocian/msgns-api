@@ -11,9 +11,12 @@ final class StaticProductTypes
 		'name' => 'youtube-subscribe-sticker',
 		'description' => 'youtube-subscribe-sticker',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
-			'target2' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -22,8 +25,12 @@ final class StaticProductTypes
 		'name' => 'facebook-sticker',
 		'description' => 'facebook-sticker',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -32,8 +39,12 @@ final class StaticProductTypes
 		'name' => 'tiktok-sticker',
 		'description' => 'tiktok-sticker',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -42,8 +53,12 @@ final class StaticProductTypes
 		'name' => 'google-review-sticker',
 		'description' => 'google-review-sticker',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -53,8 +68,12 @@ final class StaticProductTypes
 		'name' => 'instagram-sticker',
 		'description' => 'instagram-sticker',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -63,8 +82,12 @@ final class StaticProductTypes
 		'name' => 'instagram-sticker-round',
 		'description' => 'instagram-sticker-round',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -73,8 +96,12 @@ final class StaticProductTypes
 		'name' => 'instagram-sticker-square',
 		'description' => 'instagram-sticker-square',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -84,8 +111,12 @@ final class StaticProductTypes
 		'name' => 'whatsapp-sticker',
 		'description' => 'whatsapp-sticker',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -94,8 +125,12 @@ final class StaticProductTypes
 		'name' => 'whatsapp-sticker-square',
 		'description' => 'whatsapp-sticker-square',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];
@@ -104,8 +139,12 @@ final class StaticProductTypes
 		'name' => 'whatsapp-sticker-whitesquare',
 		'description' => 'whatsapp-sticker-whitesquare',
 		'config' => [
-			'product_image' => 'product_image_path_or_url',
-			'target' => '',
+			'image_path' => 'product_image_path_or_url',
+			'image_path_2' => 'product_image_path_or_url',
+			'image_path_3' => 'product_image_path_or_url',
+			'target_url' => 'https://target.url',
+			'target_url_2' => 'https://target.url',
+			'target_url_3' => 'https://target.url',
 			'password' => '123456',
 		],
 	];

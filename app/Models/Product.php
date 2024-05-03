@@ -28,14 +28,14 @@ final class Product extends Model
 
 	protected $casts = [
 		'active' => 'bool',
-		'config' => 'array',  // JSON almacenado como array
-		'tags' => 'array',    // Suponiendo que 'tags' puede ser un array JSON
-		'admin_tags' => 'array', // Suponiendo que 'admin_tags' también puede ser un array JSON
+		'config' => 'array',
+		'tags' => 'array',
+		'admin_tags' => 'array',
 	];
 
 	public function productType()
 	{
-		return $this->belongsTo(ProductTypes::class, 'product_type_id');
+		return $this->belongsTo(ProductType::class, 'product_type_id');
 	}
 
 	public function user()
@@ -83,16 +83,13 @@ final class Product extends Model
 	 *
 	 * @param int $userId
 	 * @param array{perPage:int}|null $options
-	 * @return Collection|LengthAwarePaginator
+	 * @return LengthAwarePaginator|Collection
 	 */
-	public static function findProductsByUserId(
-		int $userId,
-		?array $options = []
-	): Collection|LengthAwarePaginator
+	public static function findProductsByUserId(int $userId, ?array $options = []): Collection|LengthAwarePaginator
 	{
 		$perPage = $options['perPage'] ?? 0;
 
-		if($perPage == 0){
+		if ($perPage === 0) {
 			return self::where('user_id', $userId)->get();
 		}
 

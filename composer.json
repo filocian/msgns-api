@@ -9,7 +9,6 @@
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "spatie/laravel-data": "^4.5",
         "spatie/laravel-permission": "^6.7"
     },
     "require-dev": {
@@ -28,7 +27,12 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+		"files": [
+			"app/Helpers/StringHelpers.php",
+			"app/Helpers/ReflectionHelpers.php",
+			"app/Helpers/ArrayHelpers.php"
+		]
     },
     "autoload-dev": {
         "psr-4": {

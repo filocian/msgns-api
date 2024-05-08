@@ -34,7 +34,7 @@ final class RegisterProductRequest extends FormRequest
 			throw new ProductNotFoundException();
 		}
 
-		if($product->user_id){
+		if ($product->user_id) {
 			throw new ProductAlreadyRegistered();
 		}
 

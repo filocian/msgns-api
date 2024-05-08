@@ -36,20 +36,15 @@ final class ConfigureProductRequest extends FormRequest
 			throw new ProductNotFoundException();
 		}
 
-		$isSuperUser = $user->hasRole([
-			StaticRoles::DEV_ROLE,
-			StaticRoles::BACKOFFICE_ROLE
-		]);
+		$isSuperUser = $user->hasRole([StaticRoles::DEV_ROLE, StaticRoles::BACKOFFICE_ROLE]);
 
-		$isOwner = $user->id == $product->user_id;
+		$isOwner = $user->id === $product->user_id;
 
 		if (!$isSuperUser && !$isOwner) {
 			throw new ProductNotOwnedException();
 		}
 
-		$userHasPermissions = $user->hasAllPermissions([
-			StaticPermissions::SINGLE_PRODUCT_CONFIGURATION,
-		]);
+		$userHasPermissions = $user->hasAllPermissions([StaticPermissions::SINGLE_PRODUCT_CONFIGURATION, ]);
 
 		if (!$userHasPermissions) {
 			throw new ActionNotAllowedException();

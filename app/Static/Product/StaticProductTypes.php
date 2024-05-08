@@ -6,163 +6,154 @@ namespace App\Static\Product;
 
 final class StaticProductTypes
 {
-	public const YT_SUBSCRIBE_STICKER = [
-		'code' => 'youtube-subscribe-sticker',
-		'name' => 'youtube-subscribe-sticker',
-		'description' => 'youtube-subscribe-sticker',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+	private const MSGNS_PRODUCTS = [
+		[
+			'code' => 'S-GG-XX-RC',
+			'type' => 'sticker',
+			'model' => ['google'],
 		],
-	];
-	public const FB_STICKER = [
-		'code' => 'facebook-sticker',
-		'name' => 'facebook-sticker',
-		'description' => 'facebook-sticker',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-GG-XX-RD',
+			'type' => 'sticker',
+			'model' => ['google'],
 		],
-	];
-	public const TT_STICKER = [
-		'code' => 'tiktok-sticker',
-		'name' => 'tiktok-sticker',
-		'description' => 'tiktok-sticker',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-GW-XX-RC',
+			'type' => 'sticker',
+			'model' => ['google'],
 		],
-	];
-	public const GR_STICKER = [
-		'code' => 'google-review-sticker',
-		'name' => 'google-review-sticker',
-		'description' => 'google-review-sticker',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-GW-XX-RD',
+			'type' => 'sticker',
+			'model' => ['google'],
 		],
-	];
-
-	public const IG_STICKER = [
-		'code' => 'instagram-sticker',
-		'name' => 'instagram-sticker',
-		'description' => 'instagram-sticker',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-IG-XX-RC',
+			'type' => 'sticker',
+			'model' => ['instagram'],
 		],
-	];
-	public const IG_STICKER_ROUND = [
-		'code' => 'instagram-sticker-round',
-		'name' => 'instagram-sticker-round',
-		'description' => 'instagram-sticker-round',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-IG-XX-RD',
+			'type' => 'sticker',
+			'model' => ['instagram'],
 		],
-	];
-	public const IG_STICKER_SQUARE = [
-		'code' => 'instagram-sticker-square',
-		'name' => 'instagram-sticker-square',
-		'description' => 'instagram-sticker-square',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-IG-XX-SQ',
+			'type' => 'sticker',
+			'model' => ['instagram'],
 		],
-	];
-
-	public const WS_STICKER = [
-		'code' => 'whatsapp-sticker',
-		'name' => 'whatsapp-sticker',
-		'description' => 'whatsapp-sticker',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-FB-XX-RC',
+			'type' => 'sticker',
+			'model' => ['facebook'],
 		],
-	];
-	public const WS_STICKER_SQUARE = [
-		'code' => 'whatsapp-sticker-square',
-		'name' => 'whatsapp-sticker-square',
-		'description' => 'whatsapp-sticker-square',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-FB-XX-RD',
+			'type' => 'sticker',
+			'model' => ['facebook'],
 		],
-	];
-	public const WS_STICKER_WHITESQUARE = [
-		'code' => 'whatsapp-sticker-whitesquare',
-		'name' => 'whatsapp-sticker-whitesquare',
-		'description' => 'whatsapp-sticker-whitesquare',
-		'config' => [
-			'image_path' => 'product_image_path_or_url',
-			'image_path_2' => 'product_image_path_or_url',
-			'image_path_3' => 'product_image_path_or_url',
-			'target_url' => 'https://target.url',
-			'target_url_2' => 'https://target.url',
-			'target_url_3' => 'https://target.url',
-			'password' => '123456',
+		[
+			'code' => 'S-YT-XX-RC',
+			'type' => 'sticker',
+			'model' => ['youtube'],
+		],
+		[
+			'code' => 'S-TK-XX-RC',
+			'type' => 'sticker',
+			'model' => ['tiktok'],
+		],
+		[
+			'code' => 'S-IN-XX-RC',
+			'type' => 'sticker',
+			'model' => ['info'],
+		],
+		[
+			'code' => 'S-WR-XX-RC',
+			'type' => 'sticker',
+			'model' => ['whatsapp'],
+		],
+		[
+			'code' => 'S-WC-XX-RC',
+			'type' => 'sticker',
+			'model' => ['whatsapp'],
+		],
+		[
+			'code' => 'S-WG-XX-RC',
+			'type' => 'sticker',
+			'model' => ['whatsapp'],
+		],
+		[
+			'code' => 'S-WW-XX-SQ',
+			'type' => 'sticker',
+			'model' => ['whatsapp'],
+		],
+		[
+			'code' => 'S-WG-XX-SQ',
+			'type' => 'sticker',
+			'model' => ['whatsapp'],
+		],
+		[
+			'code' => 'P-GG-IN-RC',
+			'type' => 'card',
+			'model' => ['google', 'info'],
+		],
+		[
+			'code' => 'P-GW-IN-RC',
+			'type' => 'card',
+			'model' => ['google', 'instagram'],
+		],
+		[
+			'code' => 'P-GW-GO-RC',
+			'type' => 'card',
+			'model' => ['google', ],
+		],
+		[
+			'code' => 'P-GM-GO-RC',
+			'type' => 'card',
+			'model' => ['google'],
+		],
+		[
+			'code' => 'T-GW-XX-RC',
+			'type' => 'stand',
+			'model' => ['google'],
 		],
 	];
 
+	/**
+	 * @param array{code:string, type:string, model:array<string>} $msgnsProduct
+	 * @return array
+	 */
+	private static function buildProductStructure(array $msgnsProduct): array
+	{
+		$models = count($msgnsProduct['model']) > 1
+			? implode('+', $msgnsProduct['model'])
+			: $msgnsProduct['model'][0];
+		$baseConfig = [
+			'image_ref' => $msgnsProduct['code'],
+			'password' => '123456',
+		];
+		$targetConfig = [];
+
+		for ($x = 0; $x < count($msgnsProduct['model']); $x++) {
+			$targetCounter = $x + 1;
+			$key = "target_url_$targetCounter";
+			$targetConfig[$key] = 'https://target.url';
+		}
+
+		return [
+			'code' => $msgnsProduct['code'],
+			'name' => $msgnsProduct['code'],
+			'description' => "{$msgnsProduct['type']} $models",
+			'config' => array_merge($targetConfig, $baseConfig),
+		];
+	}
 
 	public static function all()
 	{
-		return [
-			self::YT_SUBSCRIBE_STICKER,
-			self::FB_STICKER,
-			self::TT_STICKER,
-			self::GR_STICKER,
-			self::IG_STICKER,
-			self::IG_STICKER_ROUND,
-			self::IG_STICKER_SQUARE,
-			self::WS_STICKER,
-			self::WS_STICKER_SQUARE,
-			self::WS_STICKER_WHITESQUARE,
-		];
+		$products = [];
+		foreach (self::MSGNS_PRODUCTS as $product) {
+			$products[] = self::buildProductStructure($product);
+		}
+		return $products;
 	}
 }

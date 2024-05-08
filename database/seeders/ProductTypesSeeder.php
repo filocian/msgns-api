@@ -28,7 +28,7 @@ final class ProductTypesSeeder extends Seeder
 		return array_map(function (array $productType) use ($now) {
 			return [
 				'code' => $productType['code'],
-				'name' => $productType['name'],
+				'name' => $productType['code'],
 				'description' => $productType['description'],
 				'config_template' => json_encode($productType['config']),
 				'created_at' => $now,

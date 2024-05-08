@@ -26,33 +26,21 @@ final class ProductSeeder extends Seeder
 	{
 		$now = Carbon::now();
 		$productsQty = 1;
-		$google = StaticProductTypes::GR_STICKER;
-		unset($google['code']);
-		$google['config'] = json_encode($google['config']);
-		$instagram = StaticProductTypes::IG_STICKER;
-		unset($instagram['code']);
-		$instagram['config'] = json_encode($instagram['config']);
-		$facebook = StaticProductTypes::FB_STICKER;
-		unset($facebook['code']);
-		$facebook['config'] = json_encode($facebook['config']);
+		$staticProducts = StaticProductTypes::all();
 		$productList = [];
 
-		for ($x = 0; $x < $productsQty; $x++) {
-			$productList[] = array_merge($google, [
-				'product_type_id' => 4,
-				'created_at' => $now,
-				'updated_at' => $now,
-			]);
-			$productList[] = array_merge($instagram, [
-				'product_type_id' => 5,
-				'created_at' => $now,
-				'updated_at' => $now,
-			]);
-			$productList[] = array_merge($facebook, [
-				'product_type_id' => 2,
-				'created_at' => $now,
-				'updated_at' => $now,
-			]);
+		for ($y = 0; $y < count($staticProducts); $y++) {
+			for ($x = 0; $x < $productsQty; $x++) {
+				$product = array_merge($staticProducts[$y], [
+					'product_type_id' => $y + 1,
+					'created_at' => $now,
+					'updated_at' => $now,
+				]);
+
+				unset($product['code']);
+				$product['config'] = json_encode($product['config']);
+				$productList[] = $product;
+			}
 		}
 
 		return $productList;

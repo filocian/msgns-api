@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 final class ProductDto extends BaseDTO
 {
 	public int $id;
+	public string $name;
 	public ProductConfigDto $config;
 	public ProductTypeDTO $type;
 	public UserDto|null $user;
@@ -21,6 +22,7 @@ final class ProductDto extends BaseDTO
 	public function __construct(Model $model)
 	{
 		$this->id = $model->id;
+		$this->name = $model->name;
 		$this->config = new ProductConfigDto($model->config);
 		$this->type = ProductTypeDto::fromModel($model->productType);
 		$this->user = $model->user ? UserDto::fromModel($model->user) : null;

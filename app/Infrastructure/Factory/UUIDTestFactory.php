@@ -1,10 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Infrastructure\Factory;
 
 use Ramsey\Uuid\UuidFactory;
 use Ramsey\Uuid\UuidInterface;
 
-class UUIDTestFactory extends UuidFactory
+final class UUIDTestFactory extends UuidFactory
 {
 	public UuidInterface $uuid;
 

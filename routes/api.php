@@ -32,6 +32,7 @@ Route::prefix('products')->group(function () {
 		Route::post('/{id}/assign/{password}', [ProductController::class, 'assignToCurrentUser']);
 		Route::post('/{id}/register/{password}', [ProductController::class, 'register']);
 		Route::put('/{id}/configure', [ProductController::class, 'configure']);
+		Route::put('/{id}/rename', [ProductController::class, 'rename']);
 		Route::post('/{id}/activate', [ProductController::class, 'activate']);
 		Route::post('/{id}/deactivate', [ProductController::class, 'deactivate']);
 	});

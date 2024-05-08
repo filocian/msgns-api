@@ -5,27 +5,29 @@ declare(strict_types=1);
 namespace App\Http\Requests\Product;
 
 use App\Exceptions\Permissions\ActionNotAllowedException;
-use App\Exceptions\Product\ProductAlreadyRegistered;
 use App\Exceptions\Product\ProductNotFoundException;
+use App\Exceptions\Product\ProductNotOwnedException;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Models\Product;
 use App\Models\User;
 use App\Static\Permissions\StaticPermissions;
+use App\Static\Permissions\StaticRoles;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 
-final class RegisterProductRequest extends FormRequest
+final class RenameProductRequest extends FormRequest
 {
 	/**
 	 * Determine if the user is authorized to make this request.
 	 * @throws ActionNotAllowedException
 	 * @throws ProductNotFoundException
-	 * @throws ProductAlreadyRegistered
+	 * @throws ProductNotOwnedException
 	 */
 	public function authorize(Request $request, AuthService $authService): bool
 	{
-		$user = User::find($authService->id());
+		$userId = $authService->id();
+		$user = User::find($userId);
 		$productId = (int) $request->route('id');
 
 		try {
@@ -34,14 +36,17 @@ final class RegisterProductRequest extends FormRequest
 			throw new ProductNotFoundException();
 		}
 
-		if ($product->user_id) {
-			throw new ProductAlreadyRegistered();
+		$isSuperUser = $user->hasRole([StaticRoles::DEV_ROLE, StaticRoles::BACKOFFICE_ROLE]);
+
+		$isOwner = $user->id === $product->user_id;
+
+		if (!$isSuperUser && !$isOwner) {
+			throw new ProductNotOwnedException();
 		}
 
-		if (!$user->hasAllPermissions([
-			StaticPermissions::SINGLE_PRODUCT_ASSIGNMENT,
-			StaticPermissions::SINGLE_PRODUCT_ACTIVATION,
-		])) {
+		$userHasPermissions = $user->hasAllPermissions([StaticPermissions::SINGLE_PRODUCT_CONFIGURATION, ]);
+
+		if (!$userHasPermissions) {
 			throw new ActionNotAllowedException();
 		}
 
@@ -55,6 +60,8 @@ final class RegisterProductRequest extends FormRequest
 	 */
 	public function rules(): array
 	{
-		return [];
+		return [
+			'name' => 'required|string',
+		];
 	}
 }

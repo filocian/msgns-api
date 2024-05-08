@@ -7,6 +7,7 @@ namespace App\Infrastructure\Services\Auth;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Factory\SocialLoginFactory;
 use App\Models\User;
+use App\Static\Permissions\StaticRoles;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +34,7 @@ final class AuthService
 			throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
 		}
 
+		$user->assignRole(StaticRoles::USER_ROLE);
 		return UserDto::fromModel($user);
 	}
 
@@ -93,9 +95,9 @@ final class AuthService
 
 	public function logout(): bool
 	{
-		Auth::guard('web')->logout();
+		Auth::guard('stateful-api')->logout();
 		Request::session()->invalidate();
-		Request::session()->regenerateToken();
+		//		Request::session()->regenerateToken();
 
 		return true;
 	}

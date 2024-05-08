@@ -10,12 +10,14 @@ use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Product\ActivateProductRequest;
 use App\Http\Requests\Product\ConfigureProductRequest;
 use App\Http\Requests\Product\RegisterProductRequest;
+use App\Http\Requests\Product\RenameProductRequest;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\UseCases\Product\Activation\ActivateUC;
 use App\UseCases\Product\Activation\DeactivateUC;
 use App\UseCases\Product\Assignment\AssignToCurrentUserUC;
 use App\UseCases\Product\Assignment\AssignToUserUC;
 use App\UseCases\Product\Configuration\ConfigureUC;
+use App\UseCases\Product\Configuration\RenameUC;
 use App\UseCases\Product\Filtering\FindByCurrentUserUC;
 use App\UseCases\Product\Filtering\FindByIdUC;
 use App\UseCases\Product\Registration\RegisterProductUC;
@@ -33,6 +35,7 @@ final class ProductController extends Controller
 		private readonly FindByIdUC $FindProductByIdUC,
 		private readonly FindByCurrentUserUC $FindProductByLoggedUserUC,
 		private readonly ConfigureUC $ConfigureUC,
+		private readonly RenameUC $RenameUC,
 		private readonly RegisterProductUC $RegisterProductUC
 	) {}
 
@@ -47,7 +50,7 @@ final class ProductController extends Controller
 			'id' => $id,
 		]);
 
-		return HttpJson::OK($response, Response::HTTP_CREATED);
+		return HttpJson::OK($response->wrapped('product'), Response::HTTP_CREATED);
 	}
 
 	public function deactivate(ActivateProductRequest $request, int $id): JsonResponse
@@ -56,7 +59,7 @@ final class ProductController extends Controller
 			'id' => $id,
 		]);
 
-		return HttpJson::OK($response, Response::HTTP_CREATED);
+		return HttpJson::OK($response->wrapped('product'), Response::HTTP_CREATED);
 	}
 
 	public function assign(int $id, int $userId): JsonResponse
@@ -114,6 +117,19 @@ final class ProductController extends Controller
 	public function store(StoreProductRequest $request)
 	{
 		//
+	}
+
+	/**
+	 * Rename a product.
+	 */
+	public function rename(RenameProductRequest $request, int $productId): JsonResponse
+	{
+		$product = $this->RenameUC->run([
+			'id' => $productId,
+			'name' => $request->input('name'),
+		]);
+
+		return HttpJson::OK($product->wrapped('product'));
 	}
 
 

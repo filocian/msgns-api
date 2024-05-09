@@ -22,7 +22,6 @@ final readonly class RenameUC implements UseCaseContract
 	 * @param array|null $opts
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
-	 * @throws InvalidProductTypeException
 	 */
 	public function run(mixed $data = null, ?array $opts = null): ProductDto
 	{

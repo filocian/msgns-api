@@ -44,7 +44,7 @@ final readonly class GoogleLoginUC implements UseCaseContract
 
 		$this->authService->autoLogin($user);
 
-		return $user;
+		return UserDto::fromModel($user);
 	}
 
 	/**

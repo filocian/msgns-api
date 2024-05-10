@@ -61,7 +61,7 @@ final class AuthController extends Controller
 	public function googleLogin(GoogleLoginRequest $request): JsonResponse
 	{
 		$user = $this->googleLoginUC->run($request->get('token'));
-		return HttpJson::OK($user);
+		return HttpJson::OK($user->wrapped('user'));
 	}
 
 	public function logout(LogoutRequest $request): JsonResponse

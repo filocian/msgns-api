@@ -55,7 +55,7 @@ final readonly class GenerateUC implements UseCaseContract
 	}
 	private function generateProductURL(int $productId, string $password): string
 	{
-		return env('FRONT_URL', 'http://localhost:3000') . 'product/' . $productId . '/register/' . $password;
+		return env('FRONT_URL', 'http://localhost:3000') . '/product/' . $productId . '/register/' . $password;
 	}
 	private function generateProductPassword(?int $length = null): string
 	{

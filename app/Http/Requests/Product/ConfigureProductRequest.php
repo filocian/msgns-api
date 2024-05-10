@@ -61,6 +61,7 @@ final class ConfigureProductRequest extends FormRequest
 	public function rules(): array
 	{
 		return [
+			'name' => 'string',
 			'configuration' => 'required|array',
 		];
 	}

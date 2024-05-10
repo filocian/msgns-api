@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Product\GenerateProductsController;
 use App\Http\Controllers\Product\ProductController;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -38,4 +39,15 @@ Route::prefix('products')->group(function () {
 	});
 
 	Route::get('/{id}', [ProductController::class, 'findById']);
+	Route::get('/searches-place', [ProductController::class, 'searchPlace']);
 });
+
+/**
+ * Places External API
+ */
+Route::prefix('places')->group(function () {
+	Route::middleware('auth:stateful-api')->group(function () {
+		Route::get('/search', [ProductController::class, 'searchPlace']);
+	});
+});
+

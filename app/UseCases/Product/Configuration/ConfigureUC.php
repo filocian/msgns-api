@@ -19,7 +19,7 @@ final readonly class ConfigureUC implements UseCaseContract
 	/**
 	 * UseCase: Configure a single product based on its id
 	 *
-	 * @param array{id: int, configuration: array}|null $data
+	 * @param array{id: int, name:string|null, configuration: array}|null $data
 	 * @param array|null $opts
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
@@ -28,21 +28,23 @@ final readonly class ConfigureUC implements UseCaseContract
 	public function run(mixed $data = null, ?array $opts = null): ProductDto
 	{
 		$productId = $data['id'];
+		$name =$data['name'] ?? null;
 		$config = $data['configuration'];
 
-		return $this->configureProduct($productId, $config);
+		return $this->configureProduct($productId, $name, $config);
 	}
 
 	/**
 	 * Configure a single product based on its id
 	 *
 	 * @param int $productId
+	 * @param string|null $name
 	 * @param array $config
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
 	 * @throws InvalidProductTypeException
 	 */
-	private function configureProduct(int $productId, array $config): ProductDto
+	private function configureProduct(int $productId, string|null $name, array $config): ProductDto
 	{
 		try {
 			$product = Product::findById($productId);
@@ -57,11 +59,15 @@ final readonly class ConfigureUC implements UseCaseContract
 			throw new InvalidProductTypeException();
 		}
 
-		$config = array_merge($configTemplate, $config);
+		$config = [
+			'config' => array_merge($configTemplate, $config)
+		];
 
-		$product->update([
-			'config' => $config,
-		]);
+		if(isset($name)){
+			$config['name'] = $name;
+		}
+
+		$product->update($config);
 
 		$product->refresh();
 

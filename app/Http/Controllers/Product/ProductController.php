@@ -24,6 +24,7 @@ use App\UseCases\Product\Registration\RegisterProductUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Http;
 
 final class ProductController extends Controller
 {
@@ -42,6 +43,13 @@ final class ProductController extends Controller
 	public function hello()
 	{
 		return HttpJson::OK('hello nfc');
+	}
+
+	public function searchPlace(Request $request){
+		$apiKey = env('GOOGLE_PLACES_API_KEY');
+		$placeName = $request->input('name');
+		$response = Http::get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=$placeName&inputtype=textquery&fields=place_id,type,photos,formatted_address,formatted_phone_number,name,rating,opening_hours,geometry&key=$apiKey");
+		return $response->json();
 	}
 
 	public function activate(ActivateProductRequest $request, int $id): JsonResponse
@@ -141,6 +149,7 @@ final class ProductController extends Controller
 		$product = $this->ConfigureUC->run([
 			'id' => $productId,
 			'configuration' => $request->input('configuration'),
+			'name' => $request->input('name'),
 		]);
 
 		return HttpJson::OK($product->wrapped('product'));

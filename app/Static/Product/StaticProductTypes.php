@@ -100,7 +100,7 @@ final class StaticProductTypes
 		[
 			'code' => 'P-GW-IN-RC',
 			'type' => 'card',
-			'model' => ['google', 'instagram'],
+			'model' => ['google', 'info'],
 		],
 		[
 			'code' => 'P-GW-GO-RC',
@@ -135,8 +135,7 @@ final class StaticProductTypes
 		$targetConfig = [];
 
 		for ($x = 0; $x < count($msgnsProduct['model']); $x++) {
-			$targetCounter = $x + 1;
-			$key = "target_url_$targetCounter";
+			$key = "{$msgnsProduct['model'][$x]}_url";
 			$targetConfig[$key] = 'https://target.url';
 		}
 

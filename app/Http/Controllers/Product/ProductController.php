@@ -48,7 +48,7 @@ final class ProductController extends Controller
 	public function searchPlace(Request $request){
 		$apiKey = env('GOOGLE_PLACES_API_KEY');
 		$placeName = $request->input('name');
-		$response = Http::get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=$placeName&inputtype=textquery&fields=place_id,type,photos,formatted_address,formatted_phone_number,name,rating,opening_hours,geometry&key=$apiKey");
+		$response = Http::get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=$placeName&inputtype=textquery&fields=place_id,type,photos,formatted_address,name,rating,opening_hours,geometry&key=$apiKey");
 		return $response->json();
 	}
 

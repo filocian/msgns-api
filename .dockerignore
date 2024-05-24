@@ -1,0 +1,30 @@
+# Ignorar los archivos de configuración específicos del entorno
+.env
+.env.*
+
+# Ignorar dependencias locales
+vendor/
+node_modules/
+
+# Ignorar archivos y directorios de cache
+storage/logs/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+
+# Ignorar archivos de desarrollo
+*.log
+*.sql
+*.sqlite
+*.phpunit.result.cache
+
+# Ignorar archivos de compilación de Composer
+#composer.lock
+
+# Ignorar archivos y directorios temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar configuraciones locales de editores de texto y sistemas de control de versiones
+.vscode/
+.idea/

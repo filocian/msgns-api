@@ -53,8 +53,8 @@ final class AuthController extends Controller
 			'password' => $request->get('password'),
 		];
 
-		$user = $this->loginUC->run($data);
-		return HttpJson::OK($user->toArray('user'));
+		$userAndRoles = $this->loginUC->run($data);
+		return HttpJson::OK($userAndRoles);
 	}
 
 

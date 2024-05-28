@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\Auth;
 
+use App\Infrastructure\DTO\RoleDto;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Factory\SocialLoginFactory;
 use App\Models\User;
 use App\Static\Permissions\StaticRoles;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -41,10 +43,10 @@ final class AuthService
 	/**
 	 * @param string $email
 	 * @param string $password
-	 * @return UserDto
+	 * @return array {user: UserDto, roles: array}
 	 * @throws AuthenticationException
 	 */
-	public function login(string $email, string $password): UserDto
+	public function login(string $email, string $password): array
 	{
 		if (!Auth::attempt(['email' => $email, 'password' => $password])) {
 			throw new AuthenticationException();
@@ -56,7 +58,13 @@ final class AuthService
 			throw new UnauthorizedException();
 		}
 
-		return UserDto::fromModel($user);
+		$userRoles = $this->getRoles($user);
+		$rolesDto = $userRoles->map(fn($role) => RoleDto::fromModel($role));
+
+		return [
+			'user' => UserDto::fromModel($user),
+			'roles' => $rolesDto
+		];
 	}
 
 	/**
@@ -123,5 +131,15 @@ final class AuthService
 	private function buildUserToken(User $user): string
 	{
 		return $user->createToken(sprintf('%s-%s', $user->email, time()))->plainTextToken;
+	}
+
+	public function getRoles(User $user): Collection
+	{
+		$user ??= $this->user();
+
+		if (!$user) {
+			return [];
+		}
+		return $user->roles()->get();
 	}
 }

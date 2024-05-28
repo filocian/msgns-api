@@ -20,6 +20,7 @@ use App\UseCases\Product\Configuration\ConfigureUC;
 use App\UseCases\Product\Configuration\RenameUC;
 use App\UseCases\Product\Filtering\FindByCurrentUserUC;
 use App\UseCases\Product\Filtering\FindByIdUC;
+use App\UseCases\Product\Listing\ProductListUC;
 use App\UseCases\Product\Registration\RegisterProductUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,7 +38,8 @@ final class ProductController extends Controller
 		private readonly FindByCurrentUserUC $FindProductByLoggedUserUC,
 		private readonly ConfigureUC $ConfigureUC,
 		private readonly RenameUC $RenameUC,
-		private readonly RegisterProductUC $RegisterProductUC
+		private readonly RegisterProductUC $RegisterProductUC,
+		private readonly ProductListUC $productListUC
 	) {}
 
 	public function hello()
@@ -50,6 +52,12 @@ final class ProductController extends Controller
 		$placeName = $request->input('name');
 		$response = Http::get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=$placeName&inputtype=textquery&fields=place_id,type,photos,formatted_address,name,rating,opening_hours,geometry&key=$apiKey");
 		return $response->json();
+	}
+
+	public function list(Request $request): JsonResponse
+	{
+		$products = $this->productListUC->run($request->all(), $request->all());
+		return HttpJson::OK($products->wrapped('products'));
 	}
 
 	public function activate(ActivateProductRequest $request, int $id): JsonResponse

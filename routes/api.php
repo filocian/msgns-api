@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Product\GenerateProductsController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\User\UsersController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,8 @@ Route::prefix('auth')->group(function () {
  */
 Route::prefix('products')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
+
+		Route::get('/', [ProductController::class, 'list']);
 		Route::post('/generate', [GenerateProductsController::class, 'generateProducts']);
 		Route::get('/mine', [ProductController::class, 'mine']);
 		Route::post('/{id}/assign/{password}', [ProductController::class, 'assignToCurrentUser']);
@@ -42,6 +45,11 @@ Route::prefix('products')->group(function () {
 	Route::get('/searches-place', [ProductController::class, 'searchPlace']);
 });
 
+Route::prefix('users')->group(function () {
+	Route::middleware('auth:stateful-api')->group(function () {
+		Route::get('/', [UsersController::class, 'list']);
+	});
+});
 /**
  * Places External API
  */

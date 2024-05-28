@@ -96,6 +96,24 @@ final class Product extends Model
 		return self::where('user_id', $userId)->paginate($perPage);
 	}
 
+	public static function findProducts(?array $options = []): LengthAwarePaginator
+	{
+		$perPage = $options['perPage'] ?? env('DEFAULT_PAGINATION_LENGTH', 15);
+		$page = $options['currentPage'] ?? 1;
+
+
+		$items = ($perPage === 0)
+			? self::all()
+		    : self::where(null)->skip(($page - 1) * $perPage)->take($perPage)->get();
+
+		return new LengthAwarePaginator(
+			$items, // Items for the current page
+			self::count(), // Total number of items
+			$perPage, // Items per page
+			$page, // Current page
+		);
+	}
+
 	/**
 	 * Retrieve all products of given type.
 	 *

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\Product;
 
+use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\ProductDto;
-use App\Infrastructure\Services\Auth\AuthService;
 use App\Models\Product;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 final readonly class ProductService
 {
-	public function __construct(private AuthService $authService) {}
+	public function __construct() {}
 
 	/**
 	 * Get Product by productId
@@ -120,6 +120,15 @@ final readonly class ProductService
 	public function getProductsByUserId(int $userId, ?array $options = []): Collection|LengthAwarePaginator
 	{
 		return Product::findProductsByUserId($userId, $options);
+	}
+
+	public function getProducts($options = []): PaginatorDto
+	{
+		$paginatedProducts = Product::findProducts($options);
+		return PaginatorDto::fromPaginator($paginatedProducts, ProductDto::class);
+//		return $productsCollection->map(function ($product) {
+//			return ProductDto::fromModel($product);
+//		});
 	}
 
 	/**

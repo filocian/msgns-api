@@ -39,10 +39,11 @@ Route::prefix('products')->group(function () {
 		Route::put('/{id}/rename', [ProductController::class, 'rename']);
 		Route::post('/{id}/activate', [ProductController::class, 'activate']);
 		Route::post('/{id}/deactivate', [ProductController::class, 'deactivate']);
+		Route::post('/{id}/business/add', [ProductController::class, 'addBusiness']);
 	});
 
 	Route::get('/{id}', [ProductController::class, 'findById']);
-	Route::get('/searches-place', [ProductController::class, 'searchPlace']);
+//	Route::get('/searches-place', [ProductController::class, 'searchPlace']);
 });
 
 Route::prefix('users')->group(function () {

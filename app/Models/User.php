@@ -50,6 +50,11 @@ final class User extends Authenticatable
 		return $this->hasMany(UserMetadata::class);
 	}
 
+	public function businesses()
+	{
+		return $this->hasMany(ProductBusiness::class, 'user_id');
+	}
+
 	/**
 	 * Get specific metadata by key[].
 	 *

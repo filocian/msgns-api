@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 
-final class ConfigureProductRequest extends FormRequest
+final class AddProductBusinessRequest extends FormRequest
 {
 	/**
 	 * Determine if the user is authorized to make this request.
@@ -61,9 +61,11 @@ final class ConfigureProductRequest extends FormRequest
 	public function rules(): array
 	{
 		return [
+			'user_id' => 'required|int',
 			'name' => 'string',
-			'configuration' => 'required|array',
-			'business' => 'array'
+			'types' => 'array',
+			'place_types' => 'array',
+			'size' => 'string',
 		];
 	}
 }

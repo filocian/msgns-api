@@ -12,7 +12,6 @@ use Nette\FileNotFoundException;
 final class ImportedProductSeeder extends Seeder
 {
 	private string $table = 'products';
-	private array | null $productIdentificationCache = null;
 
 	/**
 	 * Run the database seeds.
@@ -36,7 +35,7 @@ final class ImportedProductSeeder extends Seeder
 				'user_id' => $product->user_id,
 				'target_url' => $product->target_url,
 				'password' => $product->password,
-				//'usage' => $product->usage,
+				'usage' => $product->usage,
 				'name' => $product->name,
 				'description' => $product->description,
 				'active' => boolval($product->active),

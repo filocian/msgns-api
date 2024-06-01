@@ -22,25 +22,33 @@ class ImporterProductModel
 			SQL;
 		$this->connection = $connection;
 		$this->products = $this->connection->select($loadModelQuery);
+		$this->initProductIdentificationCache();
 	}
 
 	public function normalize()
 	{
-		$this->products = array_map(function ($product) {
-			$productCode = $this->resolveProductCode($product->id, $product->elem_type, $product->background);
-			return [
-				'id' => $product->id,
-				'product_type_id' => $this->resolveProductTypeId($productCode),
-				'user_id' => $product->account_id,
-				'target_url' => $product->target_url,
-				'password' => $product->password,
-				'usage' => $product->visits,
-				'name' => $product->title,
-				'description' => $product->description,
-				'active' => boolval($product->active),
-				'created_at' => $product->fecha_hora,
-			];
-		}, $this->products);
+		try {
+			$products = array_map(function ($product) {
+				$productCode = $this->resolveProductCode($product->id, $product->elem_type, $product->background);
+
+				return [
+					'id' => $product->id,
+					'product_type_id' => $this->resolveProductTypeId($productCode),
+					'user_id' => $product->account_id,
+					'target_url' => $product->target_url,
+					'password' => $product->password,
+					'usage' => $product->visits,
+					'name' => $product->title,
+					'description' => $product->description,
+					'active' => boolval($product->active),
+					'created_at' => $product->fecha_hora,
+				];
+			}, $this->products);
+
+			$this->products = $products;
+		} catch (\Exception $e) {
+			dd($e->getMessage());
+		}
 
 		return $this;
 	}
@@ -56,21 +64,11 @@ class ImporterProductModel
 
 	public function resolveProductCode(int $productId, string $productElemType, string $productBkg)
 	{
-		if (!$this->productIdentificationCache) {
-			$this->initProductIdentificationCache();
-		}
-
 		$productFound = $this->productIdentificationCache->first(function ($item) use ($productId) {
 			return $item['product_id'] == $productId;
 		});
 
 		if ($productFound) {
-			$cache = $this->productIdentificationCache->reject(function ($item) use ($productId) {
-				return $item['product_id'] === $productId;
-			});
-
-			$this->productIdentificationCache = $cache;
-
 			return $productFound['product_type'];
 		}
 
@@ -157,6 +155,8 @@ class ImporterProductModel
 		}
 
 		$this->productIdentificationCache = collect($data);
+
+
 		$this->cacheCount = $this->productIdentificationCache->count();
 	}
 }

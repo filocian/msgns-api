@@ -30,8 +30,9 @@ final readonly class ConfigureUC implements UseCaseContract
 		$productId = $data['id'];
 		$name =$data['name'] ?? null;
 		$config = $data['configuration'];
+		$business = $data['business'] ?? null;
 
-		return $this->configureProduct($productId, $name, $config);
+		return $this->configureProduct($productId, $name, $config, $business);
 	}
 
 	/**
@@ -40,11 +41,12 @@ final readonly class ConfigureUC implements UseCaseContract
 	 * @param int $productId
 	 * @param string|null $name
 	 * @param array $config
+	 * @param array|null $business
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
 	 * @throws InvalidProductTypeException
 	 */
-	private function configureProduct(int $productId, string|null $name, array $config): ProductDto
+	private function configureProduct(int $productId, string|null $name, array $config, ?array $business): ProductDto
 	{
 		try {
 			$product = Product::findById($productId);

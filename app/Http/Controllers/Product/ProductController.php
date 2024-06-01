@@ -8,6 +8,7 @@ use App\Exceptions\Product\ProductNotFoundException;
 use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Product\ActivateProductRequest;
+use App\Http\Requests\Product\AddProductBusinessRequest;
 use App\Http\Requests\Product\ConfigureProductRequest;
 use App\Http\Requests\Product\RegisterProductRequest;
 use App\Http\Requests\Product\RenameProductRequest;
@@ -16,6 +17,7 @@ use App\UseCases\Product\Activation\ActivateUC;
 use App\UseCases\Product\Activation\DeactivateUC;
 use App\UseCases\Product\Assignment\AssignToCurrentUserUC;
 use App\UseCases\Product\Assignment\AssignToUserUC;
+use App\UseCases\Product\Businesses\AddBusinessUC;
 use App\UseCases\Product\Configuration\ConfigureUC;
 use App\UseCases\Product\Configuration\RenameUC;
 use App\UseCases\Product\Filtering\FindByCurrentUserUC;
@@ -37,7 +39,8 @@ final class ProductController extends Controller
 		private readonly FindByCurrentUserUC $FindProductByLoggedUserUC,
 		private readonly ConfigureUC $ConfigureUC,
 		private readonly RenameUC $RenameUC,
-		private readonly RegisterProductUC $RegisterProductUC
+		private readonly RegisterProductUC $RegisterProductUC,
+		private readonly AddBusinessUC $AddBusinessUC,
 	) {}
 
 	public function hello()
@@ -150,6 +153,22 @@ final class ProductController extends Controller
 			'id' => $productId,
 			'configuration' => $request->input('configuration'),
 			'name' => $request->input('name'),
+		]);
+
+		return HttpJson::OK($product->wrapped('product'));
+	}
+
+	/**
+	 * Add business information for a registered product
+	 */
+	public function addBusiness(AddProductBusinessRequest $request, int $productId): JsonResponse
+	{
+		$product = $this->AddBusinessUC->run([
+			'productId' => $productId,
+			'userId' => $request->input('user_id'),
+			'name' => $request->input('name'),
+			'types' => $request->input('types'),
+			'size' => $request->input('size'),
 		]);
 
 		return HttpJson::OK($product->wrapped('product'));

@@ -98,7 +98,7 @@ final class Product extends Model
 
 	public static function findProducts(?array $options = []): LengthAwarePaginator
 	{
-		$perPage = $options['perPage'] ?? env('DEFAULT_PAGINATION_LENGTH', 15);
+		$perPage = $options['perPage'];
 
 		return self::paginate($perPage);
 	}

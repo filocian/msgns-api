@@ -20,23 +20,25 @@ final class User extends Authenticatable
 	 *
 	 * @var array<int, string>
 	 */
-	protected $fillable = ['name', 'email', 'password', 'google_id', ];
+	protected $fillable = ['name', 'email', 'password', 'google_id', 'active', 'default_locale', 'user_agent'];
 
 	protected $hidden = ['password', 'remember_token', ];
 
 	protected $casts = [
 		'email_verified_at' => 'datetime',
 		'password' => 'hashed',
+		'active' => 'boolean',
+		'user_agent' => 'array'
 	];
 
-	protected static function boot()
-	{
-		parent::boot();
-
-		self::creating(function ($model) {
-			$model->uuid = (string) Uuid::uuid4();
-		});
-	}
+//	protected static function boot()
+//	{
+//		parent::boot();
+//
+//		self::creating(function ($model) {
+//			$model->uuid = (string) Uuid::uuid4();
+//		});
+//	}
 
 	public function products()
 	{

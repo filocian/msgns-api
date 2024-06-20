@@ -24,7 +24,7 @@ final class UserSeeder extends Seeder
 
 		$user = User::create([
 			'name' => 'Dev Test User',
-			'email' => 'test@test.com',
+			'email' => 'dev@test.com',
 			'email_verified_at' => $now,
 			'created_at' => $now,
 			'updated_at' => $now,

@@ -17,6 +17,7 @@ return new class() extends Migration {
 			$table->id();
 			$table->foreignId('product_type_id')->constrained('product_types');
 			$table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+			$table->foreignId('migrated_user_id')->nullable()->constrained('users', 'migration_id')->onDelete('set null');
 			$table->json('config');
 			$table->string('name', length: 150)->default('');
 			$table->text('description')->nullable();

@@ -40,6 +40,17 @@ final readonly class GenerateUC implements UseCaseContract
 			}
 		}
 
+//		foreach ($productsToGenerate as $productType) {
+//			$template = $productTypeTemplates->find($productType['typeId']);
+//			$quantity = $productType['quantity'];
+//			for ($x = 0; $x < $quantity; $x++) {
+//				$lastId += 1;
+//				$productPassword = $this->generateProductPassword();
+//				$productUrl = $this->generateProductURL($lastId, $productPassword);
+//				$newProducts[] = $this->buildProduct($productType['typeId'], $template, $productPassword, $productUrl);
+//			}
+//		}
+
 		DB::table('products')->insert($newProducts);
 
 		return 'ok';
@@ -55,8 +66,16 @@ final readonly class GenerateUC implements UseCaseContract
 	}
 	private function generateProductURL(int $productId, string $password): string
 	{
+		//FRONT URL
+		$baseUrl = 'https://app.messagenes.com/product/';
+		return $baseUrl . $productId . '/redirect/' . $password;
+	}
+
+	private function generateTargetURL(int $productId, string $password): string
+	{
 		return env('FRONT_URL', 'http://localhost:3000') . '/product/' . $productId . '/register/' . $password;
 	}
+
 	private function generateProductPassword(?int $length = null): string
 	{
 		if ($length) {
@@ -74,14 +93,8 @@ final readonly class GenerateUC implements UseCaseContract
 		$now = Carbon::now();
 		return [
 			'product_type_id' => $productTypeId,
-			'config' => json_encode(array_merge(
-				$productTemplate->config_template,
-				[
-					'password' => $productPassword,
-					'target' => $productUrl,
-				]
-			)),
-			'name' => $productTemplate->name,
+			'password' => $productPassword,
+			'name' => $productTemplate->code,
 			'description' => $productTemplate->description,
 			'created_at' => $now,
 			'updated_at' => $now,

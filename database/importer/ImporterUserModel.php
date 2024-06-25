@@ -23,18 +23,15 @@ class ImporterUserModel
 	{
 		$this->users = array_map(function ($user) {
 			return [
-				'account_id' => $user->id,
-				'email' => $user->email,
-				'password' => $user->password,
+				'id' => $user->id,
 				'name' => $user->nombre,
-				'user_locale' => $user->idioma_usuario,
-				'soft_deleted' => boolval($user->eliminado),
-				'soft_deleted_date' => $user->fecha_eliminado,
-				'tags' => $user->tags,
-				'sellers_tags' => $user->sellers_tags,
-				'borrado' => boolval($user->borrado),
-				'last_access' => $user->ultima_conexion,
-				'contact_email' => $user->email_contacto
+				'email' => $this->fixKnownEmailProblems($user->email),
+				'contact_email' => $user->email_contacto,
+				'password' => $user->password,
+				'default_locale' => $this->resolveLocale($user->idioma_usuario),
+				'active' => boolval($user->activo) && !boolval($user->eliminado),
+				'last_access' => $this->resolveLastAccess($user->ultima_conexion),
+				'created_at' => $user->fecha_hora
 			];
 		}, $this->users);
 
@@ -48,5 +45,81 @@ class ImporterUserModel
 		$jsonFilePath = database_path($filePath);
 		file_put_contents($jsonFilePath, collect($this->users)->toJson());
 		return 'Datos exportados a ' . $filePath;
+	}
+
+	public function resolveLocale(string $lang): string
+	{
+		return match ($lang) {
+			'ca' => 'ca-ES',
+			'es' => 'es-ES',
+			'fr' => 'fr-FR',
+			'de' => 'de-DE',
+			'it' => 'it-IT',
+
+			default => 'en-UK',
+		};
+	}
+
+	public function resolveLastAccess(string $lastAccess)
+	{
+		if($lastAccess == '1970-01-01 00:00:00'){
+			$lastAccess = null;
+		}
+
+		return $lastAccess;
+	}
+
+	public function fixKnownEmailProblems(string $email)
+	{
+		$wrongDotCom = ['comb', 'comt', 'comm', 'comp', 'don'];
+		$wrongDotEs = ['esx'];
+		$wrongGmail = ['gnail', 'gamil'];
+		$initalEmail = $email;
+		$emailParts = explode('@', $email);
+
+		if (count($emailParts) != 2) {
+			return $email;
+		}
+
+		$domain = $emailParts[1];
+		$domainParts = explode('.', $domain);
+
+		if (count($domainParts) != 2) {
+			return $email;
+		}
+
+		$domainName = $domainParts[0];
+		$domainExtension = $domainParts[1];
+		$hasFix = false;
+
+		// Reemplazar errores conocidos en dominios .com
+		foreach ($wrongDotCom as $wrongCase) {
+			if (str_contains($domainExtension, $wrongCase) && strlen($domainExtension) <= 4) {
+				$email = str_replace($wrongCase, 'com', $email);
+				$hasFix = true;
+			}
+		}
+
+		// Reemplazar errores conocidos en dominios .es
+		foreach ($wrongDotEs as $wrongCase) {
+			if (str_contains($domainExtension, $wrongCase) && strlen($domainExtension) <= 3) {
+				$email = str_replace($wrongCase, 'es', $email);
+				$hasFix = true;
+			}
+		}
+
+		// Reemplazar errores conocidos en dominios @gmail
+		foreach ($wrongGmail as $wrongCase) {
+			if (str_contains($domainName, $wrongCase) && strlen($domainName) == 5) {
+				$email = str_replace($wrongCase, 'gmail', $email);
+				$hasFix = true;
+			}
+		}
+
+		if ($hasFix) {
+			dump($initalEmail . ' -> ' . $email);
+		}
+
+		return $email;
 	}
 }

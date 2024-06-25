@@ -36,21 +36,15 @@ class PrepareDatabaseMigration extends Command
 			$adminDb->statement("CREATE DATABASE IF NOT EXISTS migration_db");
 			$migrationDb = DB::connection('migration_db');
 
-			$this->mountUsersTable($migrationDb);
+			//$this->mountUsersTable($migrationDb);
 			$this->mountProductsTable($migrationDb);
-			$this->sanitizeMigrationData($migrationDb);
+			//$this->sanitizeMigrationData($migrationDb);
 
-			$users = new ImporterUserModel($migrationDb);
-			$this->info($users->normalize()->export());
+			//$users = new ImporterUserModel($migrationDb);
+			//$this->info($users->normalize()->export());
 
-			$google = new ImporterProductModel($migrationDb, 'google');
-			$this->info($google->hasType('sticker')->notOwned()->export());
-
-			$instagram = new ImporterProductModel($migrationDb, 'instagram');
-			$this->info($instagram->hasType('sticker')->notOwned()->export());
-
-			$info = new ImporterProductModel($migrationDb, 'info');
-			$this->info($info->hasType('sticker')->notOwned()->export());
+			$products = new ImporterProductModel($migrationDb);
+			$this->info($products->normalize()->export());
 		} catch (QueryException $e) {
 			$this->error('Error al ejecutar la consulta: ' . $e->getMessage());
 		} catch (\Exception $e) {

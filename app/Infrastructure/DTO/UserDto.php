@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 final class UserDto extends BaseDTO
 {
 	public int $id;
-	public string $uuid;
 	public string $name;
 	public string $email;
 	public string|null $google_id;
@@ -21,7 +20,6 @@ final class UserDto extends BaseDTO
 	public function __construct(Model $model)
 	{
 		$this->id = $model->id;
-		$this->uuid = $model->uuid;
 		$this->name = $model->name;
 		$this->email = $model->email;
 		$this->google_id = $model->google_id;

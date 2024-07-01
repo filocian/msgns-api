@@ -24,6 +24,18 @@ final class UserSeeder extends Seeder
 
 		$user = User::create([
 			'name' => 'Dev Test User',
+			'email' => 'rigomatujacrypto@gmail.com',
+			'created_at' => $now,
+			'updated_at' => $now,
+			'password' => Hash::make('daPassword123!'),
+		]);
+
+		if ($role = Role::findByName(StaticRoles::DEV_ROLE, 'stateful-api')) {
+			$user->assignRole($role);
+		}
+
+		$user = User::create([
+			'name' => 'Dev Test User',
 			'email' => 'dev@test.com',
 			'email_verified_at' => $now,
 			'created_at' => $now,

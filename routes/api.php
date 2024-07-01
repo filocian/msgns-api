@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Product\GenerateProductsController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\User\UsersController;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -17,6 +18,10 @@ Route::prefix('auth')->group(function () {
 	Route::post('/login', [AuthController::class, 'login']);
 	Route::post('/sign-up', [AuthController::class, 'signUp']);
 	Route::post('/login/social/google', [AuthController::class, 'googleLogin']);
+	Route::post('/email/verify', [VerificationController::class, 'verify']);
+	Route::post('/email/request-verification', [VerificationController::class, 'sendVerificationEmail']);
+	Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
+	Route::post('/password/request-reset', [PasswordResetController::class, 'sendPassResetEmail']);
 
 	Route::middleware('auth:stateful-api')->group(function () {
 		Route::get('/user', [AuthController::class, 'currentUser']);

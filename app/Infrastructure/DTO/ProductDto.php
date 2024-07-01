@@ -23,11 +23,11 @@ final class ProductDto extends BaseDTO
 	{
 		$this->id = $model->id;
 		$this->name = $model->name;
-		$this->config = new ProductConfigDto($model->config);
+//		$this->config = new ProductConfigDto($model->config);
 		$this->type = ProductTypeDto::fromModel($model->productType);
 		$this->user = $model->user ? UserDto::fromModel($model->user) : null;
 		$this->active = $model->active;
 		$this->created_at = $model->created_at;
-		$this->updated_at = $model->updated_at;
+		$this->updated_at = $model->updated_at ?? Carbon::create(null);
 	}
 }

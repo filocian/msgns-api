@@ -12,9 +12,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 final class Product extends Model
 {
 	use HasFactory;
-
 	protected $table = 'products';
-
 	protected $fillable = [
 		'product_type_id',
 		'user_id',
@@ -25,12 +23,9 @@ final class Product extends Model
 		'tags',
 		'admin_tags',
 	];
-
 	protected $casts = [
 		'active' => 'bool',
 		'config' => 'array',
-		'tags' => 'array',
-		'admin_tags' => 'array',
 	];
 
 	public function productType()
@@ -46,6 +41,11 @@ final class Product extends Model
 	public function metadata()
 	{
 		return $this->hasMany(ProductMetadata::class);
+	}
+
+	public function business()
+	{
+		return $this->hasOne(ProductBusiness::class, 'product_id');
 	}
 
 	/**

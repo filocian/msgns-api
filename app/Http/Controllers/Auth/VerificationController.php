@@ -66,8 +66,10 @@ final class VerificationController extends Controller
 			);
 		}
 
+		app()->setLocale($user->default_locale);
 		$verificationToken = $this->createVerificationToken($user);
-		$this->mailService->send($email, 'Email Verification', $verificationToken);
+		$html = view('emails.email-verification')->with('verificationToken', $verificationToken)->render();
+		$this->mailService->send($email, __('emailVerification.subject'), $html);
 
 		return HttpJson::OK(
 			'test send: ' . $verificationToken,

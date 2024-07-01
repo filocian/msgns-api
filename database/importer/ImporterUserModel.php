@@ -50,11 +50,11 @@ class ImporterUserModel
 	public function resolveLocale(string $lang): string
 	{
 		return match ($lang) {
-			'ca' => 'ca-ES',
-			'es' => 'es-ES',
-			'fr' => 'fr-FR',
-			'de' => 'de-DE',
-			'it' => 'it-IT',
+			'ca' => 'ca_ES',
+			'es' => 'es_ES',
+			'fr' => 'fr_FR',
+			'de' => 'de_DE',
+			'it' => 'it_IT',
 
 			default => 'en-UK',
 		};

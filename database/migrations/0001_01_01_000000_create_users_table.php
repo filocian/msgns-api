@@ -21,7 +21,7 @@ return new class() extends Migration {
 			$table->string('contact_email')->nullable();
 			$table->string('password');
 			$table->string('google_id')->nullable();
-			$table->string('default_locale')->default('en-UK');
+			$table->string('default_locale')->default('en_UK');
 			$table->json('user_agent')->default('{}');
 			$table->boolean('active')->default(true);
 			$table->timestamp('last_access')->nullable();

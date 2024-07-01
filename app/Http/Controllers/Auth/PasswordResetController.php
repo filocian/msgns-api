@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Hash;
 final class PasswordResetController extends Controller
 {
 	private ResendService $mailService;
-	static private int $VERIFICATION_GRACE_DAYS = 1;
+	static private int $RESET_GRACE_DAYS = 1;
 
 	public function __construct(ResendService $mailService)
 	{
@@ -54,8 +54,13 @@ final class PasswordResetController extends Controller
 	{
 		$email = $request->input('email');
 		$user = User::where('email', $email)->firstOrFail();
+		app()->setLocale($user->default_locale);
 		$verificationToken = $this->createVerificationToken($user);
-		$this->mailService->send($email, 'Email Verification', $verificationToken);
+		$html = view('emails.reset-password')
+			->with('email', $email)
+			->with('verificationToken', $verificationToken)
+			->render();
+		$this->mailService->send($email, __('passwordReset.subject'), $html);
 
 		return HttpJson::OK(
 			'test send: ' . $verificationToken,
@@ -69,7 +74,7 @@ final class PasswordResetController extends Controller
 		$name = $user->name;
 		$oldPassword = $user->password;
 		$now = Carbon::now();
-		$expirationDate = $now->addDays(self::$VERIFICATION_GRACE_DAYS);
+		$expirationDate = $now->addDays(self::$RESET_GRACE_DAYS);
 		$token = [
 			'value' => Crypt::encrypt($email . $name . $oldPassword),
 			'expiration_date' => $expirationDate->toDateTimeString()

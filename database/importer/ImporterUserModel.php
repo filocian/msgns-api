@@ -56,7 +56,7 @@ class ImporterUserModel
 			'de' => 'de_DE',
 			'it' => 'it_IT',
 
-			default => 'en-UK',
+			default => 'en_UK',
 		};
 	}
 

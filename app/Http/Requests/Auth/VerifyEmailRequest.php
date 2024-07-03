@@ -12,7 +12,6 @@ final class VerifyEmailRequest extends FormRequest
 	{
 		return [
 			'token' => 'required|string',
-			'email' => 'required|string',
 		];
 	}
 }

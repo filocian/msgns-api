@@ -25,6 +25,7 @@ final class UserSeeder extends Seeder
 		$user = User::create([
 			'name' => 'Dev Test User',
 			'email' => 'rigomatujacrypto@gmail.com',
+			'password_reset_required' => true,
 			'created_at' => $now,
 			'updated_at' => $now,
 			'password' => Hash::make('daPassword123!'),

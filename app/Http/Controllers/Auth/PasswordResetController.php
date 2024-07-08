@@ -28,10 +28,10 @@ final class PasswordResetController extends Controller
 
 	public function resetPassword(PasswordResetRequest $request): JsonResponse
 	{
-		$email = $request->input('email');
 		$token = $request->input('token');
-		$newPassword = $request->input('new_password');
-		$user = User::where('email', $email)->firstOrFail();
+		$newPassword = $request->input('password');
+		$parsedToken = $this->parseVerificationToken($token);
+		$user = User::where('email', $parsedToken['email'])->firstOrFail();
 
 		if(!$this->isValidVerificationToken($user, $token)){
 			return HttpJson::OK(
@@ -41,6 +41,11 @@ final class PasswordResetController extends Controller
 		}
 
 		$user->password = Hash::make($newPassword);
+
+		if($user->password_reset_required){
+			$user->password_reset_required = false;
+		}
+
 		$user->save();
 		$user->refresh();
 
@@ -75,8 +80,9 @@ final class PasswordResetController extends Controller
 		$oldPassword = $user->password;
 		$now = Carbon::now();
 		$expirationDate = $now->addDays(self::$RESET_GRACE_DAYS);
+		$tokenValue = implode(';', [$email, $name, $oldPassword]);
 		$token = [
-			'value' => Crypt::encrypt($email . $name . $oldPassword),
+			'value' => Crypt::encrypt($tokenValue),
 			'expiration_date' => $expirationDate->toDateTimeString()
 		];
 
@@ -96,16 +102,23 @@ final class PasswordResetController extends Controller
 		$name = $user->name;
 		$oldPassword = $user->password;
 
-		return $token['value'] == $email . $name . $oldPassword;
+		return $token['email'] == $email && $token['name'] == $name && $token['old_password'] == $oldPassword;
 	}
 
 	private function parseVerificationToken(string $encryptedToken): array
 	{
 		$token = json_decode(Crypt::decrypt($encryptedToken));
+		$tokenValue = explode(';', Crypt::decrypt($token->value));
+		$expiration_date = Carbon::parse($token->expiration_date);
+		$email = $tokenValue[0];
+		$name = $tokenValue[1];
+		$old_password = $tokenValue[2];
 
 		return [
-			'value' => Crypt::decrypt($token->value),
-			'expiration_date' => Carbon::parse($token->expiration_date)
+			'email' => $email,
+			'name' => $name,
+			'old_password' => $old_password,
+			'expiration_date' => $expiration_date
 		];
 	}
 }

@@ -14,7 +14,8 @@ final class ProductTypeDto extends BaseDTO
 	public string $code;
 	public string $name;
 	public string $description;
-	public ProductConfigDto $config_template;
+	public string $image_ref;
+
 	public Carbon $created_at;
 	public Carbon $updated_at;
 
@@ -24,7 +25,7 @@ final class ProductTypeDto extends BaseDTO
 		$this->code = $model->code;
 		$this->name = $model->name;
 		$this->description = $model->description;
-		$this->config_template = new ProductConfigDto($model->config_template);
+		$this->image_ref = $model->image_ref;
 		$this->created_at = $model->created_at;
 		$this->updated_at = $model->updated_at;
 	}

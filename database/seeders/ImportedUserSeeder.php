@@ -38,8 +38,10 @@ final class ImportedUserSeeder extends Seeder
 				'password' => $account->password,
 				'default_locale' => $account->default_locale,
 				'active' => $account->active,
+				'password_reset_required' => true,
 				'last_access' => $account->last_access,
-				'created_at' => $account->created_at
+				'created_at' => $account->created_at,
+				'updated_at' => $account->updated_at
 			];
 		}
 

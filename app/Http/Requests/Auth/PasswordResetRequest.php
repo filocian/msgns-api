@@ -12,8 +12,7 @@ final class PasswordResetRequest extends FormRequest
 	{
 		return [
 			'token' => 'required|string',
-			'email' => 'required|string',
-			'new_password' => 'required|string',
+			'password' => 'required|string',
 		];
 	}
 }

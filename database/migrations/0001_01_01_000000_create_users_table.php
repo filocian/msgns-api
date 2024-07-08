@@ -24,6 +24,7 @@ return new class() extends Migration {
 			$table->string('default_locale')->default('en_UK');
 			$table->json('user_agent')->default('{}');
 			$table->boolean('active')->default(true);
+			$table->boolean('password_reset_required')->default(false);
 			$table->timestamp('last_access')->nullable();
 			$table->rememberToken();
 			$table->timestamps();

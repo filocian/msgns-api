@@ -30,7 +30,7 @@ final class ProductTypesSeeder extends Seeder
 				'code' => $productType['code'],
 				'name' => $productType['code'],
 				'description' => $productType['description'],
-				'config_template' => json_encode($productType['config']),
+				'image_ref' => $productType['code'],
 				'created_at' => $now,
 				'updated_at' => $now,
 			];

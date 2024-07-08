@@ -18,7 +18,7 @@ return new class() extends Migration {
 			$table->string('code', length: 60)->unique();
 			$table->string('name', length: 60)->unique();
 			$table->text('description')->nullable();
-			$table->json('config_template');
+			$table->string('image_ref');
 			$table->timestamps();
 		});
 	}

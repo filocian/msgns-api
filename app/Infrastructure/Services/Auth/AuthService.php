@@ -48,15 +48,23 @@ final class AuthService
 	 */
 	public function login(string $email, string $password): array
 	{
-		if (!Auth::attempt(['email' => $email, 'password' => $password])) {
-			throw new AuthenticationException();
-		}
-		Request::session()->regenerate();
-
 		$user = User::query()->where('email', $email)->first();
+
 		if (!$user) {
 			throw new UnauthorizedException();
 		}
+
+		if($user->password_reset_required){
+			return [
+				'user' => UserDto::fromModel($user),
+			];
+		}
+
+		if (!Auth::attempt(['email' => $email, 'password' => $password])) {
+			throw new AuthenticationException();
+		}
+
+		Request::session()->regenerate();
 
 		$userRoles = $this->getRoles($user);
 		$rolesDto = $userRoles->map(fn($role) => RoleDto::fromModel($role));

@@ -28,6 +28,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 
 	protected $casts = [
 		'email_verified_at' => 'datetime',
+		'password_reset_required' => 'boolean',
 		'password' => 'hashed',
 		'active' => 'boolean',
 		'user_agent' => 'array'

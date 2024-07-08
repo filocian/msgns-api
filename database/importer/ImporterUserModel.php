@@ -2,6 +2,7 @@
 
 namespace Database\Importer;
 
+use Carbon\Carbon;
 use Illuminate\Database\ConnectionInterface;
 
 class ImporterUserModel
@@ -30,8 +31,10 @@ class ImporterUserModel
 				'password' => $user->password,
 				'default_locale' => $this->resolveLocale($user->idioma_usuario),
 				'active' => boolval($user->activo) && !boolval($user->eliminado),
+				'password_reset_required' => true,
 				'last_access' => $this->resolveLastAccess($user->ultima_conexion),
-				'created_at' => $user->fecha_hora
+				'created_at' => $user->fecha_hora,
+				'updated_at' => Carbon::now()->toDateTimeString()
 			];
 		}, $this->users);
 

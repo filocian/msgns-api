@@ -35,6 +35,7 @@ class ImporterProductModel
 					'id' => $product->id,
 					'product_type_id' => $this->resolveProductTypeId($productCode),
 					'user_id' => $product->account_id,
+					'model' => $product->elem_type,
 					'target_url' => $product->target_url,
 					'password' => $product->password,
 					'usage' => $product->visits,

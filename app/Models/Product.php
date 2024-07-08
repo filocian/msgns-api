@@ -136,7 +136,7 @@ final class Product extends Model
 	public static function findByConfigPair(int $productId, string $configKey, string $configValue): self
 	{
 		return self::where('id', $productId)
-			->where('config->' . $configKey, $configValue)
+			->where($configKey, $configValue)
 			->firstOrFail();
 	}
 }

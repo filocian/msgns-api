@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\UnauthorizedException;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class AuthService
@@ -93,6 +94,13 @@ final class AuthService
 		Request::session()->regenerate();
 
 		$userRoles = $this->getRoles($user);
+
+		if($userRoles->count() < 1){
+			if ($role = Role::findByName(StaticRoles::USER_ROLE, 'stateful-api')) {
+				$user->assignRole($role);
+			}
+		}
+
 		$rolesDto = $userRoles->map(fn($role) => RoleDto::fromModel($role));
 
 		return [
@@ -244,7 +252,7 @@ final class AuthService
 
 	public function isValidPasswordResetToken(User $user, string $encryptedToken): bool
 	{
-		$token = $this->parseVerificationToken($encryptedToken);
+		$token = $this->parsePasswordResetToken($encryptedToken);
 		$now = Carbon::now();
 
 		if (!$now->lessThanOrEqualTo($token['expiration_date'])) {

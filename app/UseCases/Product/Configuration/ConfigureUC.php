@@ -19,7 +19,7 @@ final readonly class ConfigureUC implements UseCaseContract
 	/**
 	 * UseCase: Configure a single product based on its id
 	 *
-	 * @param array{id: int, name:string|null, configuration: array}|null $data
+	 * @param array{id: int, name:string|null, target_url: string}|null $data
 	 * @param array|null $opts
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
@@ -29,7 +29,7 @@ final readonly class ConfigureUC implements UseCaseContract
 	{
 		$productId = $data['id'];
 		$name =$data['name'] ?? null;
-		$config = $data['configuration'];
+		$config = $data['target_url'];
 		$business = $data['business'] ?? null;
 
 		return $this->configureProduct($productId, $name, $config, $business);
@@ -40,13 +40,13 @@ final readonly class ConfigureUC implements UseCaseContract
 	 *
 	 * @param int $productId
 	 * @param string|null $name
-	 * @param array $config
+	 * @param string $target_url
 	 * @param array|null $business
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
 	 * @throws InvalidProductTypeException
 	 */
-	private function configureProduct(int $productId, string|null $name, array $config, ?array $business): ProductDto
+	private function configureProduct(int $productId, string|null $name, string $target_url, ?array $business): ProductDto
 	{
 		try {
 			$product = Product::findById($productId);
@@ -56,13 +56,12 @@ final readonly class ConfigureUC implements UseCaseContract
 
 		try {
 			$productType = ProductType::findById($product->product_type_id);
-			$configTemplate = $productType->config_template;
 		} catch (ModelNotFoundException $e) {
 			throw new InvalidProductTypeException();
 		}
 
 		$config = [
-			'config' => array_merge($configTemplate, $config)
+			'target_url' => $target_url
 		];
 
 		if(isset($name)){

@@ -16,16 +16,15 @@ final class Product extends Model
 	protected $fillable = [
 		'product_type_id',
 		'user_id',
-		'config',
+		'model',
+		'target_url',
+		'password',
 		'name',
 		'description',
 		'active',
-		'tags',
-		'admin_tags',
 	];
 	protected $casts = [
 		'active' => 'bool',
-		'config' => 'array',
 	];
 
 	public function productType()

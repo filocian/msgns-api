@@ -62,7 +62,7 @@ final class ConfigureProductRequest extends FormRequest
 	{
 		return [
 			'name' => 'string',
-			'configuration' => 'required|array',
+			'target_url' => 'required|string',
 			'business' => 'array'
 		];
 	}

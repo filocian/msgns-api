@@ -8,6 +8,7 @@ use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Auth\SendEmailVerificationRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
+use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Mail\ResendService;
 use App\Models\User;
 use Carbon\Carbon;
@@ -18,17 +19,18 @@ use Illuminate\Support\Facades\Crypt;
 final class VerificationController extends Controller
 {
 	private ResendService $mailService;
-	static private int $VERIFICATION_GRACE_DAYS = 3;
+	private AuthService $authService;
 
-	public function __construct(ResendService $mailService)
+	public function __construct(ResendService $mailService, AuthService $authService)
 	{
 		$this->mailService = $mailService;
+		$this->authService = $authService;
 	}
 
 	public function verify(VerifyEmailRequest $request): JsonResponse
 	{
 		$token = $request->input('token');
-		$parsedToken = $this->parseVerificationToken($token);
+		$parsedToken = $this->authService->parseEmailVerificationToken($token);
 
 		$user = User::where('email', $parsedToken['email'])->firstOrFail();
 
@@ -39,7 +41,7 @@ final class VerificationController extends Controller
 			);
 		}
 
-		if (!$this->isValidVerificationToken($user, $token)) {
+		if (!$this->authService->isValidEmailVerificationToken($user, $token)) {
 			return HttpJson::KO(
 				'invalid token',
 				Response::HTTP_UNAUTHORIZED
@@ -67,7 +69,7 @@ final class VerificationController extends Controller
 		}
 
 		app()->setLocale($user->default_locale);
-		$verificationToken = $this->createVerificationToken($user);
+		$verificationToken = $this->authService->generateEmailVerificationToken($user);
 		$html = view('emails.email-verification')->with('verificationToken', $verificationToken)->render();
 
 		try{
@@ -85,52 +87,52 @@ final class VerificationController extends Controller
 		);
 	}
 
-	private function createVerificationToken(User $user): string
-	{
-		$email = $user->email;
-		$name = $user->name;
-		$created_at = $user->created_at;
-		$now = Carbon::now();
-		$expirationDate = $now->addDays(self::$VERIFICATION_GRACE_DAYS);
-		$tokenValue = implode(';', [$email, $name, $created_at]);
-		$token = [
-			'value' => Crypt::encrypt($tokenValue),
-			'expiration_date' => $expirationDate->toDateTimeString()
-		];
-
-		return Crypt::encrypt(json_encode($token));
-	}
-
-	private function isValidVerificationToken(User $user, string $encryptedToken): bool
-	{
-		$token = $this->parseVerificationToken($encryptedToken);
-		$now = Carbon::now();
-
-		if (!$now->lessThanOrEqualTo($token['expiration_date'])) {
-			return false;
-		}
-
-		$email = $user->email;
-		$name = $user->name;
-		$created_at = $user->created_at;
-
-		return $token['email'] == $email && $token['name'] == $name && $token['created_at'] == $created_at;
-	}
-
-	private function parseVerificationToken(string $encryptedToken): array
-	{
-		$token = json_decode(Crypt::decrypt($encryptedToken));
-		$tokenValue = explode(';', Crypt::decrypt($token->value));
-		$expiration_date = Carbon::parse($token->expiration_date);
-		$email = $tokenValue[0];
-		$name = $tokenValue[1];
-		$created_at = $tokenValue[2];
-
-		return [
-			'email' => $email,
-			'name' => $name,
-			'created_at' => $created_at,
-			'expiration_date' => $expiration_date
-		];
-	}
+//	private function createVerificationToken(User $user): string
+//	{
+//		$email = $user->email;
+//		$name = $user->name;
+//		$created_at = $user->created_at;
+//		$now = Carbon::now();
+//		$expirationDate = $now->addDays(self::$VERIFICATION_GRACE_DAYS);
+//		$tokenValue = implode(';', [$email, $name, $created_at]);
+//		$token = [
+//			'value' => Crypt::encrypt($tokenValue),
+//			'expiration_date' => $expirationDate->toDateTimeString()
+//		];
+//
+//		return Crypt::encrypt(json_encode($token));
+//	}
+//
+//	private function isValidVerificationToken(User $user, string $encryptedToken): bool
+//	{
+//		$token = $this->parseVerificationToken($encryptedToken);
+//		$now = Carbon::now();
+//
+//		if (!$now->lessThanOrEqualTo($token['expiration_date'])) {
+//			return false;
+//		}
+//
+//		$email = $user->email;
+//		$name = $user->name;
+//		$created_at = $user->created_at;
+//
+//		return $token['email'] == $email && $token['name'] == $name && $token['created_at'] == $created_at;
+//	}
+//
+//	private function parseVerificationToken(string $encryptedToken): array
+//	{
+//		$token = json_decode(Crypt::decrypt($encryptedToken));
+//		$tokenValue = explode(';', Crypt::decrypt($token->value));
+//		$expiration_date = Carbon::parse($token->expiration_date);
+//		$email = $tokenValue[0];
+//		$name = $tokenValue[1];
+//		$created_at = $tokenValue[2];
+//
+//		return [
+//			'email' => $email,
+//			'name' => $name,
+//			'created_at' => $created_at,
+//			'expiration_date' => $expiration_date
+//		];
+//	}
 }

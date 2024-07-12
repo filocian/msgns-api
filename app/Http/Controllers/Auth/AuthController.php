@@ -39,10 +39,9 @@ final class AuthController extends Controller
 
 		$user = $this->signUpUC->run($data);
 
-		return HttpJson::OK(
-			$user->toArray('user'),
-			Response::HTTP_CREATED
-		);
+		$userAndRoles = $this->loginUC->run($data);
+
+		return HttpJson::OK($userAndRoles);
 	}
 
 

@@ -16,7 +16,7 @@ final class ProductTypeDto extends BaseDTO
 	public string $description;
 	public string $image_ref;
 	public string $primary_model;
-	public string $secondary_model;
+	public string|null $secondary_model;
 
 	public Carbon $created_at;
 	public Carbon $updated_at;

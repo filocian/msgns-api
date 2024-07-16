@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\DTO;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
+use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,6 +17,11 @@ final class ProductDto extends BaseDTO
 	public string $model;
 	public string $password;
 	public string $target_url;
+	public bool $is_primary_model;
+
+	public Product|null $parent;
+	public Product|null $child;
+
 	public int $usage;
 	public string $name;
 	public string $description;
@@ -31,6 +37,11 @@ final class ProductDto extends BaseDTO
 		$this->model = $model->model;
 		$this->password = $model->password;
 		$this->target_url = $model->target_url;
+		$this->is_primary_model = $model->isPrimaryModel();
+
+		$this->parent = $model->parentProduct;
+		$this->child = $model->childProduct;
+
 		$this->usage = $model->usage;
 		$this->name = $model->name;
 		$this->description = $model->description;

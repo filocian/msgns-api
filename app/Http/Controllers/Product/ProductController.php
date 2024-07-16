@@ -24,6 +24,10 @@ use App\UseCases\Product\Filtering\FindByCurrentUserUC;
 use App\UseCases\Product\Filtering\FindByIdUC;
 use App\UseCases\Product\Listing\ProductListUC;
 use App\UseCases\Product\Registration\RegisterProductUC;
+use App\UseCases\Product\Relationship\GetChildCandidatesUC;
+use App\UseCases\Product\Relationship\GetParentCandidatesUC;
+use App\UseCases\Product\Relationship\SetChildUC;
+use App\UseCases\Product\Relationship\SetParentUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -43,6 +47,10 @@ final class ProductController extends Controller
 		private readonly RegisterProductUC $RegisterProductUC,
 		private readonly ProductListUC $productListUC,
 		private readonly AddBusinessUC $AddBusinessUC,
+		private readonly GetParentCandidatesUC $GetParentCandidatesUC,
+		private readonly GetChildCandidatesUC $GetChildCandidatesUC,
+		private readonly SetParentUC $SetParentUC,
+		private readonly SetChildUc $SetChildUc,
 	) {}
 
 	public function hello()
@@ -188,5 +196,47 @@ final class ProductController extends Controller
 	public function destroy(string $nfcId)
 	{
 		//
+	}
+
+	/**
+	 * Get product parents candidates
+	 */
+	public function getParentCandidates(int $id)
+	{
+		$candidates = $this->GetParentCandidatesUC->run([
+			'productId' => $id
+		]);
+
+		return HttpJson::OK($candidates->wrapped('parent_candidates'));
+	}
+
+	/**
+	 * Get product child candidates
+	 */
+	public function getChildCandidates(int $id)
+	{
+		$candidates = $this->GetChildCandidatesUC->run([
+			'productId' => $id
+		]);
+
+		return HttpJson::OK($candidates->wrapped('child_candidates'));
+	}
+
+	public function setParentProduct(int $id, int $parent_id){
+		$product = $this->SetParentUC->run([
+			'productId' => $id,
+			'parentId' => $parent_id
+		]);
+
+		return HttpJson::OK($product->wrapped('product'));
+	}
+
+	public function setChildProduct(int $id, int $child_id){
+		$product = $this->SetChildUc->run([
+			'productId' => $id,
+			'childId' => $child_id
+		]);
+
+		return HttpJson::OK($product->wrapped('product'));
 	}
 }

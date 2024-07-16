@@ -18,6 +18,7 @@ return new class() extends Migration {
 			$table->foreignId('product_type_id')->constrained('product_types');
 			$table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
 			$table->string('model');
+			$table->unsignedBigInteger('linked_to_product_id')->nullable()->unique();
 			$table->string('password');
 			$table->text('target_url')->nullable();
 			$table->integer('usage')->nullable();
@@ -25,6 +26,12 @@ return new class() extends Migration {
 			$table->text('description')->nullable();
 			$table->boolean('active')->default(false);
 			$table->timestamps();
+
+			$table->foreign('linked_to_product_id')
+				->references('id')
+				->on($this->table)
+				->onDelete('cascade')
+				->onUpdate('cascade');
 		});
 	}
 

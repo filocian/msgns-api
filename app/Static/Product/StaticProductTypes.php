@@ -128,22 +128,14 @@ final class StaticProductTypes
 		$models = count($msgnsProduct['model']) > 1
 			? implode('+', $msgnsProduct['model'])
 			: $msgnsProduct['model'][0];
-		$baseConfig = [
-			'image_ref' => $msgnsProduct['code'],
-			'password' => '123456',
-		];
-		$targetConfig = [];
-
-		for ($x = 0; $x < count($msgnsProduct['model']); $x++) {
-			$key = "{$msgnsProduct['model'][$x]}_url";
-			$targetConfig[$key] = 'https://target.url';
-		}
 
 		return [
 			'code' => $msgnsProduct['code'],
 			'name' => $msgnsProduct['code'],
 			'description' => "{$msgnsProduct['type']} $models",
-			'config' => array_merge($targetConfig, $baseConfig),
+			'image_ref' => $msgnsProduct['code'],
+			'primary_model' => $msgnsProduct['model'][0],
+			'secondary_model' => $msgnsProduct['model'][1] ?? null
 		];
 	}
 

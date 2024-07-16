@@ -54,7 +54,7 @@ abstract class BaseCollectionDTO implements CollectionDTO
 	public function wrapped(string $wrapper = null): array
 	{
 		$data = $this->data->map(function ($item) {
-			return $item();
+			return $item;
 		});
 
 		if ($wrapper) {

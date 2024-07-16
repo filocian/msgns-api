@@ -162,4 +162,28 @@ final readonly class ProductService
 	 * @return array<ProductDto>
 	 */
 	public function searchUserProducts() {}
+
+	public function setChildProduct(Product $parent, int $childId)
+	{
+		$child = Product::findById($childId);
+
+		return $child->setParentProduct($parent->id);
+	}
+
+	public function setParentProduct(Product $child, int $parentId)
+	{
+		$parent = Product::findById($parentId);
+
+		return $child->setParentProduct($parent->id);
+	}
+
+	public function getParentCandidates(Product $child)
+	{
+		return $child->getParentCandidates();
+	}
+
+	public function getChildCandidates(Product $parent)
+	{
+		return $parent->getChildCandidates();
+	}
 }

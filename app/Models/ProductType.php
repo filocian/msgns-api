@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 final class ProductType extends Model
 {
 	protected $table = 'product_types';
+	protected $fillable = ['code', 'name', 'description', 'image_ref', 'primary_model', 'secondary_model'];
 	protected $casts = [
 		'config_template' => 'array',
 	];

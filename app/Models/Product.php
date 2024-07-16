@@ -12,11 +12,13 @@ use Illuminate\Pagination\LengthAwarePaginator;
 final class Product extends Model
 {
 	use HasFactory;
+
 	protected $table = 'products';
 	protected $fillable = [
 		'product_type_id',
 		'user_id',
 		'model',
+		'linked_to_product_id',
 		'target_url',
 		'password',
 		'name',
@@ -137,5 +139,92 @@ final class Product extends Model
 		return self::where('id', $productId)
 			->where($configKey, $configValue)
 			->firstOrFail();
+	}
+
+	public function isPrimaryModel(): bool
+	{
+		return $this->productType->primary_model == $this->model;
+	}
+
+	/**
+	 * Get the product that this product is linked to.
+	 */
+	public function parentProduct()
+	{
+		return $this->belongsTo(Product::class, 'linked_to_product_id');
+	}
+
+	/**
+	 * Get the child product that links to this product.
+	 */
+	public function childProduct()
+	{
+		return $this->hasOne(Product::class, 'linked_to_product_id');
+	}
+
+	/**
+	 * Set the child product that links to this product.
+	 */
+//	public function setChildProduct(int $childId): self
+//	{
+//		$childProduct = self::findById($childId);
+//		$childProduct->linked_to_product_id = $this->id;
+//
+//		$childProduct->save();
+//		$childProduct->refresh();
+//
+//		return $this;
+//	}
+
+	/**
+	 * Set the parent product that this product is linked to.
+	 */
+	public function setParentProduct(int $parentId): self
+	{
+		$this->linked_to_product_id = $parentId;
+		$this->save();
+		$this->refresh();
+
+		return $this;
+	}
+
+	/**
+	 * Retrieve parent candidates for this product.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Collection
+	 */
+	public function getParentCandidates()
+	{
+		return Product::whereHas('productType', function ($query) {
+			$query->where('code', $this->productType->code)
+				->where('primary_model', $this->productType->primary_model);
+		})
+			->whereNotNull('user_id')
+			->where('user_id', $this->user_id)
+			->whereDoesntHave('childProduct')
+			->where('id', '!=', $this->id)
+			->orderBy('updated_at', 'desc')
+			->limit(100)
+			->get();
+	}
+
+	/**
+	 * Retrieve child candidates for this product.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Collection
+	 */
+	public function getChildCandidates()
+	{
+		return Product::whereHas('productType', function ($query) {
+			$query->where('code', $this->productType->code)
+				->where('secondary_model', $this->productType->secondary_model);
+		})
+			->whereNotNull('user_id')
+			->where('user_id', $this->user_id)
+			->whereDoesntHave('parentProduct')
+			->where('id', '!=', $this->id)
+			->orderBy('updated_at', 'desc')
+			->limit(100)
+			->get();
 	}
 }

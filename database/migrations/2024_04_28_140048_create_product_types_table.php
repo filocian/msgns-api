@@ -19,6 +19,8 @@ return new class() extends Migration {
 			$table->string('name', length: 60)->unique();
 			$table->text('description')->nullable();
 			$table->string('image_ref');
+			$table->string('primary_model');
+			$table->string('secondary_model')->nullable()->default(null);
 			$table->timestamps();
 		});
 	}

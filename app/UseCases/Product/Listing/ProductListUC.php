@@ -4,7 +4,6 @@ namespace App\UseCases\Product\Listing;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\PaginatorDto;
-use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Product\ProductService;
 
 final class ProductListUC implements UseCaseContract

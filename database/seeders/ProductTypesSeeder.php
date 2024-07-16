@@ -31,6 +31,8 @@ final class ProductTypesSeeder extends Seeder
 				'name' => $productType['code'],
 				'description' => $productType['description'],
 				'image_ref' => $productType['code'],
+				'primary_model' => $productType['primary_model'],
+				'secondary_model' => $productType['secondary_model'] ?? null,
 				'created_at' => $now,
 				'updated_at' => $now,
 			];

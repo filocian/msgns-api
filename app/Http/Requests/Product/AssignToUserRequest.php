@@ -26,6 +26,9 @@ final class AssignToUserRequest extends FormRequest
 	 */
 	public function authorize(Request $request, AuthService $authService): bool
 	{
+		$loggedUserId = $authService->id();
+		$loggedUser = User::find($loggedUserId);
+
 		$user = User::find((int) $request->route('userId'));
 		$productId = (int) $request->route('id');
 
@@ -35,7 +38,7 @@ final class AssignToUserRequest extends FormRequest
 			throw new ProductNotFoundException();
 		}
 
-		if (!$user->hasAnyRole([
+		if (!$loggedUser->hasAnyRole([
 			StaticRoles::BACKOFFICE_ROLE,
 			StaticRoles::DEV_ROLE,
 		])) {

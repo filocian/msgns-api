@@ -8,6 +8,7 @@ use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Models\Product;
+use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -28,7 +29,7 @@ final readonly class AssignToUserUC implements UseCaseContract
 		$productId = $data['productId'];
 		$userId = $data['userId'];
 
-		return $this->assignToCurrentUser($productId, $userId);
+		return $this->assignToUser($productId, $userId);
 	}
 
 	/**
@@ -40,13 +41,16 @@ final readonly class AssignToUserUC implements UseCaseContract
 	 * @throws ProductNotFoundException
 	 * @throws Exception
 	 */
-	private function assignToCurrentUser(int $productId, string $userId): ProductDto
+	private function assignToUser(int $productId, string $userId): ProductDto
 	{
 		try {
+			$user = User::where('id', $userId)
+				->firstOrFail();
+
 			$product = Product::findById($productId,);
 
 			$product->update([
-				'user_id' => $userId,
+				'user_id' => $user->id,
 			]);
 
 			$product->refresh();

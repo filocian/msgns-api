@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Product;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
+use App\Http\Requests\Product\AssignToUserRequest;
 use App\Http\Requests\Product\RegisterProductRequest;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\UseCases\Product\Activation\ActivateUC;
@@ -25,10 +26,8 @@ final class AdminProductController extends Controller
 	public function __construct(
 		private readonly ActivateUC $ActivateProductUC,
 		private readonly DeactivateUC $DeactivateProductUC,
-		private readonly AssignToUserUC $AssignToUserUc,
+		private readonly AssignToUserUC $AssignToUserUC,
 		private readonly FindByIdUC $FindProductByIdUC,
-		private readonly FindByCurrentUserUC $FindProductByLoggedUserUC,
-		private readonly ProductListUC $productListUC
 	) {}
 
 	public function hello()
@@ -54,13 +53,14 @@ final class AdminProductController extends Controller
 		return HttpJson::OK($response, Response::HTTP_CREATED);
 	}
 
-	public function assign(int $id, int $userId): JsonResponse
+	public function assignToUser(AssignToUserRequest $request, int $id, string $userId): JsonResponse
 	{
-		$response = $this->AssignToUserUc->run([
-			'id' => $id,
+		$product = $this->AssignToUserUC->run([
+			'productId' => $id,
+			'userId' => $userId,
 		]);
 
-		return HttpJson::OK($response, Response::HTTP_CREATED);
+		return HttpJson::OK($product->wrapped('product'), Response::HTTP_CREATED);
 	}
 
 	public function findById(Request $request, int $id): JsonResponse

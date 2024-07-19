@@ -6,6 +6,7 @@ namespace App\Infrastructure\DTO;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
 use App\Models\Product;
+use App\Models\ProductBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,6 +22,8 @@ final class ProductDto extends BaseDTO
 
 	public Product|null $parent;
 	public Product|null $child;
+
+	public ProductBusinessDto|null $business_data;
 
 	public int $usage;
 	public string $name;
@@ -41,6 +44,8 @@ final class ProductDto extends BaseDTO
 
 		$this->parent = $model->parentProduct;
 		$this->child = $model->childProduct;
+
+		$this->business_data = $model->business ? ProductBusinessDto::fromModel($model->business) : null;
 
 		$this->usage = $model->usage;
 		$this->name = $model->name;

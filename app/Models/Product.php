@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 final class Product extends Model
 {
@@ -100,8 +101,55 @@ final class Product extends Model
 	public static function findProducts(?array $options = []): LengthAwarePaginator
 	{
 		$perPage = $options['perPage'];
+		$currentPage = $options['currentPage'] ?? 1;
 
-		return self::paginate($perPage);
+//		Paginator::currentPageResolver(function () use ($currentPage) {
+//			return $currentPage;
+//		});
+
+		$filters = [
+			'id' => $options['id'] ?? null,
+			'code' => $options['code'] ?? null,
+			'name' => $options['name'] ?? null,
+			'owner_id' => $options['owner_id'] ?? null,
+			'owner_email' => $options['owner_email'] ?? null,
+			'active' => $options['active'] ?? null,
+		];
+
+		$query = Product::query();
+
+		if($filters['id']){
+			$query->where('id', $filters['id']);
+		}
+
+		if($filters['code']){
+			$productType = $filters['code'];
+			$query->whereHas('productType', function ($q) use ($productType) {
+				$q->where('code', $productType);
+			});
+		}
+
+		if($filters['name']){
+			$query->where('name', $filters['name']);
+		}
+
+		if($filters['owner_id']){
+			$query->where('user_id', $filters['owner_id']);
+		}
+
+		if($filters['owner_email']){
+			$userEmail = $filters['owner_email'];
+			$query->whereHas('user', function ($q) use ($userEmail) {
+				$q->where('email', $userEmail);
+			});
+		}
+
+		if($filters['active']){
+			$query->where('active', $filters['active']);
+		}
+
+//		return self::paginate($perPage);
+		return $query->paginate($perPage);
 	}
 
 	/**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\Product\AdminProductController;
 use App\Http\Controllers\Product\GenerateProductsController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\User\UsersController;
@@ -38,7 +39,8 @@ Route::prefix('products')->group(function () {
 		Route::get('/', [ProductController::class, 'list']);
 		Route::post('/generate', [GenerateProductsController::class, 'generateProducts']);
 		Route::get('/mine', [ProductController::class, 'mine']);
-		Route::post('/{id}/assign/{password}', [ProductController::class, 'assignToCurrentUser']);
+//		Route::post('/{id}/assign/{password}', [ProductController::class, 'assignToCurrentUser']);
+		Route::post('/{id}/assign/{userId}', [AdminProductController::class, 'assignToUser']);
 		Route::post('/{id}/register/{password}', [ProductController::class, 'register']);
 		Route::put('/{id}/configure', [ProductController::class, 'configure']);
 		Route::put('/{id}/rename', [ProductController::class, 'rename']);

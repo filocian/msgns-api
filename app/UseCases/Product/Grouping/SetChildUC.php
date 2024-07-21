@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCases\Product\Relationship;
+namespace App\UseCases\Product\Grouping;
 
 
 use App\Infrastructure\Contracts\UseCaseContract;

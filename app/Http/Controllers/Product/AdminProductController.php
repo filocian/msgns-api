@@ -17,6 +17,7 @@ use App\UseCases\Product\Assignment\AssignToUserUC;
 use App\UseCases\Product\Filtering\FindByCurrentUserUC;
 use App\UseCases\Product\Filtering\FindByIdUC;
 use App\UseCases\Product\Listing\ProductListUC;
+use App\UseCases\Product\Grouping\RemoveProductLinkUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -27,6 +28,7 @@ final class AdminProductController extends Controller
 		private readonly ActivateUC $ActivateProductUC,
 		private readonly DeactivateUC $DeactivateProductUC,
 		private readonly AssignToUserUC $AssignToUserUC,
+		private readonly RemoveProductLinkUC $RemoveProductLinkUC,
 		private readonly FindByIdUC $FindProductByIdUC,
 	) {}
 
@@ -72,4 +74,12 @@ final class AdminProductController extends Controller
 		return HttpJson::OK($response);
 	}
 
+	public function removeProductLink(int $child_id): JsonResponse
+	{
+		$response = $this->RemoveProductLinkUC->run([
+			'childId' => $child_id,
+		]);
+
+		return HttpJson::OK($response);
+	}
 }

@@ -10,7 +10,7 @@ use App\Models\ProductBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
-final class ProductDto extends BaseDTO
+final class GroupedProductDto extends BaseDTO
 {
 	public int $id;
 	public ProductTypeDTO $type;
@@ -18,19 +18,11 @@ final class ProductDto extends BaseDTO
 	public string $model;
 	public string $password;
 	public string $target_url;
-	public bool $is_primary_model;
-
-	public GroupedProductDto|null $parent;
-	public GroupedProductDto|null $child;
-
 	public ProductBusinessDto|null $business_data;
-
 	public int $usage;
 	public string $name;
 	public string $description;
 	public bool $active;
-	public Carbon $created_at;
-	public Carbon $updated_at;
 
 	public function __construct(Model $model)
 	{
@@ -40,18 +32,10 @@ final class ProductDto extends BaseDTO
 		$this->model = $model->model;
 		$this->password = $model->password;
 		$this->target_url = $model->target_url;
-		$this->is_primary_model = $model->isPrimaryModel();
-
-		$this->parent = $model->parentProduct ? GroupedProductDto::fromModel($model->parentProduct) : null;
-		$this->child = $model->childProduct ? GroupedProductDto::fromModel($model->childProduct) : null;
-
 		$this->business_data = $model->business ? ProductBusinessDto::fromModel($model->business) : null;
-
 		$this->usage = $model->usage;
 		$this->name = $model->name;
 		$this->description = $model->description;
 		$this->active = $model->active;
-		$this->created_at = $model->created_at;
-		$this->updated_at = $model->updated_at ?? Carbon::create(null);
 	}
 }

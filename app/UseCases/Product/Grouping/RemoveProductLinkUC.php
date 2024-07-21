@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCases\Product\Relationship;
+namespace App\UseCases\Product\Grouping;
 
 
 use App\Infrastructure\Contracts\UseCaseContract;
@@ -8,7 +8,7 @@ use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 
-final class SetParentUC implements UseCaseContract{
+final class RemoveProductLinkUC implements UseCaseContract{
 	public function __construct(
 		private ProductService $productService
 	) {}
@@ -22,13 +22,12 @@ final class SetParentUC implements UseCaseContract{
 	 */
 	public function run(mixed $data = null, ?array $opts = []): ProductDto
 	{
-		$childId = $data['productId'];
-		$parentId = $data['parentId'];
+		$childId = $data['childId'];
 
 		$child = Product::findById($childId);
-		$parent = Product::findById($parentId);
-
-		$child->setParentProduct($parent->id);
+		$child->linked_to_product_id = null;
+		$child->save();
+		$child->refresh();
 
 		return ProductDto::fromModel($child);
 	}

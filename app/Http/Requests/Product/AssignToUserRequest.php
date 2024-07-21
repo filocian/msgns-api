@@ -28,11 +28,10 @@ final class AssignToUserRequest extends FormRequest
 	{
 		$loggedUserId = $authService->id();
 		$loggedUser = User::find($loggedUserId);
-
-		$user = User::find((int) $request->route('userId'));
 		$productId = (int) $request->route('id');
 
 		try {
+			$user = User::find((int) $request->route('userId'));
 			$product = Product::findById($productId);
 		} catch (ModelNotFoundException $e) {
 			throw new ProductNotFoundException();

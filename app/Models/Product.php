@@ -213,16 +213,16 @@ final class Product extends Model
 	/**
 	 * Set the child product that links to this product.
 	 */
-//	public function setChildProduct(int $childId): self
-//	{
-//		$childProduct = self::findById($childId);
-//		$childProduct->linked_to_product_id = $this->id;
-//
-//		$childProduct->save();
-//		$childProduct->refresh();
-//
-//		return $this;
-//	}
+	public function setChildProduct(int $childId): self
+	{
+		$childProduct = self::findById($childId);
+		$childProduct->linked_to_product_id = $this->id;
+
+		$childProduct->save();
+		$childProduct->refresh();
+
+		return $this;
+	}
 
 	/**
 	 * Set the parent product that this product is linked to.
@@ -234,6 +234,19 @@ final class Product extends Model
 		$this->refresh();
 
 		return $this;
+	}
+
+	/**
+	 * Removes product link (child reference).
+	 */
+	public function removeProductLink(int $childId): self
+	{
+		$child = self::findById($childId);
+		$child->linked_to_product_id = null;
+		$child->save();
+		$child->refresh();
+
+		return $child;
 	}
 
 	/**

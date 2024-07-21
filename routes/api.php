@@ -39,8 +39,6 @@ Route::prefix('products')->group(function () {
 		Route::get('/', [ProductController::class, 'list']);
 		Route::post('/generate', [GenerateProductsController::class, 'generateProducts']);
 		Route::get('/mine', [ProductController::class, 'mine']);
-//		Route::post('/{id}/assign/{password}', [ProductController::class, 'assignToCurrentUser']);
-		Route::post('/{id}/assign/{userId}', [AdminProductController::class, 'assignToUser']);
 		Route::post('/{id}/register/{password}', [ProductController::class, 'register']);
 		Route::put('/{id}/configure', [ProductController::class, 'configure']);
 		Route::put('/{id}/rename', [ProductController::class, 'rename']);
@@ -48,14 +46,22 @@ Route::prefix('products')->group(function () {
 		Route::post('/{id}/deactivate', [ProductController::class, 'deactivate']);
 		Route::post('/{id}/business/add', [ProductController::class, 'addBusiness']);
 
-		Route::get('/{id}/parent-candidates', [ProductController::class, 'getParentCandidates']);
-		Route::get('/{id}/child-candidates', [ProductController::class, 'getChildCandidates']);
-		Route::put('/{id}/set-child/{child_id}', [ProductController::class, 'setChildProduct']);
-		Route::put('/{id}/set-parent/{parent_id}', [ProductController::class, 'setParentProduct']);
+//		Route::get('/{id}/parent-candidates', [ProductController::class, 'getParentCandidates']);
+//		Route::get('/{id}/child-candidates', [ProductController::class, 'getChildCandidates']);
+//		Route::put('/{id}/set-child/{child_id}', [ProductController::class, 'setChildProduct']);
+//		Route::put('/{id}/set-parent/{parent_id}', [ProductController::class, 'setParentProduct']);
+
+
+		Route::get('/{id}/group-candidates', [ProductController::class, 'getGroupCandidates']);
+		Route::put('/{referenceId}/group/{candidateId}', [ProductController::class, 'setProductGroup']);
+
+
+		//ADMIN EndPoints
+		Route::post('/{id}/assign/{userId}', [AdminProductController::class, 'assignToUser']);
+		Route::put('/{child_id}/remove-product-link', [AdminProductController::class, 'removeProductLink']);
 	});
 
 	Route::get('/{id}', [ProductController::class, 'findById']);
-//	Route::get('/searches-place', [ProductController::class, 'searchPlace']);
 });
 
 Route::prefix('users')->group(function () {

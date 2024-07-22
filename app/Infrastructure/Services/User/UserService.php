@@ -12,4 +12,9 @@ class UserService {
 		$paginatedUsers = User::findUsers($opts);
 		return PaginatorDto::fromPaginator($paginatedUsers, UserDto::class);
 	}
+
+	public function findById($opts = []): UserDto {
+		$user = User::findById($opts['id']);
+		return UserDto::fromModel($user);
+	}
 }

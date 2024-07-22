@@ -76,6 +76,11 @@ final class User extends Authenticatable implements MustVerifyEmail
 		return self::where('google_id', $googleId)->first();
 	}
 
+	public static function findById(string $id): self|null
+	{
+		return self::where('id', $id)->firstOrfail();
+	}
+
 	public static function findUsers(?array $options = []): \Illuminate\Contracts\Pagination\LengthAwarePaginator
 	{
 		$perPage = $options['perPage'] ?? env('DEFAULT_PAGINATION_LENGTH', 15);

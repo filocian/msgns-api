@@ -60,6 +60,7 @@ Route::prefix('products')->group(function () {
 Route::prefix('users')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
 		Route::get('/', [UsersController::class, 'list']);
+		Route::get('/{id}', [UsersController::class, 'find']);
 	});
 });
 /**

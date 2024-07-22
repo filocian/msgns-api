@@ -24,6 +24,15 @@ final readonly class UserListUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = []): PaginatorDto
 	{
-		return $this->userService->findUsers($opts);
+//		dd($this->resolveOptions($opts));
+		return $this->userService->findUsers($this->resolveOptions($opts));
+	}
+
+	private function resolveOptions(?array $options): array
+	{
+		return array_merge([
+			'page' => 1,
+			'perPage' => (int) env('DEFAULT_PAGINATION_LENGTH', 15),
+		], $options);
 	}
 }

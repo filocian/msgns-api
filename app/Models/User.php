@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Infrastructure\DTO\PaginatorDto;
+use App\Infrastructure\DTO\UserDto;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -74,20 +76,40 @@ final class User extends Authenticatable implements MustVerifyEmail
 		return self::where('google_id', $googleId)->first();
 	}
 
-	public static function findUsers(?array $options = []): LengthAwarePaginator
+	public static function findUsers(?array $options = []): \Illuminate\Contracts\Pagination\LengthAwarePaginator
 	{
 		$perPage = $options['perPage'] ?? env('DEFAULT_PAGINATION_LENGTH', 15);
-		$page = $options['currentPage'] ?? 1;
+		$page = $options['page'] ?? 1;
 
-		$items = ($perPage === 0)
-			? self::all()
-			: self::where(null)->skip(($page - 1) * $perPage)->take($perPage)->get();
+		$filters = [
+			'id' => $options['id'] ?? null,
+			'name' => $options['name'] ?? null,
+			'email' => $options['email'] ?? null,
+			'active' => $options['active'] ?? null,
+		];
 
-		return new LengthAwarePaginator(
-			$items, // Items for the current page
-			self::count(), // Total number of items
-			$perPage, // Items per page
-			$page, // Current page
-		);
+		$query = User::query();
+
+		if($filters['name']){
+			$query->where('name', $filters['name']);
+		}
+
+		if($filters['email']){
+			$query->where('email', $filters['email']);
+		}
+
+		if($filters['id']){
+			$query->where('id', $filters['id']);
+		}
+
+		return $query->orderBy('id', 'asc')->paginate($perPage);
+
+//		return PaginatorDto::fromPaginator($paginatedProducts, UserDto::class);
+	}
+
+	public function getRoles(int $userId): mixed
+	{
+		$user = self::where('id', $userId)->firstOrFail();
+		return $user->getRoleNames();
 	}
 }

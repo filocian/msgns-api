@@ -46,15 +46,8 @@ Route::prefix('products')->group(function () {
 		Route::post('/{id}/deactivate', [ProductController::class, 'deactivate']);
 		Route::post('/{id}/business/add', [ProductController::class, 'addBusiness']);
 
-//		Route::get('/{id}/parent-candidates', [ProductController::class, 'getParentCandidates']);
-//		Route::get('/{id}/child-candidates', [ProductController::class, 'getChildCandidates']);
-//		Route::put('/{id}/set-child/{child_id}', [ProductController::class, 'setChildProduct']);
-//		Route::put('/{id}/set-parent/{parent_id}', [ProductController::class, 'setParentProduct']);
-
-
 		Route::get('/{id}/group-candidates', [ProductController::class, 'getGroupCandidates']);
 		Route::put('/{referenceId}/group/{candidateId}', [ProductController::class, 'setProductGroup']);
-
 
 		//ADMIN EndPoints
 		Route::post('/{id}/assign/{userId}', [AdminProductController::class, 'assignToUser']);

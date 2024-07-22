@@ -148,7 +148,6 @@ final class Product extends Model
 			$query->where('active', $filters['active']);
 		}
 
-//		return self::paginate($perPage);
 		return $query->paginate($perPage);
 	}
 

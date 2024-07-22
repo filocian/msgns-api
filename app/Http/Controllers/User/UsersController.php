@@ -22,7 +22,7 @@ class UsersController extends Controller
 	public function list(Request $request): JsonResponse
 	{
 		$users = $this->userListUC->run($request->all(), $request->all());
-		return HttpJson::OK(['users' => $users]);
+		return HttpJson::OK($users->wrapped('users'));
 	}
 
 }

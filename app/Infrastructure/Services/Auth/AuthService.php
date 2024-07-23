@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\UnauthorizedException;
 use Spatie\Permission\Models\Role;
@@ -281,5 +282,24 @@ final class AuthService
 			'old_password' => $old_password,
 			'expiration_date' => $expiration_date
 		];
+	}
+
+	public function setEmailVerified(int $userId): UserDto
+	{
+		$user = User::find($userId)->firstorFail();
+		$user->markEmailAsVerified();
+
+		return UserDto::fromModel($user);
+	}
+
+	public function setUserPassword(int $userId, string $password)
+	{
+		$user = User::find($userId)->firstOrFail();
+		$user->password = Hash::make($password);
+		$user->password_reset_required = false;
+		$user->save();
+		$user->refresh();
+
+		return UserDto::fromModel($user);
 	}
 }

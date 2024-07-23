@@ -6,15 +6,14 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
+use App\Http\Requests\Auth\SetEmailVerifiedRequest;
 use App\Http\Requests\Auth\SendEmailVerificationRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Mail\ResendService;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Crypt;
 
 final class VerificationController extends Controller
 {
@@ -48,10 +47,10 @@ final class VerificationController extends Controller
 			);
 		}
 
-		$user->markEmailAsVerified();
+		$userDto = $this->authService->setEmailVerified($user->id);
 
 		return HttpJson::OK(
-			'good to go',
+			$userDto->wrapped('user'),
 			Response::HTTP_CREATED
 		);
 	}
@@ -87,52 +86,13 @@ final class VerificationController extends Controller
 		);
 	}
 
-//	private function createVerificationToken(User $user): string
-//	{
-//		$email = $user->email;
-//		$name = $user->name;
-//		$created_at = $user->created_at;
-//		$now = Carbon::now();
-//		$expirationDate = $now->addDays(self::$VERIFICATION_GRACE_DAYS);
-//		$tokenValue = implode(';', [$email, $name, $created_at]);
-//		$token = [
-//			'value' => Crypt::encrypt($tokenValue),
-//			'expiration_date' => $expirationDate->toDateTimeString()
-//		];
-//
-//		return Crypt::encrypt(json_encode($token));
-//	}
-//
-//	private function isValidVerificationToken(User $user, string $encryptedToken): bool
-//	{
-//		$token = $this->parseVerificationToken($encryptedToken);
-//		$now = Carbon::now();
-//
-//		if (!$now->lessThanOrEqualTo($token['expiration_date'])) {
-//			return false;
-//		}
-//
-//		$email = $user->email;
-//		$name = $user->name;
-//		$created_at = $user->created_at;
-//
-//		return $token['email'] == $email && $token['name'] == $name && $token['created_at'] == $created_at;
-//	}
-//
-//	private function parseVerificationToken(string $encryptedToken): array
-//	{
-//		$token = json_decode(Crypt::decrypt($encryptedToken));
-//		$tokenValue = explode(';', Crypt::decrypt($token->value));
-//		$expiration_date = Carbon::parse($token->expiration_date);
-//		$email = $tokenValue[0];
-//		$name = $tokenValue[1];
-//		$created_at = $tokenValue[2];
-//
-//		return [
-//			'email' => $email,
-//			'name' => $name,
-//			'created_at' => $created_at,
-//			'expiration_date' => $expiration_date
-//		];
-//	}
+	public function setEmailVerified(SetEmailVerifiedRequest $request, int $id): JsonResponse
+	{
+		$userDto = $this->authService->setEmailVerified($id);
+
+		return HttpJson::OK(
+			$userDto->wrapped('user'),
+			Response::HTTP_CREATED
+		);
+	}
 }

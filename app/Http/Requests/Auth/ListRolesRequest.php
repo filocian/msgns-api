@@ -2,38 +2,30 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Product;
+namespace App\Http\Requests\Auth;
 
 use App\Exceptions\Permissions\ActionNotAllowedException;
-use App\Exceptions\Product\ProductAlreadyRegistered;
-use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Services\Auth\AuthService;
-use App\Models\Product;
 use App\Models\User;
 use App\Static\Permissions\StaticRoles;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 
-final class AssignToUserRequest extends FormRequest
+final class ListRolesRequest extends FormRequest
 {
 	/**
-	 * Determine if the user is authorized to make this request.
 	 * @throws ActionNotAllowedException
-	 * @throws ProductNotFoundException
-	 * @throws ProductAlreadyRegistered
 	 */
 	public function authorize(Request $request, AuthService $authService): bool
 	{
 		$loggedUserId = $authService->id();
 		$loggedUser = User::find($loggedUserId);
-		$productId = (int) $request->route('id');
 
 		try {
-			$user = User::find((int) $request->route('userId'));
-			$product = Product::findById($productId);
+			$user = User::find((int) $request->route('id'));
 		} catch (ModelNotFoundException $e) {
-			throw new ProductNotFoundException();
+			throw new ModelNotFoundException();
 		}
 
 		if (!$loggedUser->hasAnyRole([
@@ -46,11 +38,6 @@ final class AssignToUserRequest extends FormRequest
 		return true;
 	}
 
-	/**
-	 * Get the validation rules that apply to the request.
-	 *
-	 * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-	 */
 	public function rules(): array
 	{
 		return [];

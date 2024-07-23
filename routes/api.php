@@ -60,7 +60,11 @@ Route::prefix('products')->group(function () {
 Route::prefix('users')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
 		Route::get('/', [UsersController::class, 'list']);
+		Route::get('/list-roles', [UsersController::class, 'listRoles']);
 		Route::get('/{id}', [UsersController::class, 'find']);
+		Route::put('/{id}/set-roles', [UsersController::class, 'setUserRoles']);
+		Route::put('/{id}/set-password', [PasswordResetController::class, 'setUserPassword']);
+		Route::put('/{id}/set-email-verified', [VerificationController::class, 'setEmailVerified']);
 	});
 });
 /**

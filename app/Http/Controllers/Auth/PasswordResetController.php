@@ -8,6 +8,7 @@ use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Auth\PasswordResetRequest;
 use App\Http\Requests\Auth\SendPasswordResetRequest;
+use App\Http\Requests\Auth\SetUserPasswordRequest;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Mail\ResendService;
 use App\Models\User;
@@ -75,52 +76,14 @@ final class PasswordResetController extends Controller
 		);
 	}
 
-//	private function createVerificationToken(User $user): string
-//	{
-//		$email = $user->email;
-//		$name = $user->name;
-//		$oldPassword = $user->password;
-//		$now = Carbon::now();
-//		$expirationDate = $now->addDays(self::$RESET_GRACE_DAYS);
-//		$tokenValue = implode(';', [$email, $name, $oldPassword]);
-//		$token = [
-//			'value' => Crypt::encrypt($tokenValue),
-//			'expiration_date' => $expirationDate->toDateTimeString()
-//		];
-//
-//		return Crypt::encrypt(json_encode($token));
-//	}
-//
-//	private function isValidVerificationToken(User $user, string $encryptedToken): bool
-//	{
-//		$token = $this->parseVerificationToken($encryptedToken);
-//		$now = Carbon::now();
-//
-//		if (!$now->lessThanOrEqualTo($token['expiration_date'])) {
-//			return false;
-//		}
-//
-//		$email = $user->email;
-//		$name = $user->name;
-//		$oldPassword = $user->password;
-//
-//		return $token['email'] == $email && $token['name'] == $name && $token['old_password'] == $oldPassword;
-//	}
-//
-//	private function parseVerificationToken(string $encryptedToken): array
-//	{
-//		$token = json_decode(Crypt::decrypt($encryptedToken));
-//		$tokenValue = explode(';', Crypt::decrypt($token->value));
-//		$expiration_date = Carbon::parse($token->expiration_date);
-//		$email = $tokenValue[0];
-//		$name = $tokenValue[1];
-//		$old_password = $tokenValue[2];
-//
-//		return [
-//			'email' => $email,
-//			'name' => $name,
-//			'old_password' => $old_password,
-//			'expiration_date' => $expiration_date
-//		];
-//	}
+	public function setUserPassword(SetUserPasswordRequest $request, int $id): JsonResponse
+	{
+		$password = $request->input('password');
+		$user = $this->authService->setUserPassword($id, $password);
+
+		return HttpJson::OK(
+			$user->wrapped('user'),
+			Response::HTTP_CREATED
+		);
+	}
 }

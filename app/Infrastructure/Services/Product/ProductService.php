@@ -126,9 +126,6 @@ final readonly class ProductService
 	{
 		$paginatedProducts = Product::findProducts($options);
 		return PaginatorDto::fromPaginator($paginatedProducts, ProductDto::class);
-//		return $productsCollection->map(function ($product) {
-//			return ProductDto::fromModel($product);
-//		});
 	}
 
 	/**

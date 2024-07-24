@@ -70,6 +70,10 @@ class ImporterProductModel
 		});
 
 		if ($productFound) {
+			if($productFound['product_type'] == 'P-GW-IN-RC'){
+				return 'P-GW-IG-RC';
+			}
+
 			return $productFound['product_type'];
 		}
 
@@ -126,7 +130,7 @@ class ImporterProductModel
 			'S-WW-XX-SQ' => 16,
 			'S-WG-XX-SQ' => 17,
 			'P-GG-IN-RC' => 18,
-			'P-GW-IN-RC' => 19,
+			'P-GW-IG-RC' => 19,
 			'P-GW-GO-RC' => 20,
 			'P-GM-GO-RC' => 21,
 			'T-GW-XX-RC' => 22

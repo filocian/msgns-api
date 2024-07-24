@@ -98,9 +98,9 @@ final class StaticProductTypes
 			'model' => ['google', 'info'],
 		],
 		[
-			'code' => 'P-GW-IN-RC',
+			'code' => 'P-GW-IG-RC',
 			'type' => 'card',
-			'model' => ['google', 'info'],
+			'model' => ['google', 'instagram'],
 		],
 		[
 			'code' => 'P-GW-GO-RC',

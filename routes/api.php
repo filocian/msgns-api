@@ -37,6 +37,7 @@ Route::prefix('products')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
 
 		Route::get('/', [ProductController::class, 'list']);
+		Route::get('/export', [ProductController::class, 'productListExport']);
 		Route::post('/generate', [GenerateProductsController::class, 'generateProducts']);
 		Route::get('/mine', [ProductController::class, 'mine']);
 		Route::post('/{id}/register/{password}', [ProductController::class, 'register']);
@@ -60,6 +61,7 @@ Route::prefix('products')->group(function () {
 Route::prefix('users')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
 		Route::get('/', [UsersController::class, 'list']);
+		Route::get('/export', [UsersController::class, 'userListExport']);
 		Route::get('/list-roles', [UsersController::class, 'listRoles']);
 		Route::get('/{id}', [UsersController::class, 'find']);
 		Route::put('/{id}/set-roles', [UsersController::class, 'setUserRoles']);

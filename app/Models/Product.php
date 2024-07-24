@@ -101,19 +101,28 @@ final class Product extends Model
 	public static function findProducts(?array $options = []): LengthAwarePaginator
 	{
 		$perPage = $options['perPage'];
-		$currentPage = $options['currentPage'] ?? 1;
 
-//		Paginator::currentPageResolver(function () use ($currentPage) {
-//			return $currentPage;
-//		});
+		$query = self::customProductQuery($options);
 
+		return $query->paginate($perPage);
+	}
+
+	public static function exportProducts(?array $options = []): Collection
+	{
+		$query = self::customProductQuery($options);
+
+		return $query->get();
+	}
+
+	public static function customProductQuery(array $currentFilters): \Illuminate\Database\Eloquent\Builder
+	{
 		$filters = [
-			'id' => $options['id'] ?? null,
-			'code' => $options['code'] ?? null,
-			'name' => $options['name'] ?? null,
-			'owner_id' => $options['owner_id'] ?? null,
-			'owner_email' => $options['owner_email'] ?? null,
-			'active' => $options['active'] ?? null,
+			'id' => $currentFilters['id'] ?? null,
+			'code' => $currentFilters['code'] ?? null,
+			'name' => $currentFilters['name'] ?? null,
+			'owner_id' => $currentFilters['owner_id'] ?? null,
+			'owner_email' => $currentFilters['owner_email'] ?? null,
+			'active' => $currentFilters['active'] ?? null,
 		];
 
 		$query = Product::query();
@@ -125,12 +134,12 @@ final class Product extends Model
 		if($filters['code']){
 			$productType = $filters['code'];
 			$query->whereHas('productType', function ($q) use ($productType) {
-				$q->where('code', $productType);
+				$q->where('code', 'like', '%' . $productType . '%');
 			});
 		}
 
 		if($filters['name']){
-			$query->where('name', $filters['name']);
+			$query->where('name', 'like', '%' . $filters['name'] . '%');
 		}
 
 		if($filters['owner_id']){
@@ -140,7 +149,7 @@ final class Product extends Model
 		if($filters['owner_email']){
 			$userEmail = $filters['owner_email'];
 			$query->whereHas('user', function ($q) use ($userEmail) {
-				$q->where('email', $userEmail);
+				$q->where('email', 'like', '%' . $userEmail . '%');
 			});
 		}
 
@@ -148,7 +157,7 @@ final class Product extends Model
 			$query->where('active', $filters['active']);
 		}
 
-		return $query->paginate($perPage);
+		return $query;
 	}
 
 	/**

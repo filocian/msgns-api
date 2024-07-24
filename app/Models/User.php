@@ -86,30 +86,42 @@ final class User extends Authenticatable implements MustVerifyEmail
 		$perPage = $options['perPage'] ?? env('DEFAULT_PAGINATION_LENGTH', 15);
 		$page = $options['page'] ?? 1;
 
+		$query = self::customUserQuery($options);
+
+		return $query->orderBy('id', 'asc')->paginate($perPage);
+	}
+
+	public static function exportUsers(?array $options = []): Collection
+	{
+		$query = self::customUserQuery($options);
+
+		return $query->get();
+	}
+
+	public static function customUserQuery(array $currentFilters): \Illuminate\Database\Eloquent\Builder
+	{
 		$filters = [
-			'id' => $options['id'] ?? null,
-			'name' => $options['name'] ?? null,
-			'email' => $options['email'] ?? null,
-			'active' => $options['active'] ?? null,
+			'id' => $currentFilters['id'] ?? null,
+			'name' => $currentFilters['name'] ?? null,
+			'email' => $currentFilters['email'] ?? null,
+			'active' => $currentFilters['active'] ?? null,
 		];
 
 		$query = User::query();
 
 		if($filters['name']){
-			$query->where('name', $filters['name']);
+			$query->where('name', 'like', '%' . $filters['name'] . '%');
 		}
 
 		if($filters['email']){
-			$query->where('email', $filters['email']);
+			$query->where('email', 'like', '%' . $filters['email'] . '%');
 		}
 
 		if($filters['id']){
 			$query->where('id', $filters['id']);
 		}
 
-		return $query->orderBy('id', 'asc')->paginate($perPage);
-
-//		return PaginatorDto::fromPaginator($paginatedProducts, UserDto::class);
+		return $query;
 	}
 
 	public function getRoles(int $userId): mixed

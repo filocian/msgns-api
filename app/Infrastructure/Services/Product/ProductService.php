@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\Product;
 
+use App\Infrastructure\DTO\CollectionDto;
 use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\ProductDto;
 use App\Models\Product;
@@ -126,6 +127,11 @@ final readonly class ProductService
 	{
 		$paginatedProducts = Product::findProducts($options);
 		return PaginatorDto::fromPaginator($paginatedProducts, ProductDto::class);
+	}
+
+	public function exportProducts($options = []): Collection
+	{
+		return Product::exportProducts($options);
 	}
 
 	/**

@@ -286,7 +286,7 @@ final class AuthService
 
 	public function setEmailVerified(int $userId): UserDto
 	{
-		$user = User::find($userId)->firstorFail();
+		$user = User::where('id', $userId)->firstorFail();
 		$user->markEmailAsVerified();
 
 		return UserDto::fromModel($user);

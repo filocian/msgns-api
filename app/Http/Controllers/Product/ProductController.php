@@ -10,6 +10,7 @@ use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Product\ActivateProductRequest;
 use App\Http\Requests\Product\AddProductBusinessRequest;
 use App\Http\Requests\Product\ConfigureProductRequest;
+use App\Http\Requests\Product\ProductListExportRequest;
 use App\Http\Requests\Product\RegisterProductRequest;
 use App\Http\Requests\Product\RenameProductRequest;
 use App\Http\Requests\Product\StoreProductRequest;
@@ -24,12 +25,9 @@ use App\UseCases\Product\Filtering\FindByCurrentUserUC;
 use App\UseCases\Product\Filtering\FindByIdUC;
 use App\UseCases\Product\Grouping\GetGroupCandidatesUC;
 use App\UseCases\Product\Grouping\SetGroupUC;
+use App\UseCases\Product\Listing\ProductListExportUC;
 use App\UseCases\Product\Listing\ProductListUC;
 use App\UseCases\Product\Registration\RegisterProductUC;
-use App\UseCases\Product\Grouping\GetChildCandidatesUC;
-use App\UseCases\Product\Grouping\GetParentCandidatesUC;
-use App\UseCases\Product\Grouping\SetChildUC;
-use App\UseCases\Product\Grouping\SetParentUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -48,6 +46,7 @@ final class ProductController extends Controller
 		private readonly RenameUC $RenameUC,
 		private readonly RegisterProductUC $RegisterProductUC,
 		private readonly ProductListUC $productListUC,
+		private readonly ProductListExportUC $ProductListExportUC,
 		private readonly AddBusinessUC $AddBusinessUC,
 		private readonly GetGroupCandidatesUC $GetGroupCandidatesUC,
 		private readonly SetGroupUC $SetGroupUC,
@@ -69,6 +68,16 @@ final class ProductController extends Controller
 	{
 		$products = $this->productListUC->run($request->all(), $request->all());
 		return HttpJson::OK($products->wrapped('products'));
+	}
+
+	public function productListExport(ProductListExportRequest $request): JsonResponse
+	{
+		ini_set('memory_limit', '600M');
+//		ini_set('max_execution_time', '300');
+
+		$products = $this->ProductListExportUC->run($request->all(), $request->all());
+
+		return HttpJson::OK(['products' => $products]);
 	}
 
 	public function activate(ActivateProductRequest $request, int $id): JsonResponse

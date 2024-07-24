@@ -7,8 +7,10 @@ namespace App\Http\Controllers\User;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Auth\ListRolesRequest;
 use App\Http\Requests\Auth\SetUserPasswordRequest;
+use App\Http\Requests\User\UserListExportRequest;
 use App\Infrastructure\DTO\UserDto;
 use App\Models\User;
+use App\UseCases\Users\Listing\UserListExportUC;
 use App\UseCases\Users\Listing\UserListUC;
 use App\UseCases\Users\Search\UserFindByIdUC;
 use Illuminate\Http\Request;
@@ -19,8 +21,9 @@ use Spatie\Permission\Models\Role;
 class UsersController extends Controller
 {
 	public function __construct(
-		private readonly UserListUC $userListUC,
-		private readonly UserFindByIdUC $userFindByIdUC,
+		private readonly UserListUC       $userListUC,
+		private readonly UserListExportUC $userListExportUC,
+		private readonly UserFindByIdUC   $userFindByIdUC,
 	)
 	{
 	}
@@ -29,6 +32,13 @@ class UsersController extends Controller
 	{
 		$users = $this->userListUC->run($request->all(), $request->all());
 		return HttpJson::OK($users->wrapped('users'));
+	}
+
+	public function userListExport(UserListExportRequest $request): JsonResponse
+	{
+		ini_set('memory_limit', '256M');
+		$users = $this->userListExportUC->run($request->all(), $request->all());
+		return HttpJson::OK(['users' => $users]);
 	}
 
 	public function find(Request $request, int $id): JsonResponse

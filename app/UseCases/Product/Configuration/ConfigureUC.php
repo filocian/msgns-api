@@ -29,7 +29,7 @@ final readonly class ConfigureUC implements UseCaseContract
 	{
 		$productId = $data['id'];
 		$name =$data['name'] ?? null;
-		$config = $data['target_url'];
+		$config = $data['target_url'] ?? null;
 		$business = $data['business'] ?? null;
 
 		return $this->configureProduct($productId, $name, $config, $business);

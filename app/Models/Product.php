@@ -120,6 +120,7 @@ final class Product extends Model
 			'id' => $currentFilters['id'] ?? null,
 			'code' => $currentFilters['code'] ?? null,
 			'name' => $currentFilters['name'] ?? null,
+			'model' => $currentFilters['model'] ?? null,
 			'owner_id' => $currentFilters['owner_id'] ?? null,
 			'owner_email' => $currentFilters['owner_email'] ?? null,
 			'active' => $currentFilters['active'] ?? null,
@@ -136,6 +137,10 @@ final class Product extends Model
 			$query->whereHas('productType', function ($q) use ($productType) {
 				$q->where('code', 'like', '%' . $productType . '%');
 			});
+		}
+
+		if($filters['model']){
+			$query->where('model', 'like', '%' . $filters['model'] . '%');
 		}
 
 		if($filters['name']){

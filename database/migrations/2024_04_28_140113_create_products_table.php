@@ -21,7 +21,7 @@ return new class() extends Migration {
 			$table->unsignedBigInteger('linked_to_product_id')->nullable()->unique();
 			$table->string('password');
 			$table->text('target_url')->nullable();
-			$table->integer('usage')->nullable();
+			$table->integer('usage')->default(0);
 			$table->string('name', length: 150)->default('');
 			$table->text('description')->nullable();
 			$table->boolean('active')->default(false);

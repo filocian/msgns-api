@@ -71,9 +71,31 @@ final class User extends Authenticatable implements MustVerifyEmail
 		return $this->metadata()->whereIn('key', $keys)->get();
 	}
 
-	public static function findByGoogleId(string $googleId): self|null
+	public static function findByGoogleId(string $googleId, string $email = null): self|null
 	{
-		return self::where('google_id', $googleId)->first();
+		$user = self::query()
+			->when(!empty($googleId), function ($query) use ($googleId) {
+				return $query->where('google_id', $googleId);
+			})
+			->when(!empty($email), function ($query) use ($email) {
+				if ($query->getQuery()->wheres) {
+					return $query->orWhere('email', $email);
+				} else {
+					return $query->where('email', $email);
+				}
+			})
+			->first();
+
+		if (!$user->google_id) {
+			$user ->update([
+				'google_id' => $googleId,
+			]);
+
+			$user->refresh();
+		}
+
+		return $user;
+//		return self::where('google_id', $googleId)->first();
 	}
 
 	public static function findById(string $id): self|null

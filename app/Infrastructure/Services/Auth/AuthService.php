@@ -97,9 +97,7 @@ final class AuthService
 		$userRoles = $this->getRoles($user);
 
 		if($userRoles->count() < 1){
-			if ($role = Role::findByName(StaticRoles::USER_ROLE, 'stateful-api')) {
-				$user->assignRole($role);
-			}
+			$this->setDefaultRole($user);
 		}
 
 		$rolesDto = $userRoles->map(fn($role) => RoleDto::fromModel($role));
@@ -138,6 +136,12 @@ final class AuthService
 			$userId = $user->id;
 			$user = new User();
 			$user->id = $userId;
+		}
+
+		$userRoles = $this->getRoles($user);
+
+		if($userRoles->count() < 1){
+			$this->setDefaultRole($user);
 		}
 
 		Auth::login($user);
@@ -301,5 +305,12 @@ final class AuthService
 		$user->refresh();
 
 		return UserDto::fromModel($user);
+	}
+
+	private function setDefaultRole(User $user): void
+	{
+		if ($role = Role::findByName(StaticRoles::USER_ROLE, 'stateful-api')) {
+			$user->assignRole($role);
+		}
 	}
 }

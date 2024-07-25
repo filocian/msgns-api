@@ -34,16 +34,16 @@ final class VerificationController extends Controller
 		$user = User::where('email', $parsedToken['email'])->firstOrFail();
 
 		if ($user->hasVerifiedEmail()) {
-			return HttpJson::OK(
-				'already verified',
-				Response::HTTP_UNAUTHORIZED
+			return HttpJson::KO(
+				'already_verified',
+				Response::HTTP_BAD_REQUEST
 			);
 		}
 
 		if (!$this->authService->isValidEmailVerificationToken($user, $token)) {
 			return HttpJson::KO(
-				'invalid token',
-				Response::HTTP_UNAUTHORIZED
+				'invalid_token',
+				Response::HTTP_BAD_REQUEST
 			);
 		}
 
@@ -61,9 +61,9 @@ final class VerificationController extends Controller
 		$user = User::where('email', $email)->firstOrFail();
 
 		if ($user->hasVerifiedEmail()) {
-			return HttpJson::OK(
-				'already verified',
-				Response::HTTP_UNAUTHORIZED
+			return HttpJson::KO(
+				'already_verified',
+				Response::HTTP_BAD_REQUEST
 			);
 		}
 
@@ -74,7 +74,7 @@ final class VerificationController extends Controller
 		try{
 			$this->mailService->send($email, __('emailVerification.subject'), $html);
 		} catch (\Exception $error){
-			return HttpJson::OK(
+			return HttpJson::KO(
 				$error->getMessage(),
 				Response::HTTP_BAD_REQUEST
 			);

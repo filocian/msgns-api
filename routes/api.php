@@ -52,7 +52,7 @@ Route::prefix('products')->group(function () {
 		Route::put('/{referenceId}/group/{candidateId}', [ProductController::class, 'setProductGroup']);
 
 		//ADMIN EndPoints
-		Route::post('/{id}/assign/{userId}', [AdminProductController::class, 'assignToUser']);
+		Route::post('/{id}/assign', [AdminProductController::class, 'assignToUser']);
 		Route::put('/{child_id}/remove-product-link', [AdminProductController::class, 'removeProductLink']);
 	});
 

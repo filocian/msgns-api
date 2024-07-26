@@ -55,11 +55,12 @@ final class AdminProductController extends Controller
 		return HttpJson::OK($response, Response::HTTP_CREATED);
 	}
 
-	public function assignToUser(AssignToUserRequest $request, int $id, string $userId): JsonResponse
+	public function assignToUser(AssignToUserRequest $request, int $id): JsonResponse
 	{
+		$email = $request->input('email');
 		$product = $this->AssignToUserUC->run([
 			'productId' => $id,
-			'userId' => $userId,
+			'email' => $email,
 		]);
 
 		return HttpJson::OK($product->wrapped('product'), Response::HTTP_CREATED);
@@ -76,10 +77,10 @@ final class AdminProductController extends Controller
 
 	public function removeProductLink(int $child_id): JsonResponse
 	{
-		$response = $this->RemoveProductLinkUC->run([
+		$product = $this->RemoveProductLinkUC->run([
 			'childId' => $child_id,
 		]);
 
-		return HttpJson::OK($response);
+		return HttpJson::OK($product->wrapped('product'));
 	}
 }

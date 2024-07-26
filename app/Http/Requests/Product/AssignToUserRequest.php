@@ -30,7 +30,7 @@ final class AssignToUserRequest extends FormRequest
 		$productId = (int) $request->route('id');
 
 		try {
-			$user = User::find((int) $request->route('userId'));
+			$user = User::where('email', $request->input('email'));
 			$product = Product::findById($productId);
 		} catch (ModelNotFoundException $e) {
 			throw new ProductNotFoundException();

@@ -19,7 +19,7 @@ final readonly class AssignToUserUC implements UseCaseContract
 	/**
 	 * UseCase: Assign a product to given user
 	 *
-	 * @param array{productId: int, userId: int}|null $data
+	 * @param array{productId: int, email: string}|null $data
 	 * @param array|null $opts
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
@@ -27,24 +27,24 @@ final readonly class AssignToUserUC implements UseCaseContract
 	public function run(mixed $data = null, ?array $opts = null): ProductDto
 	{
 		$productId = $data['productId'];
-		$userId = $data['userId'];
+		$email = $data['email'];
 
-		return $this->assignToUser($productId, $userId);
+		return $this->assignToUser($productId, $email);
 	}
 
 	/**
 	 * Assign a product to given user
 	 *
 	 * @param int $productId
-	 * @param string $userId
+	 * @param string $email
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
 	 * @throws Exception
 	 */
-	private function assignToUser(int $productId, string $userId): ProductDto
+	private function assignToUser(int $productId, string $email): ProductDto
 	{
 		try {
-			$user = User::where('id', $userId)
+			$user = User::where('email', $email)
 				->firstOrFail();
 
 			$product = Product::findById($productId,);

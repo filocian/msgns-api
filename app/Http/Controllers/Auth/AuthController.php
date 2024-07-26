@@ -12,6 +12,7 @@ use App\Http\Requests\Auth\LogoutRequest;
 use App\Http\Requests\Auth\SignupRequest;
 use App\UseCases\Auth\CurrentUserUC;
 use App\UseCases\Auth\GoogleLoginUC;
+use App\UseCases\Auth\HasAdminRightsUC;
 use App\UseCases\Auth\LoginUC;
 use App\UseCases\Auth\LogoutUC;
 use App\UseCases\Auth\SignUpUC;
@@ -27,6 +28,7 @@ final class AuthController extends Controller
 		readonly private SignUpUC $signUpUC,
 		readonly private LogoutUC $logoutUC,
 		readonly private CurrentUserUC $currentUserUC,
+		readonly private HasAdminRightsUC $hasAdminRightsUC,
 	) {}
 
 	public function signUp(SignupRequest $request): JsonResponse
@@ -74,6 +76,15 @@ final class AuthController extends Controller
 		$user = $this->currentUserUC->run();
 
 		return HttpJson::OK($user);
+	}
+
+	public function hasAdminRights(int $userId): JsonResponse
+	{
+		$hasAdminRights = $this->hasAdminRightsUC->run([
+			'id' => $userId
+		]);
+
+		return HttpJson::OK(['has_admin_rights' => $hasAdminRights]);
 	}
 
 	public function hello(): JsonResponse

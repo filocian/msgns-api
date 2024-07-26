@@ -26,6 +26,7 @@ final class AuthService
 {
 	static private int $VERIFICATION_GRACE_DAYS = 3;
 	static private int $RESET_GRACE_DAYS = 1;
+	static private $ADMIN_ROLES = [StaticRoles::DEV_ROLE, StaticRoles::BACKOFFICE_ROLE];
 	private ResendService $mailService;
 
 	public function __construct(ResendService $mailService)
@@ -305,6 +306,13 @@ final class AuthService
 		$user->refresh();
 
 		return UserDto::fromModel($user);
+	}
+
+	public function hasAdminRole(int $userId): bool
+	{
+		$user = User::where('id', $userId)->firstOrfail();
+
+		return $user->hasAnyRole(self::$ADMIN_ROLES);
 	}
 
 	private function setDefaultRole(User $user): void

@@ -26,6 +26,7 @@ Route::prefix('auth')->group(function () {
 
 	Route::middleware('auth:stateful-api')->group(function () {
 		Route::get('/user', [AuthController::class, 'currentUser']);
+		Route::get('/user/{id}/has-admin-rights', [AuthController::class, 'hasAdminRights']);
 		Route::post('/logout', [AuthController::class, 'logout']);
 	});
 });

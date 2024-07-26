@@ -297,7 +297,7 @@ final class AuthService
 		return UserDto::fromModel($user);
 	}
 
-	public function setUserPassword(int $userId, string $password)
+	public function setUserPassword(int $userId, string $password): UserDto
 	{
 		$user = User::where('id', $userId)->firstOrFail();
 		$user->password = Hash::make($password);

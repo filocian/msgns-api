@@ -299,7 +299,7 @@ final class AuthService
 
 	public function setUserPassword(int $userId, string $password)
 	{
-		$user = User::find($userId)->firstOrFail();
+		$user = User::where('id', $userId)->firstOrFail();
 		$user->password = Hash::make($password);
 		$user->password_reset_required = false;
 		$user->save();

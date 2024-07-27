@@ -57,6 +57,7 @@ Route::prefix('products')->group(function () {
 	});
 
 	Route::get('/{id}', [ProductController::class, 'findById']);
+	Route::get('/{id}/{password}/get-target', [ProductController::class, 'redirect']);
 });
 
 Route::prefix('users')->group(function () {
@@ -70,6 +71,7 @@ Route::prefix('users')->group(function () {
 		Route::put('/{id}/set-email-verified', [VerificationController::class, 'setEmailVerified']);
 	});
 });
+
 /**
  * Places External API
  */

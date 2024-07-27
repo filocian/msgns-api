@@ -27,6 +27,7 @@ use App\UseCases\Product\Grouping\GetGroupCandidatesUC;
 use App\UseCases\Product\Grouping\SetGroupUC;
 use App\UseCases\Product\Listing\ProductListExportUC;
 use App\UseCases\Product\Listing\ProductListUC;
+use App\UseCases\Product\Redirect\ProductRedirectionUC;
 use App\UseCases\Product\Registration\RegisterProductUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,7 @@ final class ProductController extends Controller
 		private readonly AddBusinessUC $AddBusinessUC,
 		private readonly GetGroupCandidatesUC $GetGroupCandidatesUC,
 		private readonly SetGroupUC $SetGroupUC,
+		private readonly ProductRedirectionUC $ProductRedirectionUC,
 	) {}
 
 	public function hello()
@@ -230,5 +232,17 @@ final class ProductController extends Controller
 		]);
 
 		return HttpJson::OK($referenceProduct->wrapped('product'));
+	}
+
+	public function redirect(int $id, string $password): JsonResponse
+	{
+		$productTarget = $this->ProductRedirectionUC->run([
+			'id' => $id,
+			'password' => $password
+		]);
+
+
+
+		return HttpJson::OK(['target_url' => $productTarget]);
 	}
 }

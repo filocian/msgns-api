@@ -16,7 +16,7 @@ final class ResendService
 	)
 	{
 		Resend::emails()->send([
-			'from' => $from,
+			'from' => env('MAIL_FROM_ADDRESS'),
 			'to' => [$to],
 			'subject' => $subject,
 			'html' => $body,

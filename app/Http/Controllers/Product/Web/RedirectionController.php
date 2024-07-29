@@ -22,20 +22,34 @@ use App\UseCases\Product\Redirect\ProductRedirectionUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class RedirectionController extends Controller
 {
 	public function __construct(
 		private readonly ProductRedirectionUC $ProductRedirectionUC
-	) {}
-
-	public function legacyRedirect(Request $request, int $id): \Illuminate\Http\RedirectResponse
+	)
 	{
-		$password = $request->input('psw');
+	}
+
+	public function legacyRedirect(Request $request, string $path): \Illuminate\Http\RedirectResponse
+	{
+		if($request->input('psw')){
+			$parsedUrl = [
+				'id' => (int) $path,
+				'pass' => $request->input('psw')
+			];
+		}else{
+			$parsedUrl = $this->parseUrlWithQueryParams($path, '&');
+		}
+
+		if(!$parsedUrl){
+			throw new NotFoundHttpException();
+		}
 
 		$productTarget = $this->ProductRedirectionUC->run([
-			'id' => $id,
-			'password' => $password
+			'id' => $parsedUrl['id'],
+			'password' => $parsedUrl['pass']
 		]);
 
 		return redirect()->away($productTarget);
@@ -49,5 +63,27 @@ final class RedirectionController extends Controller
 		]);
 
 		return redirect()->away($productTarget);
+	}
+
+	private function parseUrlWithQueryParams(string $urlSegment, string $separator): array | null{
+		$segments = explode($separator, $urlSegment);
+
+		if(count($segments) > 1){
+			$productId = $segments[0];
+			$queryValues = explode('=', $segments[1]);
+			$pswQueryParam = $queryValues[0] ?? null;
+			$pswQueryValue = $queryValues[1] ?? null;
+
+			if($pswQueryParam == 'psw' && $pswQueryValue != null){
+				$productPassword = $pswQueryValue;
+			}
+
+			return [
+				'id' => (int) $productId,
+				'pass' => $productPassword ?? null,
+			];
+		}
+
+		return null;
 	}
 }

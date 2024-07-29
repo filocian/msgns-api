@@ -32,15 +32,15 @@ final class RedirectionController extends Controller
 	{
 	}
 
-	public function legacyRedirect(Request $request, string $path): \Illuminate\Http\RedirectResponse
+	public function legacyRedirect(Request $request, string $data): \Illuminate\Http\RedirectResponse
 	{
 		if($request->input('psw')){
 			$parsedUrl = [
-				'id' => (int) $path,
+				'id' => (int) $data,
 				'pass' => $request->input('psw')
 			];
 		}else{
-			$parsedUrl = $this->parseUrlWithQueryParams($path, '&');
+			$parsedUrl = $this->parseUrlWithQueryParams($data, '&');
 		}
 
 		if(!$parsedUrl){

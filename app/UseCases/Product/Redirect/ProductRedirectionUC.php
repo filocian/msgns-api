@@ -21,7 +21,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = null): string | null
 	{
-		$productId = $data['id'];
+		$productId = (int) $data['id'];
 		$productPassword = $data['password'];
 
 		$product = Product::findByConfigPair($productId, 'password', $productPassword);

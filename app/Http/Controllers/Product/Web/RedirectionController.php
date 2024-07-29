@@ -36,7 +36,7 @@ final class RedirectionController extends Controller
 	{
 		if($request->input('psw')){
 			$parsedUrl = [
-				'id' => (int) $data,
+				'id' => $data,
 				'pass' => $request->input('psw')
 			];
 		}else{

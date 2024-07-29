@@ -28,7 +28,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 		$productDto = ProductDto::fromModel($product);
 
-		if($productDto->target_url){
+		if($productDto->target_url && $productDto->user){
 			$product->update(['usage' => $productDto->usage + 1]);
 			return $productDto->target_url;
 		}

@@ -29,7 +29,7 @@ final class RedirectionController extends Controller
 		private readonly ProductRedirectionUC $ProductRedirectionUC
 	) {}
 
-	public function legacyRedirect(Request $request, int $id): \Illuminate\Http\RedirectResponse
+	public function legacyRedirect(Request $request, int $id): string
 	{
 		$password = $request->input('psw');
 
@@ -38,7 +38,8 @@ final class RedirectionController extends Controller
 			'password' => $password
 		]);
 
-		return redirect()->away($productTarget);
+//		return redirect()->away($productTarget);
+		return $productTarget;
 	}
 
 	public function v2Redirect(Request $request, int $id, string $password): \Illuminate\Http\RedirectResponse

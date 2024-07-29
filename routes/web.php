@@ -9,5 +9,5 @@ Route::get('/', function () {
 	return view('welcome');
 });
 
-Route::get('/nfc/{id}', [RedirectionController::class, 'legacyRedirect']);
+Route::get('/nfc/{data}', [RedirectionController::class, 'legacyRedirect']);
 Route::get('/product/{id}/redirect/{password}', [RedirectionController::class, 'v2Redirect']);

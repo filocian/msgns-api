@@ -21,7 +21,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = null): string | null
 	{
-		$productId = $data['id'];
+		$productId = (int) $data['id'];
 		$productPassword = $data['password'];
 
 		$product = Product::findByConfigPair($productId, 'password', $productPassword);
@@ -33,9 +33,9 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 			return $productDto->target_url;
 		}
 
-//		if(!$productDto->user){
-//			return env('FRONT_URL') . '/product/' . $productDto->id . '/register/' . $productDto->password;
-//		}
+		if(!$productDto->user){
+			return env('FRONT_URL') . '/product/' . $productDto->id . '/register/' . $productDto->password;
+		}
 
 		return 'www.messagenes.com';
 	}

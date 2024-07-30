@@ -21,6 +21,6 @@ final readonly class SignUpUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = null): UserDto
 	{
-		return $this->authService->signUp($data);
+		return UserDto::fromModel($this->authService->signUp($data));
 	}
 }

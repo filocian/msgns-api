@@ -43,7 +43,7 @@ final class AuthController extends Controller
 
 		$userAndRoles = $this->loginUC->run($data);
 
-		return HttpJson::OK($userAndRoles);
+		return HttpJson::OK($userAndRoles->wrapped('user'));
 	}
 
 
@@ -55,7 +55,12 @@ final class AuthController extends Controller
 		];
 
 		$userAndRoles = $this->loginUC->run($data);
-		return HttpJson::OK($userAndRoles);
+
+		if(!$userAndRoles){
+			return HttpJson::KO('invalid_credentials');
+		}
+
+		return HttpJson::OK($userAndRoles->wrapped('user'));
 	}
 
 

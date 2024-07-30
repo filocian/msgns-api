@@ -29,11 +29,7 @@ final readonly class GoogleLoginUC implements UseCaseContract
 			throw new UnauthorizedException('Invalid google user id');
 		}
 
-//		$user = User::findByGoogleId($googleUser['google_id']);
-
-
 		$user = User::findByGoogleId($googleUser['google_id'], $googleUser['email']);
-
 
 		if (!$user) {
 			$user = $this->signup($data);
@@ -63,10 +59,10 @@ final readonly class GoogleLoginUC implements UseCaseContract
 			throw new UnauthorizedException('Invalid google user id');
 		}
 
-		return $this->authService->signUp([
+		return UserDto::fromModel($this->authService->signUp([
 			...$googleUser,
 			'password' => bin2hex(random_bytes(10)),
-		]);
+		]));
 	}
 
 

@@ -36,9 +36,9 @@ final class AuthService
 
 	/**
 	 * @param array $data {email: string, name: string, password: string, google_id: ?string }
-	 * @return UserDto
+	 * @return User
 	 */
-	public function signUp(array $data): UserDto
+	public function signUp(array $data): User
 	{
 		$user = User::create([
 			'name' => $data['name'],
@@ -66,16 +66,16 @@ final class AuthService
 			}
 		}
 
-		return UserDto::fromModel($user);
+		return $user;
 	}
 
 	/**
 	 * @param string $email
 	 * @param string $password
-	 * @return array {user: UserDto, roles: array}
+	 * @return UserDto | null
 	 * @throws AuthenticationException
 	 */
-	public function login(string $email, string $password): array
+	public function login(string $email, string $password): UserDto | null
 	{
 		$user = User::query()->where('email', $email)->first();
 
@@ -84,13 +84,11 @@ final class AuthService
 		}
 
 		if($user->password_reset_required){
-			return [
-				'user' => UserDto::fromModel($user),
-			];
+			return UserDto::fromModel($user);
 		}
 
 		if (!Auth::attempt(['email' => $email, 'password' => $password])) {
-			throw new AuthenticationException();
+			return null;
 		}
 
 		Request::session()->regenerate();
@@ -101,12 +99,7 @@ final class AuthService
 			$this->setDefaultRole($user);
 		}
 
-		$rolesDto = $userRoles->map(fn($role) => RoleDto::fromModel($role));
-
-		return [
-			'user' => UserDto::fromModel($user),
-			'roles' => $rolesDto
-		];
+		return UserDto::fromModel($user);
 	}
 
 	/**
@@ -181,7 +174,7 @@ final class AuthService
 		return $user->createToken(sprintf('%s-%s', $user->email, time()))->plainTextToken;
 	}
 
-	public function getRoles(User $user): Collection
+	public function getRoles(User $user): Collection | array
 	{
 		$user ??= $this->user();
 

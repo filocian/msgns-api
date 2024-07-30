@@ -40,7 +40,7 @@ final class RedirectionController extends Controller
 				'pass' => $request->input('psw')
 			];
 		}else{
-			$parsedUrl = $this->parseUrlWithQueryParams($data, '&');
+			$parsedUrl = $this->parseUrlWithQueryParams($data);
 		}
 
 		if(!$parsedUrl){
@@ -65,8 +65,8 @@ final class RedirectionController extends Controller
 		return redirect()->away($productTarget);
 	}
 
-	private function parseUrlWithQueryParams(string $urlSegment, string $separator): array | null{
-		$segments = explode($separator, $urlSegment);
+	private function parseUrlWithQueryParams(string $urlSegment): array | null{
+		$segments = explode('&', $urlSegment);
 
 		if(count($segments) > 1){
 			$productId = $segments[0];

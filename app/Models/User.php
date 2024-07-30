@@ -64,7 +64,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 	 * Get specific metadata by key[].
 	 *
 	 * @param array $keys
-	 * @return \Illuminate\Database\Eloquent\Collection
+	 * @return Collection
 	 */
 	public function getMetadataByKeys(array $keys): Collection
 	{
@@ -86,7 +86,11 @@ final class User extends Authenticatable implements MustVerifyEmail
 			})
 			->first();
 
-		if (!$user->google_id) {
+		if(!$user){
+			return null;
+		}
+
+		if (!isset($user->google_id)) {
 			$user ->update([
 				'google_id' => $googleId,
 			]);
@@ -95,7 +99,6 @@ final class User extends Authenticatable implements MustVerifyEmail
 		}
 
 		return $user;
-//		return self::where('google_id', $googleId)->first();
 	}
 
 	public static function findById(string $id): self|null

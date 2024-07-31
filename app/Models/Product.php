@@ -25,6 +25,7 @@ final class Product extends Model
 		'name',
 		'description',
 		'active',
+		'configuration_status'
 	];
 	protected $casts = [
 		'active' => 'bool',
@@ -48,6 +49,11 @@ final class Product extends Model
 	public function business()
 	{
 		return $this->hasOne(ProductBusiness::class, 'product_id');
+	}
+
+	public function configurationStatus()
+	{
+		return $this->belongsTo(ProductConfigurationStatus::class, 'configuration_status', 'status_code');
 	}
 
 	/**
@@ -128,37 +134,37 @@ final class Product extends Model
 
 		$query = Product::query();
 
-		if($filters['id']){
+		if ($filters['id']) {
 			$query->where('id', $filters['id']);
 		}
 
-		if($filters['code']){
+		if ($filters['code']) {
 			$productType = $filters['code'];
 			$query->whereHas('productType', function ($q) use ($productType) {
 				$q->where('code', 'like', '%' . $productType . '%');
 			});
 		}
 
-		if($filters['model']){
+		if ($filters['model']) {
 			$query->where('model', 'like', '%' . $filters['model'] . '%');
 		}
 
-		if($filters['name']){
+		if ($filters['name']) {
 			$query->where('name', 'like', '%' . $filters['name'] . '%');
 		}
 
-		if($filters['owner_id']){
+		if ($filters['owner_id']) {
 			$query->where('user_id', $filters['owner_id']);
 		}
 
-		if($filters['owner_email']){
+		if ($filters['owner_email']) {
 			$userEmail = $filters['owner_email'];
 			$query->whereHas('user', function ($q) use ($userEmail) {
 				$q->where('email', 'like', '%' . $userEmail . '%');
 			});
 		}
 
-		if($filters['active']){
+		if ($filters['active']) {
 			$query->where('active', $filters['active']);
 		}
 
@@ -271,7 +277,8 @@ final class Product extends Model
 	{
 		return Product::whereHas('productType', function ($query) {
 			$query->where('code', $this->productType->code)
-				->where('primary_model', $this->productType->primary_model);
+				->where('primary_model', $this->productType->primary_model)
+				->whereNotIn('code', ['P-GW-GO-RC', 'P-GM-GO-RC']);
 		})
 			->whereNotNull('user_id')
 			->where('user_id', $this->user_id)
@@ -291,7 +298,8 @@ final class Product extends Model
 	{
 		return Product::whereHas('productType', function ($query) {
 			$query->where('code', $this->productType->code)
-				->where('secondary_model', $this->productType->secondary_model);
+				->where('secondary_model', $this->productType->secondary_model)
+				->whereNotIn('code', ['P-GW-GO-RC', 'P-GM-GO-RC']);
 		})
 			->whereNotNull('user_id')
 			->where('user_id', $this->user_id)

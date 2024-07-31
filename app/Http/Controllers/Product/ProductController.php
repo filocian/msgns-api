@@ -179,7 +179,6 @@ final class ProductController extends Controller
 		$product = $this->ConfigureUC->run([
 			'id' => $productId,
 			'target_url' => $request->input('target_url'),
-			'name' => $request->input('name'),
 		]);
 
 		return HttpJson::OK($product->wrapped('product'));
@@ -193,6 +192,7 @@ final class ProductController extends Controller
 		$product = $this->AddBusinessUC->run([
 			'productId' => $productId,
 			'userId' => $request->input('user_id'),
+			'notBusiness' => $request->input('not_a_business'),
 			'name' => $request->input('name'),
 			'types' => $request->input('types'),
 			'size' => $request->input('size'),

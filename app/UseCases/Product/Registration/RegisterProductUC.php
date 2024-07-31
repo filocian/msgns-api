@@ -8,7 +8,9 @@ use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Auth\AuthService;
+use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
+use App\Models\ProductConfigurationStatus;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -16,6 +18,7 @@ final readonly class RegisterProductUC implements UseCaseContract
 {
 	public function __construct(
 		private AuthService $authService,
+		private ProductService $productService,
 	) {}
 
 	/**
@@ -50,9 +53,13 @@ final readonly class RegisterProductUC implements UseCaseContract
 		try {
 			$product = Product::findByConfigPair($productId, 'password', $password);
 
+			$configStatus = $this->productService
+				->resolveConfigurationStatus($product, ProductConfigurationStatus::$STATUS_ASSIGNED);
+
 			$product->update([
 				'user_id' => $userId,
 				'active' => true,
+				'configuration_status' => $configStatus,
 			]);
 
 			$product->refresh();

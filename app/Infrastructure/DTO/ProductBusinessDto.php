@@ -13,6 +13,7 @@ final class ProductBusinessDto extends BaseDTO
 	public int $id;
 	public int $product_id;
 	public int $user_id;
+	public bool $not_a_business;
 	public string|null $name;
 	public array $types;
 	public array $place_types;
@@ -25,6 +26,7 @@ final class ProductBusinessDto extends BaseDTO
 		$this->id = $model->id;
 		$this->product_id = $model->product_id;
 		$this->user_id = $model->user_id;
+		$this->not_a_business = $model->not_a_business ?? false;
 		$this->name = $model->name;
 		$this->types = $model->types;
 		$this->place_types = $model->place_types;

@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Static\Permissions\StaticPermissions;
 use App\Static\Permissions\StaticRoles;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
@@ -56,14 +57,12 @@ final class ConfigureProductRequest extends FormRequest
 	/**
 	 * Get the validation rules that apply to the request.
 	 *
-	 * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+	 * @return array<string, ValidationRule|array|string>
 	 */
 	public function rules(): array
 	{
 		return [
-			'name' => 'string',
-			'target_url' => 'string',
-			'business' => 'array'
+			'target_url' => 'string|required',
 		];
 	}
 }

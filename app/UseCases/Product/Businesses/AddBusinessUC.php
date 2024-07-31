@@ -6,11 +6,14 @@ namespace App\UseCases\Product\Businesses;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductBusinessDto;
+use App\Infrastructure\Services\Product\ProductService;
+use App\Models\Product;
 use App\Models\ProductBusiness;
+use App\Models\ProductConfigurationStatus;
 
 final readonly class AddBusinessUC implements UseCaseContract
 {
-	public function __construct()
+	public function __construct(private ProductService $productService)
 	{
 	}
 
@@ -32,6 +35,9 @@ final readonly class AddBusinessUC implements UseCaseContract
 		if(isset($data['name'])){
 			$businessData['name'] = $data['name'];
 		}
+		if(isset($data['notBusiness'])){
+			$businessData['not_a_business'] = $data['notBusiness'];
+		}
 
 		if(isset($data['size'])){
 			$businessData['size'] = $data['size'];
@@ -45,21 +51,13 @@ final readonly class AddBusinessUC implements UseCaseContract
 			$businessData
 		);
 
-//		$name = $data['name'];
-//		$size = $data['size'];
-//		$types = $data['types'];
-//		$place_types = $data['place_types'] ?? null;
-//		$productId = $data['productId'];
-//		$userId = $data['userId'];
-//
-//		$business = new ProductBusiness;
-//		$business->product_id = $productId;
-//		$business->user_id = $userId;
-//		$business->name = $name;
-//		$business->types = $types;
-//		$business->place_types = $place_types;
-//		$business->size = $size;
-//		$business->save();
+		$productId = $data['productId'];
+		$product = Product::findById($productId);
+		$configStatus = $this->productService
+			->resolveConfigurationStatus($product, ProductConfigurationStatus::$STATUS_BUSINESS_SET);
+		$product->update(['configuration_status' => $configStatus]);
+		$product->refresh();
+
 
 		return ProductBusinessDto::fromModel($business);
 	}

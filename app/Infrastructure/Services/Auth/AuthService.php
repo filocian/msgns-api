@@ -15,6 +15,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Request;
@@ -54,14 +55,14 @@ final class AuthService
 
 		$user->assignRole(StaticRoles::USER_ROLE);
 
-		if($user->google_id == ''){
+		if ($user->google_id == '') {
 			app()->setLocale($user->default_locale);
 			$verificationToken = $this->generateEmailVerificationToken($user);
 			$html = view('emails.email-verification')->with('verificationToken', $verificationToken)->render();
 
-			try{
+			try {
 				$this->mailService->send($user->email, __('emailVerification.subject'), $html);
-			} catch (\Exception $error){
+			} catch (\Exception $error) {
 				dd($error->getMessage());
 			}
 		}
@@ -75,15 +76,16 @@ final class AuthService
 	 * @return UserDto | null
 	 * @throws AuthenticationException
 	 */
-	public function login(string $email, string $password): UserDto | null
+	public function login(string $email, string $password): UserDto|null
 	{
 		$user = User::query()->where('email', $email)->first();
+		Cookie::queue(Cookie::forget(env('SESSION_COOKIE')));
 
 		if (!$user) {
 			throw new UnauthorizedException();
 		}
 
-		if($user->password_reset_required){
+		if ($user->password_reset_required) {
 			return UserDto::fromModel($user);
 		}
 
@@ -95,7 +97,7 @@ final class AuthService
 
 		$userRoles = $this->getRoles($user);
 
-		if($userRoles->count() < 1){
+		if ($userRoles->count() < 1) {
 			$this->setDefaultRole($user);
 		}
 
@@ -134,7 +136,7 @@ final class AuthService
 
 		$userRoles = $this->getRoles($user);
 
-		if($userRoles->count() < 1){
+		if ($userRoles->count() < 1) {
 			$this->setDefaultRole($user);
 		}
 
@@ -145,8 +147,9 @@ final class AuthService
 	public function logout(): bool
 	{
 		Auth::guard('stateful-api')->logout();
+		Cookie::queue(Cookie::forget(env('SESSION_COOKIE')));
 		Request::session()->invalidate();
-		//		Request::session()->regenerateToken();
+		Request::session()->regenerateToken();
 
 		return true;
 	}
@@ -174,7 +177,7 @@ final class AuthService
 		return $user->createToken(sprintf('%s-%s', $user->email, time()))->plainTextToken;
 	}
 
-	public function getRoles(User $user): Collection | array
+	public function getRoles(User $user): Collection|array
 	{
 		$user ??= $this->user();
 

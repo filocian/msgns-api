@@ -12,6 +12,7 @@ class ProductBusiness extends Model
 	protected $fillable = [
 		'product_id',
 		'user_id',
+		'not_a_business',
 		'name',
 		'types',
 		'place_types',
@@ -20,6 +21,7 @@ class ProductBusiness extends Model
 	protected $casts = [
 		'types' => 'array',
 		'place_types' => 'array',
+		'not_a_business' => 'boolean'
 	];
 
 	public function product()

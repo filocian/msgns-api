@@ -8,18 +8,20 @@ use App\Exceptions\Product\InvalidProductTypeException;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
+use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
+use App\Models\ProductConfigurationStatus;
 use App\Models\ProductType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 final readonly class ConfigureUC implements UseCaseContract
 {
-	public function __construct() {}
+	public function __construct(private ProductService $productService) {}
 
 	/**
 	 * UseCase: Configure a single product based on its id
 	 *
-	 * @param array{id: int, name:string|null, target_url: string}|null $data
+	 * @param array{id: int, target_url: string}|null $data
 	 * @param array|null $opts
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
@@ -28,25 +30,21 @@ final readonly class ConfigureUC implements UseCaseContract
 	public function run(mixed $data = null, ?array $opts = null): ProductDto
 	{
 		$productId = $data['id'];
-		$name =$data['name'] ?? null;
 		$config = $data['target_url'] ?? null;
-		$business = $data['business'] ?? null;
 
-		return $this->configureProduct($productId, $name, $config, $business);
+		return $this->configureProduct($productId, $config);
 	}
 
 	/**
 	 * Configure a single product based on its id
 	 *
 	 * @param int $productId
-	 * @param string|null $name
 	 * @param string $target_url
-	 * @param array|null $business
 	 * @return ProductDto
 	 * @throws ProductNotFoundException
 	 * @throws InvalidProductTypeException
 	 */
-	private function configureProduct(int $productId, string|null $name, string $target_url, ?array $business): ProductDto
+	private function configureProduct(int $productId, string $target_url): ProductDto
 	{
 		try {
 			$product = Product::findById($productId);
@@ -60,13 +58,13 @@ final readonly class ConfigureUC implements UseCaseContract
 			throw new InvalidProductTypeException();
 		}
 
-		$config = [
-			'target_url' => $target_url
-		];
+		$configStatus = $this->productService
+			->resolveConfigurationStatus($product, ProductConfigurationStatus::$STATUS_TARGET_SET);
 
-		if(isset($name)){
-			$config['name'] = $name;
-		}
+		$config = [
+			'target_url' => $target_url,
+			'configuration_status' => $configStatus,
+		];
 
 		$product->update($config);
 

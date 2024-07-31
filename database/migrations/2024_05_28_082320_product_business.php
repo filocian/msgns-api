@@ -16,8 +16,9 @@ return new class extends Migration
 			$table->id();
 			$table->foreignId('product_id')->constrained('products');
 			$table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+			$table->boolean('not_a_business')->default(false);
 			$table->string('name', length: 150)->nullable()->default(null);
-			$table->json('types');
+			$table->json('types')->default('{}');
 			$table->json('place_types')->nullable()->default(null);
 			$table->string('size')->nullable()->default(null);
 			$table->timestamps();

@@ -8,12 +8,14 @@ use App\Exceptions\Product\InvalidProductTypeException;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
+use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
+use App\Models\ProductConfigurationStatus;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 final readonly class RenameUC implements UseCaseContract
 {
-	public function __construct() {}
+	public function __construct(private ProductService $productService) {}
 
 	/**
 	 * UseCase: Configure a single product based on its id
@@ -47,8 +49,12 @@ final readonly class RenameUC implements UseCaseContract
 			throw new ProductNotFoundException();
 		}
 
+		$configStatus = $this->productService
+			->resolveConfigurationStatus($product, ProductConfigurationStatus::$STATUS_COMPLETED);
+
 		$product->update([
 			'name' => $name,
+			'configuration_status' => $configStatus
 		]);
 
 		$product->refresh();

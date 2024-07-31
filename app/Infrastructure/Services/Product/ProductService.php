@@ -8,6 +8,7 @@ use App\Infrastructure\DTO\CollectionDto;
 use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\ProductDto;
 use App\Models\Product;
+use App\Models\ProductConfigurationStatus;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -188,5 +189,52 @@ final readonly class ProductService
 	public function getChildCandidates(Product $parent)
 	{
 		return $parent->getChildCandidates();
+	}
+
+	public function resolveConfigurationStatus(Product $product, string $actionStatus): string{
+		$productStatus = $product->configuration_status;
+		$notStarted = ProductConfigurationStatus::$STATUS_NOT_STARTED;
+		$assigned = ProductConfigurationStatus::$STATUS_ASSIGNED;
+		$targetSet = ProductConfigurationStatus::$STATUS_TARGET_SET;
+		$businessSet = ProductConfigurationStatus::$STATUS_BUSINESS_SET;
+		$completed = ProductConfigurationStatus::$STATUS_COMPLETED;
+
+		if($productStatus == $completed){
+			return $completed;
+		}
+
+		if($productStatus == $notStarted){
+			if($actionStatus == $assigned){
+				return $assigned;
+			} else {
+				return $notStarted;
+			}
+		}
+
+		if($productStatus == $assigned){
+			if($actionStatus == $targetSet){
+				return $targetSet;
+			} else {
+				return $assigned;
+			}
+		}
+
+		if($productStatus == $targetSet){
+			if($actionStatus == $businessSet){
+				return $businessSet;
+			} else {
+				return $targetSet;
+			}
+		}
+
+		if($productStatus == $businessSet){
+			if($actionStatus == $completed){
+				return $completed;
+			} else{
+				return $businessSet;
+			}
+		}
+
+		return $productStatus;
 	}
 }

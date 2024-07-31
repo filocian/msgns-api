@@ -29,6 +29,7 @@ final class ProductDto extends BaseDTO
 	public string $name;
 	public string $description;
 	public bool $active;
+	public string $configuration_status;
 	public Carbon $created_at;
 	public Carbon $updated_at;
 
@@ -51,6 +52,7 @@ final class ProductDto extends BaseDTO
 		$this->name = $model->name;
 		$this->description = $model->description;
 		$this->active = $model->active;
+		$this->configuration_status = $model->configuration_status;
 		$this->created_at = $model->created_at;
 		$this->updated_at = $model->updated_at ?? Carbon::create(null);
 	}

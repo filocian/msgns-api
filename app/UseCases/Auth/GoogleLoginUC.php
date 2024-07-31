@@ -32,14 +32,16 @@ final readonly class GoogleLoginUC implements UseCaseContract
 		$user = User::findByGoogleId($googleUser['google_id'], $googleUser['email']);
 
 		if (!$user) {
-			$user = $this->signup($data);
+			$userDto = $this->signup($data);
+			$user = User::where('id', $userDto->id)->firstOrFail();
 		}
 
 		//TODO: Revisar amb Luis
-		if (!$user->google_id) {
-			$user = User::update($user->id, [
+		if (!isset($user->google_id)) {
+			$user->update($user->id, [
 				'google_id' => $googleUser['google_id'],
 			]);
+			$user->refresh();
 		}
 
 		$this->authService->autoLogin($user);

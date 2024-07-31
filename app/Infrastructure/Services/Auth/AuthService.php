@@ -79,7 +79,6 @@ final class AuthService
 	public function login(string $email, string $password): UserDto|null
 	{
 		$user = User::query()->where('email', $email)->first();
-		Cookie::queue(Cookie::forget(env('SESSION_COOKIE')));
 
 		if (!$user) {
 			throw new UnauthorizedException();

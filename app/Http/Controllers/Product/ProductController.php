@@ -143,9 +143,9 @@ final class ProductController extends Controller
 	 *
 	 * @throws ProductNotFoundException
 	 */
-	public function mine(): JsonResponse
+	public function mine(Request $request): JsonResponse
 	{
-		$products = $this->FindProductByLoggedUserUC->run();
+		$products = $this->FindProductByLoggedUserUC->run($request->all(), $request->all());
 		return HttpJson::OK($products->wrapped('products'));
 	}
 

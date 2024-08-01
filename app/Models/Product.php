@@ -96,12 +96,14 @@ final class Product extends Model
 	public static function findProductsByUserId(int $userId, ?array $options = []): Collection|LengthAwarePaginator
 	{
 		$perPage = $options['perPage'] ?? 0;
+		$query = self::where('user_id', $userId)
+			->where('linked_to_product_id', null);
 
 		if ($perPage === 0) {
-			return self::where('user_id', $userId)->get();
+			return $query->get();
 		}
 
-		return self::where('user_id', $userId)->paginate($perPage);
+		return $query->paginate($perPage);
 	}
 
 	public static function findProducts(?array $options = []): LengthAwarePaginator
@@ -280,10 +282,10 @@ final class Product extends Model
 				->where('primary_model', $this->productType->primary_model)
 				->whereNotIn('code', ['P-GW-GO-RC', 'P-GM-GO-RC']);
 		})
-			->whereNotNull('user_id')
 			->where('user_id', $this->user_id)
-			->whereDoesntHave('childProduct')
 			->where('id', '!=', $this->id)
+			->where('model', $this->productType->primary_model)
+			->whereDoesntHave('childProduct')
 			->orderBy('updated_at', 'desc')
 			->limit(100)
 			->get();
@@ -301,10 +303,10 @@ final class Product extends Model
 				->where('secondary_model', $this->productType->secondary_model)
 				->whereNotIn('code', ['P-GW-GO-RC', 'P-GM-GO-RC']);
 		})
-			->whereNotNull('user_id')
 			->where('user_id', $this->user_id)
-			->whereDoesntHave('parentProduct')
 			->where('id', '!=', $this->id)
+			->where('model', $this->productType->secondary_model)
+			->whereDoesntHave('parentProduct')
 			->orderBy('updated_at', 'desc')
 			->limit(100)
 			->get();

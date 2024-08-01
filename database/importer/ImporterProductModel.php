@@ -41,6 +41,7 @@ class ImporterProductModel
 					'usage' => $product->visits,
 					'name' => $product->title,
 					'description' => $product->description,
+					'configuration_status' => $product->account_id ? 'completed' : 'not-started',
 					'active' => boolval($product->active),
 					'created_at' => $product->fecha_hora,
 				];

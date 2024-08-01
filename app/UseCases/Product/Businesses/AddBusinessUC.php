@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\UseCases\Product\Businesses;
 
 use App\Infrastructure\Contracts\UseCaseContract;
-use App\Infrastructure\DTO\ProductBusinessDto;
+use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 use App\Models\ProductBusiness;
@@ -22,9 +22,9 @@ final readonly class AddBusinessUC implements UseCaseContract
 	 *
 	 * @param mixed $data
 	 * @param array|null $opts
-	 * @return ProductBusinessDto
+	 * @return ProductDto
 	 */
-	public function run(mixed $data = null, ?array $opts = null): ProductBusinessDto
+	public function run(mixed $data = null, ?array $opts = null): ProductDto
 	{
 		$businessData = [
 			'types' => $data['types'] ?? [],
@@ -59,6 +59,6 @@ final readonly class AddBusinessUC implements UseCaseContract
 		$product->refresh();
 
 
-		return ProductBusinessDto::fromModel($business);
+		return ProductDto::fromModel($product);
 	}
 }

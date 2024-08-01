@@ -38,6 +38,7 @@ final class ImportedProductSeeder extends Seeder
 				'target_url' => $product->target_url,
 				'usage' => $product->usage,
 				'name' => $product->name,
+				'configuration_status' => $product->configuration_status,
 				'description' => $product->description,
 				'active' => boolval($product->active),
 				'created_at' => $product->created_at,

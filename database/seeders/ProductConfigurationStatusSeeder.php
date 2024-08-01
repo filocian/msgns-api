@@ -14,27 +14,27 @@ final class ProductConfigurationStatusSeeder extends Seeder
 	 */
 	public function run(): void{
 		ProductConfigurationStatus::create([
-			'status_code' => 'not-started',
+			'status_code' => ProductConfigurationStatus::$STATUS_NOT_STARTED,
 			'description' => 'configuration not started'
 		]);
 
 		ProductConfigurationStatus::create([
-			'status_code' => 'assigned',
+			'status_code' => ProductConfigurationStatus::$STATUS_ASSIGNED,
 			'description' => 'assigned to user'
 		]);
 
 		ProductConfigurationStatus::create([
-			'status_code' => 'target_set',
+			'status_code' => ProductConfigurationStatus::$STATUS_TARGET_SET,
 			'description' => 'product target set'
 		]);
 
 		ProductConfigurationStatus::create([
-			'status_code' => 'business_set',
+			'status_code' => ProductConfigurationStatus::$STATUS_BUSINESS_SET,
 			'description' => 'product target set'
 		]);
 
 		ProductConfigurationStatus::create([
-			'status_code' => 'completed',
+			'status_code' => ProductConfigurationStatus::$STATUS_COMPLETED,
 			'description' => 'configuration completed'
 		]);
 	}

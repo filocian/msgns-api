@@ -54,6 +54,8 @@ Route::prefix('products')->group(function () {
 		//ADMIN EndPoints
 		Route::post('/{id}/assign', [AdminProductController::class, 'assignToUser']);
 		Route::put('/{child_id}/remove-product-link', [AdminProductController::class, 'removeProductLink']);
+		Route::get('/config-status-list', [ProductController::class, 'getProductConfigStatusList']);
+		Route::put('/{id}/set-config-status', [ProductController::class, 'setProductConfigStatus']);
 	});
 
 	Route::get('/{id}', [ProductController::class, 'findById']);

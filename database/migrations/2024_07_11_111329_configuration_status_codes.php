@@ -14,6 +14,7 @@ return new class extends Migration
 	{
 		Schema::create($this->table, function (Blueprint $table) {
 			$table->string('status_code')->primary();
+			$table->string('label');
 			$table->string('description');
 			$table->timestamps();
 		});

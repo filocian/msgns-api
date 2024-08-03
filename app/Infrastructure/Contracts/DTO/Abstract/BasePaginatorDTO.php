@@ -27,7 +27,7 @@ abstract class BasePaginatorDTO implements PaginatorDTO
 				'lastPage' => $paginator->lastPage(),
 				'perPage' => $paginator->perPage(),
 				'total' => $paginator->total(),
-				'pageCount' => $paginator->count(),
+				'pageCount' => $paginator->lastPage(),
 				'hasMorePages' => $paginator->hasMorePages(),
 			],
 		]);

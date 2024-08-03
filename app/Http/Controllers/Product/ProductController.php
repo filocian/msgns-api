@@ -10,9 +10,11 @@ use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Product\ActivateProductRequest;
 use App\Http\Requests\Product\AddProductBusinessRequest;
 use App\Http\Requests\Product\ConfigureProductRequest;
+use App\Http\Requests\Product\ListProductConfigStatusRequest;
 use App\Http\Requests\Product\ProductListExportRequest;
 use App\Http\Requests\Product\RegisterProductRequest;
 use App\Http\Requests\Product\RenameProductRequest;
+use App\Http\Requests\Product\SetProductConfigStatusRequest;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\UseCases\Product\Activation\ActivateUC;
 use App\UseCases\Product\Activation\DeactivateUC;
@@ -20,7 +22,9 @@ use App\UseCases\Product\Assignment\AssignToCurrentUserUC;
 use App\UseCases\Product\Assignment\AssignToUserUC;
 use App\UseCases\Product\Businesses\AddBusinessUC;
 use App\UseCases\Product\Configuration\ConfigureUC;
+use App\UseCases\Product\Configuration\ListConfigStatusUC;
 use App\UseCases\Product\Configuration\RenameUC;
+use App\UseCases\Product\Configuration\SetConfigStatusUC;
 use App\UseCases\Product\Filtering\FindByCurrentUserUC;
 use App\UseCases\Product\Filtering\FindByIdUC;
 use App\UseCases\Product\Grouping\GetGroupCandidatesUC;
@@ -42,19 +46,21 @@ final class ProductController extends Controller
 		private readonly AssignToUserUC $AssignToUserUc,
 		private readonly AssignToCurrentUserUC $AssignToCurrentUserUC,
 		private readonly FindByIdUC $FindProductByIdUC,
-		private readonly FindByCurrentUserUC $FindProductByLoggedUserUC,
-		private readonly ConfigureUC $ConfigureUC,
-		private readonly RenameUC $RenameUC,
-		private readonly RegisterProductUC $RegisterProductUC,
-		private readonly ProductListUC $productListUC,
-		private readonly ProductListExportUC $ProductListExportUC,
-		private readonly AddBusinessUC $AddBusinessUC,
+		private readonly FindByCurrentUserUC  $FindProductByLoggedUserUC,
+		private readonly ConfigureUC          $ConfigureUC,
+		private readonly RenameUC             $RenameUC,
+		private readonly RegisterProductUC    $RegisterProductUC,
+		private readonly ProductListUC        $productListUC,
+		private readonly ProductListExportUC  $ProductListExportUC,
+		private readonly AddBusinessUC        $AddBusinessUC,
 		private readonly GetGroupCandidatesUC $GetGroupCandidatesUC,
-		private readonly SetGroupUC $SetGroupUC,
+		private readonly SetGroupUC           $SetGroupUC,
 		private readonly ProductRedirectionUC $ProductRedirectionUC,
+		private readonly ListConfigStatusUC   $ListStatusUC,
+		private readonly SetConfigStatusUC	  $SetConfigStatusUC,
 	) {}
 
-	public function hello()
+	public function hello(): JsonResponse
 	{
 		return HttpJson::OK('hello nfc');
 	}
@@ -75,7 +81,6 @@ final class ProductController extends Controller
 	public function productListExport(ProductListExportRequest $request): JsonResponse
 	{
 		ini_set('memory_limit', '600M');
-//		ini_set('max_execution_time', '300');
 
 		$products = $this->ProductListExportUC->run($request->all(), $request->all());
 
@@ -241,8 +246,23 @@ final class ProductController extends Controller
 			'password' => $password
 		]);
 
-
-
 		return HttpJson::OK(['target_url' => $productTarget]);
+	}
+
+	public function getProductConfigStatusList(ListProductConfigStatusRequest $request): JsonResponse
+	{
+		$statusList = $this->ListStatusUC->run();
+
+		return HttpJson::OK($statusList->wrapped('config_status_list'));
+	}
+
+	public function setProductConfigStatus(SetProductConfigStatusRequest $request, int $id): JsonResponse
+	{
+		$product = $this->SetConfigStatusUC->run([
+			'productId' => $id,
+			'status' => $request->input('status')
+		]);
+
+		return HttpJson::OK($product->wrapped('product'));
 	}
 }

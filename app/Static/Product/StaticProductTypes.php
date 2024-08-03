@@ -105,7 +105,7 @@ final class StaticProductTypes
 		[
 			'code' => 'P-GW-GO-RC',
 			'type' => 'card',
-			'model' => ['google', ],
+			'model' => ['google'],
 		],
 		[
 			'code' => 'P-GM-GO-RC',

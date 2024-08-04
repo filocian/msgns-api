@@ -134,10 +134,11 @@ final class ProductController extends Controller
 		return HttpJson::OK($product->wrapped('product'), Response::HTTP_CREATED);
 	}
 
-	public function findById(Request $request, string $id): JsonResponse
+	public function findById(Request $request, string $id, string|null $password = null): JsonResponse
 	{
 		$product = $this->FindProductByIdUC->run([
 			'id' => (int) $id,
+			'password' => $password
 		]);
 
 		return HttpJson::OK($product->wrapped('product'));

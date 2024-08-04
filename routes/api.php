@@ -58,7 +58,7 @@ Route::prefix('products')->group(function () {
 		Route::put('/{id}/set-config-status', [ProductController::class, 'setProductConfigStatus']);
 	});
 
-	Route::get('/{id}', [ProductController::class, 'findById']);
+	Route::get('/{id}/{password?}', [ProductController::class, 'findById']);
 	Route::get('/{id}/{password}/get-target', [ProductController::class, 'redirect']);
 });
 

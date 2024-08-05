@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class ProductConfigurationStatus extends Model
 {
@@ -15,9 +16,14 @@ class ProductConfigurationStatus extends Model
 		'description'
 	];
 
+	public static function list(): Collection
+	{
+		return self::get();
+	}
+
 	public static string $STATUS_NOT_STARTED = 'not-started';
 	public static string $STATUS_ASSIGNED = 'assigned';
-	public static string $STATUS_TARGET_SET = 'target_set';
-	public static string $STATUS_BUSINESS_SET = 'business_set';
+	public static string $STATUS_TARGET_SET = 'target-set';
+	public static string $STATUS_BUSINESS_SET = 'business-set';
 	public static string $STATUS_COMPLETED = 'completed';
 }

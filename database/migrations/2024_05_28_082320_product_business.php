@@ -19,7 +19,7 @@ return new class extends Migration
 			$table->boolean('not_a_business')->default(false);
 			$table->string('name', length: 150)->nullable()->default(null);
 			$table->json('types')->default('{}');
-			$table->json('place_types')->nullable()->default(null);
+			$table->json('place_types')->nullable()->default('{}');
 			$table->string('size')->nullable()->default(null);
 			$table->timestamps();
 		});

@@ -43,10 +43,12 @@ final readonly class AddBusinessUC implements UseCaseContract
 			$businessData['size'] = $data['size'];
 		}
 
+		$businessData['user_id'] = $data['userId'];
+
 		$business = ProductBusiness::updateOrCreate(
 			[
 				'product_id' => $data['productId'],
-				'user_id' => $data['userId'],
+//				'user_id' => $data['userId'],
 			],
 			$businessData
 		);

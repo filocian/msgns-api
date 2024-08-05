@@ -15,6 +15,6 @@ class ProdDbTestSeeder extends Seeder
 	 */
 	public function run()
 	{
-		$this->call([ImportedUserSeeder::class, ImportedProductSeeder::class]);
+		$this->call([ImportedUserSeeder::class, ImportedProductSeeder::class, ImportedSegmentationSeeder::class]);
 	}
 }

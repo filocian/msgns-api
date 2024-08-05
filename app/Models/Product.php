@@ -282,6 +282,7 @@ final class Product extends Model
 				->where('primary_model', $this->productType->primary_model)
 				->whereNotIn('code', ['P-GW-GO-RC', 'P-GM-GO-RC']);
 		})
+			->whereNotNull('user_id')
 			->where('user_id', $this->user_id)
 			->where('id', '!=', $this->id)
 			->where('model', $this->productType->primary_model)
@@ -303,6 +304,7 @@ final class Product extends Model
 				->where('secondary_model', $this->productType->secondary_model)
 				->whereNotIn('code', ['P-GW-GO-RC', 'P-GM-GO-RC']);
 		})
+			->whereNotNull('user_id')
 			->where('user_id', $this->user_id)
 			->where('id', '!=', $this->id)
 			->where('model', $this->productType->secondary_model)

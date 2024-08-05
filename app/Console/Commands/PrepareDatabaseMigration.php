@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Database\Importer\ImporterProductModel;
+use Database\Importer\ImporterSegmentationModel;
 use Database\Importer\ImporterUserModel;
 use Illuminate\Console\Command;
 use Illuminate\Database\ConnectionInterface;
@@ -48,6 +49,9 @@ class PrepareDatabaseMigration extends Command
 
 			$products = new ImporterProductModel($migrationDb);
 			$this->info($products->normalize()->export());
+
+			$segmentation = new ImporterSegmentationModel($migrationDb);
+			$this->info($segmentation->normalize()->export());
 		} catch (QueryException $e) {
 			$this->error('Error al ejecutar la consulta: ' . $e->getMessage());
 		} catch (\Exception $e) {
@@ -106,82 +110,6 @@ class PrepareDatabaseMigration extends Command
 	}
 
 	public function fixDuplicatedUsersAndProductOwnership(ConnectionInterface $connection){
-		$sql_BU = <<<SQL
-				DROP TABLE IF EXISTS `audit_users`;
-
-				CREATE TABLE `audit_users` (
-					`old_id` BIGINT,
-					`new_id` BIGINT,
-					`operation` VARCHAR(50),
-					`timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-				DROP TABLE IF EXISTS `audit_nfc`;
-
-				CREATE TABLE `audit_nfc` (
-					`nfc_id` BIGINT,
-					`old_account_id` BIGINT,
-					`new_account_id` BIGINT,
-					`operation` VARCHAR(50),
-					`timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-				/* Paso 2.1: Encontrar usuarios duplicados y el usuario que se va a conservar
-				CREATE TEMPORARY TABLE temporary_user_selection AS
-				SELECT id, email
-				FROM users u1
-				WHERE ultima_conexion = (
-					SELECT MAX(ultima_conexion)
-					FROM users u2
-					WHERE u1.email = u2.email
-				);*/
-
-				-- Paso 2.1: Encontrar usuarios duplicados y el usuario que se va a conservar
-				CREATE TEMPORARY TABLE temporary_user_selection AS
-				SELECT id, email
-				FROM users u1
-				WHERE id = (
-					SELECT id
-					FROM users u2
-					WHERE u1.email = u2.email
-					ORDER BY ultima_conexion DESC, id DESC
-					LIMIT 1
-				);
-
-				-- Paso 2.2: Seleccionar los usuarios que se van a eliminar
-				CREATE TEMPORARY TABLE temporary_user_deletion AS
-				SELECT u1.id, u1.email
-				FROM users u1
-				LEFT JOIN temporary_user_selection u2 ON u1.id = u2.id
-				WHERE u2.id IS NULL;
-
-				-- Paso 2.3: Registrar los cambios en la tabla de auditoría de `users`
-				INSERT INTO audit_users (old_id, new_id, operation)
-				SELECT old_user.id, new_user.id, 'DELETE'
-				FROM temporary_user_deletion old_user
-				JOIN temporary_user_selection new_user ON old_user.email = new_user.email;
-
-				-- Paso 2.4: Actualizar los productos `nfc` con los nuevos `account_id` y registrar cambios
-				INSERT INTO audit_nfc (nfc_id, old_account_id, new_account_id, operation)
-				SELECT n.id, old_user.id, new_user.id, 'UPDATE'
-				FROM nfc n
-				JOIN temporary_user_deletion old_user ON n.account_id = old_user.id
-				JOIN temporary_user_selection new_user ON old_user.email = new_user.email;
-
-				UPDATE nfc n
-				JOIN temporary_user_deletion old_user ON n.account_id = old_user.id
-				JOIN temporary_user_selection new_user ON old_user.email = new_user.email
-				SET n.account_id = new_user.id;
-
-				-- Paso 2.5: Eliminar usuarios duplicados
-				DELETE FROM users
-				WHERE id IN (SELECT id FROM temporary_user_deletion);
-
-				-- Paso 2.6: Limpieza de tablas temporales
-				DROP TEMPORARY TABLE IF EXISTS temporary_user_selection;
-				DROP TEMPORARY TABLE IF EXISTS temporary_user_deletion;
-			SQL;
-
 		$sql = <<<SQL
 			-- Crear tablas de auditoría si no existen
 			DROP TABLE IF EXISTS `audit_users`;

@@ -13,7 +13,10 @@ use App\Models\ProductConfigurationStatus;
 
 final readonly class ProductRedirectionUC implements UseCaseContract
 {
-	public function __construct(private AuthService $authService)
+	public function __construct(
+		private AuthService    $authService,
+		private ProductUsageUC $productUsageUC
+	)
 	{
 	}
 
@@ -38,6 +41,13 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		return $this->resolveTargetUrl($product);
 	}
 
+	public function updateProductUsage(Product $product): void
+	{
+		$this->productUsageUC->run([
+			'productModel' => $product
+		]);
+	}
+
 	private function resolveTargetUrl(Product $product): string
 	{
 		$loggedUserId = $this->authService->id();
@@ -60,6 +70,8 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		if ($hasOwner && $configStatus != ProductConfigurationStatus::$STATUS_COMPLETED) {
 			return $this->resolveIncompleteUrl($productDto, $loggedUserId);
 		}
+
+		$this->updateProductUsage($product);
 
 		return $productDto->target_url;
 	}

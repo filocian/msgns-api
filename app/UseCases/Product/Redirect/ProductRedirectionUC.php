@@ -15,7 +15,8 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 {
 	public function __construct(
 		private AuthService    $authService,
-		private ProductUsageUC $productUsageUC
+		private ProductUsageUC $productUsageUC,
+		private WhatsappResolverUC $whatsappResolverUC
 	)
 	{
 	}
@@ -23,7 +24,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	/**
 	 * UseCase: Activate a product based on product id and its password
 	 *
-	 * @param array{id: int, password: string}|null $data
+	 * @param array{id: int, password: string, browserLocales: string}|null $data
 	 * @param array|null $opts
 	 * @return ProductDto | null
 	 */
@@ -31,6 +32,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	{
 		$productId = (int)$data['id'];
 		$productPassword = $data['password'];
+		$browserLocale = $data['browserLocales'];
 
 		try {
 			$product = Product::findByConfigPair($productId, 'password', $productPassword);
@@ -38,7 +40,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 			return $this->resolveNotFoundUrl();
 		}
 
-		return $this->resolveTargetUrl($product);
+		return $this->resolveTargetUrl($product, $browserLocale);
 	}
 
 	public function updateProductUsage(Product $product): void
@@ -48,7 +50,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		]);
 	}
 
-	private function resolveTargetUrl(Product $product): string
+	private function resolveTargetUrl(Product $product, string $browserLocale = null): string
 	{
 		$loggedUserId = $this->authService->id();
 		$productDto = ProductDto::fromModel($product);
@@ -71,9 +73,24 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 			return $this->resolveIncompleteUrl($productDto, $loggedUserId);
 		}
 
+		$target_url = $productDto->target_url;
+
+		if($productDto->model == 'whatsapp'){
+			$whatsappUrl = $this->whatsappResolverUC->run([
+				'productModel' => $product,
+				'browserLocales' => $browserLocale
+			]);
+
+			if(!$whatsappUrl){
+				return $this->resolveIncompleteUrl($productDto, $loggedUserId);
+			}
+
+			$target_url = $whatsappUrl;
+		}
+
 		$this->updateProductUsage($product);
 
-		return $productDto->target_url;
+		return $target_url;
 	}
 
 	private function resolveStepperUrl(ProductDto $productDto): string

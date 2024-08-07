@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Whatsapp\WhatsappMessage;
+use App\Models\Whatsapp\WhatsappPhone;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +56,16 @@ final class Product extends Model
 	public function configurationStatus()
 	{
 		return $this->belongsTo(ProductConfigurationStatus::class, 'configuration_status', 'status_code');
+	}
+
+	public function whatsappMessages()
+	{
+		return $this->hasMany(WhatsappMessage::class);
+	}
+
+	public function whatsappPhones()
+	{
+		return $this->hasMany(WhatsappPhone::class);
 	}
 
 	/**

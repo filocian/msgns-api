@@ -41,7 +41,8 @@ class ImporterProductModel
 					'usage' => $product->visits,
 					'name' => $product->title,
 					'description' => $product->description,
-					'configuration_status' => $product->account_id ? 'completed' : 'not-started',
+//					'configuration_status' => $product->account_id ? 'completed' : 'not-started',
+					'configuration_status' => $this->resolveProductStatus($product),
 					'active' => boolval($product->active),
 					'created_at' => $product->fecha_hora,
 				];
@@ -62,6 +63,26 @@ class ImporterProductModel
 		$jsonFilePath = database_path($filePath);
 		file_put_contents($jsonFilePath, collect($this->products)->toJson());
 		return 'Datos exportados a ' . $filePath;
+	}
+
+	public function resolveProductStatus(mixed $product): string
+	{
+		$assigned = boolval($product->account_id);
+		if($product->elem_type == 'whatsapp' && $assigned){
+			return 'completed';
+		}
+
+		$hasTarget = boolval($product->target_url);
+
+		if($assigned && $hasTarget){
+			return 'completed';
+		}
+
+		if($assigned && ! $hasTarget){
+			return 'assigned';
+		}
+
+		return 'not-started';
 	}
 
 	public function resolveProductCode(int $productId, string $productElemType, string $productBkg)

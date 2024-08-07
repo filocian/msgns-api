@@ -34,6 +34,10 @@ final class RedirectionController extends Controller
 
 	public function legacyRedirect(Request $request, string $data): \Illuminate\Http\RedirectResponse
 	{
+		$browserLocales = $request->header('Accept-language');
+		$browserLocale = preg_replace('/[\r\n\s]+/', '', $browserLocales); // Elimina saltos de línea y espacios
+		$browserLocales = filter_var($browserLocales, FILTER_SANITIZE_FULL_SPECIAL_CHARS); // Sanitiza la cadena
+
 		if($request->input('psw')){
 			$parsedUrl = [
 				'id' => $data,
@@ -49,7 +53,8 @@ final class RedirectionController extends Controller
 
 		$productTarget = $this->ProductRedirectionUC->run([
 			'id' => $parsedUrl['id'],
-			'password' => $parsedUrl['pass']
+			'password' => $parsedUrl['pass'],
+			'browserLocales' => $browserLocales,
 		]);
 
 		return redirect()->away($productTarget);
@@ -57,9 +62,14 @@ final class RedirectionController extends Controller
 
 	public function v2Redirect(Request $request, int $id, string $password): \Illuminate\Http\RedirectResponse
 	{
+		$browserLocales = $request->header('Accept-language');
+		$browserLocale = preg_replace('/[\r\n\s]+/', '', $browserLocales); // Elimina saltos de línea y espacios
+		$browserLocales = filter_var($browserLocales, FILTER_SANITIZE_FULL_SPECIAL_CHARS); // Sanitiza la cadena
+
 		$productTarget = $this->ProductRedirectionUC->run([
 			'id' => $id,
-			'password' => $password
+			'password' => $password,
+			'browserLocales' => $browserLocales,
 		]);
 
 		return redirect()->away($productTarget);

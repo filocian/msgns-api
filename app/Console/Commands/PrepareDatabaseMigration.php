@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Database\Importer\ImporterProductModel;
 use Database\Importer\ImporterSegmentationModel;
 use Database\Importer\ImporterUserModel;
+use Database\Importer\ImporterWhatsappChannelsModel;
 use Illuminate\Console\Command;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\QueryException;
@@ -42,6 +43,7 @@ class PrepareDatabaseMigration extends Command
 
 			$this->mountUsersTable($migrationDb);
 			$this->mountProductsTable($migrationDb);
+			$this->mountWhatsappChannelsTable($migrationDb);
 			$this->sanitizeMigrationData($migrationDb);
 
 			$users = new ImporterUserModel($migrationDb);
@@ -52,6 +54,9 @@ class PrepareDatabaseMigration extends Command
 
 			$segmentation = new ImporterSegmentationModel($migrationDb);
 			$this->info($segmentation->normalize()->export());
+
+			$whatsapp = new ImporterWhatsappChannelsModel($migrationDb);
+			$this->info($whatsapp->normalize()->export());
 		} catch (QueryException $e) {
 			$this->error('Error al ejecutar la consulta: ' . $e->getMessage());
 		} catch (\Exception $e) {
@@ -94,6 +99,24 @@ class PrepareDatabaseMigration extends Command
 		$usersSql = file_get_contents($usersSqlFilePath);
 		$connection->unprepared($usersSql);
 		$this->info("Mounted Users table.");
+	}
+
+	public function mountWhatsappChannelsTable(ConnectionInterface $connection)
+	{
+		$this->info("Mounting WhatsappChannels table...");
+		$connection->statement("DROP TABLE IF EXISTS whatsapp_channels");
+		$sqlSchemePath = database_path('importer/WhatsappChannelsTable.sql');
+		$connection->unprepared(file_get_contents($sqlSchemePath));
+
+		$whatsappChannelsSqlFilePath = database_path('sql/WhatsappChannels.sql');
+		if (!file_exists($whatsappChannelsSqlFilePath)) {
+			$this->error('El archivo SQL no existe en la ruta especificada: '. $whatsappChannelsSqlFilePath);
+			return;
+		}
+
+		$usersSql = file_get_contents($whatsappChannelsSqlFilePath);
+		$connection->unprepared($usersSql);
+		$this->info("Mounted WhatsappChannels table.");
 	}
 
 	public function sanitizeMigrationData(ConnectionInterface $connection)

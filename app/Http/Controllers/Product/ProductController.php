@@ -240,11 +240,16 @@ final class ProductController extends Controller
 		return HttpJson::OK($referenceProduct->wrapped('product'));
 	}
 
-	public function redirect(int $id, string $password): JsonResponse
+	public function redirect(Request $request, int $id, string $password): JsonResponse
 	{
+		$browserLocales = $request->header('Accept-language', 'en-US,en;q=1');
+		$browserLocale = preg_replace('/[\r\n\s]+/', '', $browserLocales); // Elimina saltos de línea y espacios
+		$browserLocales = filter_var($browserLocales, FILTER_SANITIZE_FULL_SPECIAL_CHARS); // Sanitiza la cadena
+
 		$productTarget = $this->ProductRedirectionUC->run([
 			'id' => $id,
-			'password' => $password
+			'password' => $password,
+			'browserLocales' => $browserLocales,
 		]);
 
 		return HttpJson::OK(['target_url' => $productTarget]);

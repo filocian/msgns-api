@@ -17,7 +17,7 @@ final class ProductDto extends BaseDTO
 	public UserDto|null $user;
 	public string $model;
 	public string $password;
-	public string $target_url;
+	public string|null $target_url;
 	public bool $is_primary_model;
 
 	public GroupedProductDto|null $parent;

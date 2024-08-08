@@ -19,7 +19,8 @@ class ProdDbTestSeeder extends Seeder
 			ImportedUserSeeder::class,
 			ImportedProductSeeder::class,
 			ImportedSegmentationSeeder::class,
-			ImportedWhatsappSeeder::class
+			ImportedWhatsappSeeder::class,
+			ImportedNewProductSeeder::class
 		]);
 	}
 }

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Database\Importer\ImporterNewProductModel;
 use Database\Importer\ImporterProductModel;
 use Database\Importer\ImporterSegmentationModel;
 use Database\Importer\ImporterUserModel;
@@ -44,6 +45,7 @@ class PrepareDatabaseMigration extends Command
 			$this->mountUsersTable($migrationDb);
 			$this->mountProductsTable($migrationDb);
 			$this->mountWhatsappChannelsTable($migrationDb);
+			//$this->mountNewProductsTable($migrationDb); No hace falta ya que el seed json ya fué generado
 			$this->sanitizeMigrationData($migrationDb);
 
 			$users = new ImporterUserModel($migrationDb);
@@ -57,6 +59,9 @@ class PrepareDatabaseMigration extends Command
 
 			$whatsapp = new ImporterWhatsappChannelsModel($migrationDb);
 			$this->info($whatsapp->normalize()->export());
+
+			//$newProducts = new ImporterNewProductModel($migrationDb); No hace falta ya que el seed json ya fué generado
+			//$this->info($newProducts->normalize()->export()); No hace falta ya que el seed json ya fué generado
 		} catch (QueryException $e) {
 			$this->error('Error al ejecutar la consulta: ' . $e->getMessage());
 		} catch (\Exception $e) {
@@ -81,6 +86,25 @@ class PrepareDatabaseMigration extends Command
 		$productsSql = file_get_contents($sqlDataPath);
 		$connection->unprepared($productsSql);
 		$this->info("Mounted Products table.");
+	}
+
+	public function mountNewProductsTable(ConnectionInterface $connection)
+	{
+		$this->info("Mounting Products table...");
+		$connection->statement("DROP TABLE IF EXISTS new_products");
+
+		$sqlSchemePath = database_path('importer/NewProductsTable.sql');
+		$sqlDataPath = database_path('sql/NewProducts.sql');
+		$connection->unprepared(file_get_contents($sqlSchemePath));
+
+		if (!file_exists($sqlDataPath)) {
+			$this->error('El archivo SQL no existe en la ruta especificada: ' . $sqlDataPath);
+			return;
+		}
+
+		$productsSql = file_get_contents($sqlDataPath);
+		$connection->unprepared($productsSql);
+		$this->info("Mounted NEW Products table.");
 	}
 
 	public function mountUsersTable(ConnectionInterface $connection)

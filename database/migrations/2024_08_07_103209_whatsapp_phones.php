@@ -15,11 +15,9 @@ return new class extends Migration
 		Schema::create($this->table, function (Blueprint $table) {
 			$table->id();
 			$table->foreignId('product_id')->constrained('products');
-			$table->string('phone', 20);
-			$table->string('prefix', 10);
+			$table->string('phone', 40);
+			$table->string('prefix', 15);
 			$table->timestamps();
-
-//			$table->unique(['phone', 'prefix']);
 		});
     }
 

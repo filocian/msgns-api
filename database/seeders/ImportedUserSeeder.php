@@ -34,6 +34,7 @@ final class ImportedUserSeeder extends Seeder
 				'id' => $account->id,
 				'name' => $account->name,
 				'email' => $account->email,
+				'phone' => $account->phone ?? null,
 				'contact_email' => $account->contact_email,
 				'password' => $account->password,
 				'default_locale' => $account->default_locale,

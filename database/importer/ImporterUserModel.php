@@ -28,6 +28,7 @@ class ImporterUserModel
 				'name' => $user->nombre,
 				'email' => $this->fixKnownEmailProblems($user->email),
 				'contact_email' => $user->email_contacto,
+				'phone' => $user->telefono,
 				'password' => $user->password,
 				'default_locale' => $this->resolveLocale($user->idioma_usuario),
 				'active' => boolval($user->activo) && !boolval($user->eliminado),

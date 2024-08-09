@@ -36,6 +36,7 @@ final class AuthController extends Controller
 		$data = [
 			'email' => $request->get('email'),
 			'name' => $request->get('name'),
+			'phone' => $request->get('phone'),
 			'password' => $request->get('password'),
 		];
 

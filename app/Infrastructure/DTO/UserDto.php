@@ -14,6 +14,8 @@ final class UserDto extends BaseDTO
 	public int $id;
 	public string $name;
 	public string $email;
+	public string|null $contact_email;
+	public string|null $phone;
 	public string|null $google_id;
 	public bool $password_reset_required;
 	public mixed $roles;
@@ -26,6 +28,8 @@ final class UserDto extends BaseDTO
 		$this->id = $model->id;
 		$this->name = $model->name;
 		$this->email = $model->email;
+		$this->contact_email = $model->contact_email ?? null;
+		$this->phone = $model->phone ?? null;
 		$this->google_id = $model->google_id;
 		$this->roles = $model->getRoles($model->id);
 		$this->password_reset_required = $model->password_reset_required;

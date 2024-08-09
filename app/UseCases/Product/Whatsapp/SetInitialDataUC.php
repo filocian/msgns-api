@@ -15,9 +15,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 final readonly class SetInitialDataUC implements UseCaseContract
 {
 	public function __construct(
-		private AddPhoneUC   $addPhoneUC,
-		private AddMessageUC $addMessageUC,
-		private ProductService $productService
+		private AddPhoneUC          $addPhoneUC,
+		private AddMessageUC        $addMessageUC,
+		private SetDefaultMessageUC $setDefaultMessageUC,
+		private ProductService      $productService
 	)
 	{
 	}
@@ -58,11 +59,18 @@ final readonly class SetInitialDataUC implements UseCaseContract
 			'phone_number' => $phone,
 		]);
 
-		return $this->addMessageUC->run([
+		$messageDto = $this->addMessageUC->run([
 			'id' => $productId,
 			'phone_id' => $savedPhone->id,
 			'message_locale_id' => $localeId,
 			'message' => $message
 		]);
+
+		$this->setDefaultMessageUC->run([
+			'product_id' => $productId,
+			'message_id' => $messageDto->id
+		]);
+
+		return $messageDto;
 	}
 }

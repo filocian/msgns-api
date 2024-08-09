@@ -307,6 +307,10 @@ final class ProductController extends Controller
 			'id' => $id
 		]);
 
+		if(!$phones){
+			return HttpJson::OK(['messages' => []]);
+		}
+
 		return HttpJson::OK($phones->wrapped('phones'));
 	}
 
@@ -315,11 +319,15 @@ final class ProductController extends Controller
 	 */
 	public function getProductWhatsappMessages(GetWhatsappDataRequest $request, int $id): JsonResponse
 	{
-		$phones = $this->ListMessagesUC->run([
+		$messages = $this->ListMessagesUC->run([
 			'id' => $id
 		]);
 
-		return HttpJson::OK($phones->wrapped('messages'));
+		if(!$messages){
+			return HttpJson::OK(['messages' => []]);
+		}
+
+		return HttpJson::OK($messages->wrapped('messages'));
 	}
 
 	/**

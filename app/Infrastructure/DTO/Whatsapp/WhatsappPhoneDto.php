@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 final class WhatsappPhoneDto extends BaseDTO{
 	public int $id;
-	public ProductDto $product;
+	public int $product_id;
 	public string $phone;
 	public string $prefix;
 	public Carbon $created_at;
@@ -18,7 +18,7 @@ final class WhatsappPhoneDto extends BaseDTO{
 	public function __construct(Model $model)
 	{
 		$this->id = $model->id;
-		$this->product = ProductDto::fromModel($model->product);
+		$this->product_id = $model->product_id;
 		$this->phone = $model->phone;
 		$this->prefix = $model->prefix;
 		$this->created_at = $model->created_at;

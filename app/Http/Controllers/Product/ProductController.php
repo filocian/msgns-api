@@ -16,6 +16,13 @@ use App\Http\Requests\Product\RegisterProductRequest;
 use App\Http\Requests\Product\RenameProductRequest;
 use App\Http\Requests\Product\SetProductConfigStatusRequest;
 use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\Whatsapp\GetWhatsappDataRequest;
+use App\Http\Requests\Product\Whatsapp\RemoveWhatsappMessageRequest;
+use App\Http\Requests\Product\Whatsapp\RemoveWhatsappPhoneRequest;
+use App\Http\Requests\Product\Whatsapp\SaveInitialWhatsappDataRequest;
+use App\Http\Requests\Product\Whatsapp\SaveWhatsappMessageRequest;
+use App\Http\Requests\Product\Whatsapp\SaveWhatsappPhoneRequest;
+use App\Http\Requests\Product\Whatsapp\SetDefaultWhatsappMessageRequest;
 use App\UseCases\Product\Activation\ActivateUC;
 use App\UseCases\Product\Activation\DeactivateUC;
 use App\UseCases\Product\Assignment\AssignToCurrentUserUC;
@@ -33,6 +40,14 @@ use App\UseCases\Product\Listing\ProductListExportUC;
 use App\UseCases\Product\Listing\ProductListUC;
 use App\UseCases\Product\Redirect\ProductRedirectionUC;
 use App\UseCases\Product\Registration\RegisterProductUC;
+use App\UseCases\Product\Whatsapp\AddMessageUC;
+use App\UseCases\Product\Whatsapp\AddPhoneUC;
+use App\UseCases\Product\Whatsapp\ListMessagesUC;
+use App\UseCases\Product\Whatsapp\ListPhonesUC;
+use App\UseCases\Product\Whatsapp\RemoveMessageUC;
+use App\UseCases\Product\Whatsapp\RemovePhoneUC;
+use App\UseCases\Product\Whatsapp\SetDefaultMessageUC;
+use App\UseCases\Product\Whatsapp\SetInitialDataUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -41,31 +56,42 @@ use Illuminate\Support\Facades\Http;
 final class ProductController extends Controller
 {
 	public function __construct(
-		private readonly ActivateUC $ActivateProductUC,
-		private readonly DeactivateUC $DeactivateProductUC,
-		private readonly AssignToUserUC $AssignToUserUc,
+		private readonly ActivateUC            $ActivateProductUC,
+		private readonly DeactivateUC          $DeactivateProductUC,
+		private readonly AssignToUserUC        $AssignToUserUc,
 		private readonly AssignToCurrentUserUC $AssignToCurrentUserUC,
-		private readonly FindByIdUC $FindProductByIdUC,
-		private readonly FindByCurrentUserUC  $FindProductByLoggedUserUC,
-		private readonly ConfigureUC          $ConfigureUC,
-		private readonly RenameUC             $RenameUC,
-		private readonly RegisterProductUC    $RegisterProductUC,
-		private readonly ProductListUC        $productListUC,
-		private readonly ProductListExportUC  $ProductListExportUC,
-		private readonly AddBusinessUC        $AddBusinessUC,
-		private readonly GetGroupCandidatesUC $GetGroupCandidatesUC,
-		private readonly SetGroupUC           $SetGroupUC,
-		private readonly ProductRedirectionUC $ProductRedirectionUC,
-		private readonly ListConfigStatusUC   $ListStatusUC,
-		private readonly SetConfigStatusUC	  $SetConfigStatusUC,
-	) {}
+		private readonly FindByIdUC            $FindProductByIdUC,
+		private readonly FindByCurrentUserUC   $FindProductByLoggedUserUC,
+		private readonly ConfigureUC           $ConfigureUC,
+		private readonly RenameUC              $RenameUC,
+		private readonly RegisterProductUC     $RegisterProductUC,
+		private readonly ProductListUC         $productListUC,
+		private readonly ProductListExportUC   $ProductListExportUC,
+		private readonly AddBusinessUC         $AddBusinessUC,
+		private readonly GetGroupCandidatesUC  $GetGroupCandidatesUC,
+		private readonly SetGroupUC            $SetGroupUC,
+		private readonly ProductRedirectionUC  $ProductRedirectionUC,
+		private readonly ListConfigStatusUC    $ListStatusUC,
+		private readonly SetConfigStatusUC     $SetConfigStatusUC,
+		private readonly ListPhonesUC          $ListPhonesUC,
+		private readonly ListMessagesUC        $ListMessagesUC,
+		private readonly SetInitialDataUC      $setInitialDataUC,
+		private readonly AddPhoneUC            $addPhoneUC,
+		private readonly RemovePhoneUC         $removePhoneUC,
+		private readonly AddMessageUC          $addMessageUC,
+		private readonly RemoveMessageUC       $removeMessageUC,
+		private readonly SetDefaultMessageUC   $setDefaultMessageUC,
+	)
+	{
+	}
 
 	public function hello(): JsonResponse
 	{
 		return HttpJson::OK('hello nfc');
 	}
 
-	public function searchPlace(Request $request){
+	public function searchPlace(Request $request)
+	{
 		$apiKey = env('GOOGLE_PLACES_API_KEY');
 		$placeName = $request->input('name');
 		$response = Http::get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=$placeName&inputtype=textquery&fields=place_id,type,photos,formatted_address,name,rating,opening_hours,geometry&key=$apiKey");
@@ -137,7 +163,7 @@ final class ProductController extends Controller
 	public function findById(Request $request, string $id, string|null $password = null): JsonResponse
 	{
 		$product = $this->FindProductByIdUC->run([
-			'id' => (int) $id,
+			'id' => (int)$id,
 			'password' => $password
 		]);
 
@@ -270,5 +296,111 @@ final class ProductController extends Controller
 		]);
 
 		return HttpJson::OK($product->wrapped('product'));
+	}
+
+	/**
+	 * Get product whatsapp phones
+	 */
+	public function getProductWhatsappPhones(GetWhatsappDataRequest $request, int $id): JsonResponse
+	{
+		$phones = $this->ListPhonesUC->run([
+			'id' => $id
+		]);
+
+		return HttpJson::OK($phones->wrapped('phones'));
+	}
+
+	/**
+	 * Get product whatsapp phones
+	 */
+	public function getProductWhatsappMessages(GetWhatsappDataRequest $request, int $id): JsonResponse
+	{
+		$phones = $this->ListMessagesUC->run([
+			'id' => $id
+		]);
+
+		return HttpJson::OK($phones->wrapped('messages'));
+	}
+
+	/**
+	 * Add product whatsapp phone
+	 */
+	public function addProductWhatsappPhone(SaveWhatsappPhoneRequest $request, int $id): JsonResponse
+	{
+		$phone = $this->addPhoneUC->run([
+			'id' => $id,
+			'phone_prefix' => $request->input('phone_prefix'),
+			'phone_number' => $request->input('phone_number'),
+		]);
+
+		return HttpJson::OK($phone->wrapped('phone'));
+	}
+
+	/**
+	 * Remove product whatsapp phone
+	 */
+	public function removeProductWhatsappPhone(RemoveWhatsappPhoneRequest $request, int $id): JsonResponse
+	{
+		$phone = $this->removePhoneUC->run([
+			'phone_id' => $request->input('phone_id'),
+		]);
+
+		return HttpJson::OK($phone->wrapped('phone'));
+	}
+
+	/**
+	 * Add product whatsapp message
+	 */
+	public function addProductWhatsappMessage(SaveWhatsappMessageRequest $request, int $id): JsonResponse
+	{
+		$message = $this->addMessageUC->run([
+			'id' => $id,
+			'phone_id' => $request->input('phone_id'),
+			'message_locale_id' => $request->input('message_locale_id'),
+			'message' => $request->input('message'),
+		]);
+
+		return HttpJson::OK($message->wrapped('message'));
+	}
+
+	/**
+	 * Remove product whatsapp message
+	 */
+	public function removeProductWhatsappMessage(RemoveWhatsappMessageRequest $request, int $id): JsonResponse
+	{
+		$message = $this->removeMessageUC->run([
+			'message_id' => $request->input('message_id'),
+		]);
+
+		return HttpJson::OK($message->wrapped('message'));
+	}
+
+	/**
+	 * Set default product whatsapp message
+	 */
+	public function setDefaultProductWhatsappMessage(SetDefaultWhatsappMessageRequest $request, int $id, int $messageId): JsonResponse
+	{
+		$message = $this->setDefaultMessageUC->run([
+			'product_id' => $id,
+			'message_id' => $messageId,
+		]);
+
+		return HttpJson::OK($message->wrapped('message'));
+	}
+
+	/**
+	 * Set product whatsapp initial data
+	 */
+	public function addProductWhatsappInitialData(SaveInitialWhatsappDataRequest $request, int $id): JsonResponse
+	{
+		$message = $this->setInitialDataUC->run([
+			'id' => $id,
+			'phone_prefix' => $request->input('phone_prefix'),
+			'phone_number' => $request->input('phone_number'),
+			'message_locale_id' => $request->input('message_locale_id'),
+			'message' => $request->input('message'),
+		]);
+
+		return HttpJson::OK($message->wrapped('message'));
 	}
 }

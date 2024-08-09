@@ -44,6 +44,7 @@ final class AuthService
 		$user = User::create([
 			'name' => $data['name'],
 			'email' => $data['email'],
+			'phone' => $data['phone'] ?? null,
 			'password' => bcrypt($data['password']),
 			'google_id' => $data['google_id'] ?? '',
 			'password_reset_required' => false

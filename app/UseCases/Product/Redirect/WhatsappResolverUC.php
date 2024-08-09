@@ -43,7 +43,7 @@ final readonly class WhatsappResolverUC implements UseCaseContract
 			return null;
 		}
 
-		$fullPhoneNumber = $message->phone->prefix . $message->phone->phone;
+		$fullPhoneNumber = preg_replace('/[^0-9]/', '', $message->phone->prefix . $message->phone->phone);
 
 		return str_replace(
 			['<<phone>>', '<<message>>'],

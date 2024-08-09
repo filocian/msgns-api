@@ -15,7 +15,7 @@ return new class extends Migration
 		Schema::create($this->table, function (Blueprint $table) {
 			$table->id();
 			$table->foreignId('product_id')->constrained('products');
-			$table->foreignId('phone_id')->constrained('whatsapp_phones');
+			$table->foreignId('phone_id')->constrained('whatsapp_phones')->onDelete('cascade');
 			$table->foreignId('locale_id')->constrained('whatsapp_locales');
 			$table->text('message');
 			$table->boolean('default')->default(false);

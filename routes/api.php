@@ -51,6 +51,17 @@ Route::prefix('products')->group(function () {
 		Route::get('/{id}/group-candidates', [ProductController::class, 'getGroupCandidates']);
 		Route::put('/{referenceId}/group/{candidateId}', [ProductController::class, 'setProductGroup']);
 
+		//Whatsapp
+		Route::get('/{id}/whatsapp/phones', [ProductController::class, 'getProductWhatsappPhones']);
+		Route::get('/{id}/whatsapp/messages', [ProductController::class, 'getProductWhatsappMessages']);
+		Route::get('/{id}/whatsapp/copy/{source_id}', [ProductController::class, 'copyProductWhatsappMessages']);
+		Route::post('/{id}/whatsapp/add/initial', [ProductController::class, 'addProductWhatsappInitialData']);
+		Route::post('/{id}/whatsapp/add/phone', [ProductController::class, 'addProductWhatsappPhone']);
+		Route::post('/{id}/whatsapp/remove/phone', [ProductController::class, 'removeProductWhatsappPhone']);
+		Route::post('/{id}/whatsapp/add/message', [ProductController::class, 'addProductWhatsappMessage']);
+		Route::post('/{id}/whatsapp/remove/message', [ProductController::class, 'removeProductWhatsappMessage']);
+		Route::put('/{id}/whatsapp/default/message/{message_id}', [ProductController::class, 'setDefaultProductWhatsappMessage']);
+
 		//ADMIN EndPoints
 		Route::post('/{id}/assign', [AdminProductController::class, 'assignToUser']);
 		Route::put('/{child_id}/remove-product-link', [AdminProductController::class, 'removeProductLink']);

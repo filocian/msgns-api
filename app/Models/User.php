@@ -24,26 +24,30 @@ final class User extends Authenticatable implements MustVerifyEmail
 	 *
 	 * @var array<int, string>
 	 */
-	protected $fillable = ['name', 'password_reset_required', 'email', 'password', 'phone', 'google_id', 'active', 'default_locale', 'user_agent'];
+	protected $fillable = [
+		'name',
+		'password_reset_required',
+		'email',
+		'password',
+		'phone',
+		'google_id',
+		'active',
+		'default_locale',
+		'user_agent',
+		'last_access'
+	];
 
 	protected $hidden = ['password', 'remember_token', ];
 
 	protected $casts = [
 		'email_verified_at' => 'datetime',
+		'created_at' => 'datetime',
+		'updated_at' => 'datetime',
+		'last_access' => 'datetime',
 		'password_reset_required' => 'boolean',
 		'password' => 'hashed',
 		'active' => 'boolean',
-		'user_agent' => 'array'
 	];
-
-//	protected static function boot()
-//	{
-//		parent::boot();
-//
-//		self::creating(function ($model) {
-//			$model->uuid = (string) Uuid::uuid4();
-//		});
-//	}
 
 	public function products()
 	{

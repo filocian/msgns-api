@@ -38,6 +38,7 @@ final class AuthController extends Controller
 			'name' => $request->get('name'),
 			'phone' => $request->get('phone'),
 			'password' => $request->get('password'),
+			'user_agent' => $request->get('user_agent'),
 		];
 
 		$user = $this->signUpUC->run($data);
@@ -53,6 +54,7 @@ final class AuthController extends Controller
 		$data = [
 			'email' => $request->get('email'),
 			'password' => $request->get('password'),
+			'user_agent' => $request->get('user_agent')
 		];
 
 		$userAndRoles = $this->loginUC->run($data);
@@ -67,7 +69,11 @@ final class AuthController extends Controller
 
 	public function googleLogin(GoogleLoginRequest $request): JsonResponse
 	{
-		$user = $this->googleLoginUC->run($request->get('token'));
+		$data = [
+			'token' => 	$request->get('token'),
+			'user_agent' => $request->get('user_agent')
+		];
+		$user = $this->googleLoginUC->run($data);
 		return HttpJson::OK($user->wrapped('user'));
 	}
 

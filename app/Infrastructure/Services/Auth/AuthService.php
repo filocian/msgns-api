@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\Auth;
 
-use App\Infrastructure\DTO\RoleDto;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Factory\SocialLoginFactory;
 use App\Infrastructure\Services\Mail\ResendService;
+use App\Infrastructure\Services\User\UserService;
 use App\Models\User;
 use App\Static\Permissions\StaticRoles;
 use Carbon\Carbon;
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +18,6 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Validation\UnauthorizedException;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -29,10 +27,12 @@ final class AuthService
 	static private int $RESET_GRACE_DAYS = 1;
 	static private $ADMIN_ROLES = [StaticRoles::DEV_ROLE, StaticRoles::BACKOFFICE_ROLE];
 	private ResendService $mailService;
+	private UserService $userService;
 
-	public function __construct(ResendService $mailService)
+	public function __construct(ResendService $mailService, UserService $userService)
 	{
 		$this->mailService = $mailService;
+		$this->userService = $userService;
 	}
 
 	/**
@@ -47,7 +47,9 @@ final class AuthService
 			'phone' => $data['phone'] ?? null,
 			'password' => bcrypt($data['password']),
 			'google_id' => $data['google_id'] ?? '',
-			'password_reset_required' => false
+			'password_reset_required' => false,
+			'user_agent' => $data['user_agent'] ?? null,
+			'last_access' => Carbon::now()
 		]);
 
 		if (!$user) {
@@ -74,15 +76,15 @@ final class AuthService
 	/**
 	 * @param string $email
 	 * @param string $password
+	 * @param string|null $user_agent
 	 * @return UserDto | null
-	 * @throws AuthenticationException
 	 */
-	public function login(string $email, string $password): UserDto|null
+	public function login(string $email, string $password, string|null $user_agent): UserDto|null
 	{
 		$user = User::query()->where('email', $email)->first();
 
 		if (!$user) {
-			throw new UnauthorizedException();
+			return null;
 		}
 
 		if ($user->password_reset_required) {
@@ -101,13 +103,16 @@ final class AuthService
 			$this->setDefaultRole($user);
 		}
 
+		$this->userService->updateUserAgent($user->id, $user_agent);
+		$this->userService->updateUserLastAccess($user->id);
+
 		return UserDto::fromModel($user);
 	}
 
 	/**
 	 * @param string $provider
 	 * @param array $data {google_id: string, email: string, name: string}
-	 * @return UserDto
+	 * @return UserDto|null
 	 */
 	public function socialLogin(string $provider, array $data): UserDto|null
 	{
@@ -126,7 +131,7 @@ final class AuthService
 		return $socialLoginHandler->signup($data);
 	}
 
-	public function autoLogin(User|UserDto $user): void
+	public function autoLogin(User|UserDto $user, mixed $user_agent=null): void
 	{
 		if ($user instanceof UserDto) {
 			$userId = $user->id;
@@ -139,6 +144,11 @@ final class AuthService
 		if ($userRoles->count() < 1) {
 			$this->setDefaultRole($user);
 		}
+
+		$this->userService->updateUserLastAccess($user->id);
+		$this->userService->updateUserAgent($user->id, $user_agent);
+
+
 
 		Auth::login($user);
 	}
@@ -187,7 +197,7 @@ final class AuthService
 		return $user->roles()->get();
 	}
 
-	public function generateEmailVerificationToken(User $user)
+	public function generateEmailVerificationToken(User $user): string
 	{
 		$email = $user->email;
 		$name = $user->name;

@@ -19,7 +19,9 @@ final class UserDto extends BaseDTO
 	public string|null $google_id;
 	public bool $password_reset_required;
 	public mixed $roles;
+	public string|null $user_agent;
 	public Carbon | null $email_verified_at;
+	public Carbon | null $last_access;
 	public Carbon $created_at;
 	public Carbon $updated_at;
 
@@ -33,7 +35,9 @@ final class UserDto extends BaseDTO
 		$this->google_id = $model->google_id;
 		$this->roles = $model->getRoles($model->id);
 		$this->password_reset_required = $model->password_reset_required;
+		$this->user_agent = $model->user_agent ?? null;
 		$this->email_verified_at = $model->email_verified_at;
+		$this->last_access = $model->last_access ?? null;
 		$this->created_at = $model->created_at;
 		$this->updated_at = $model->updated_at;
 	}

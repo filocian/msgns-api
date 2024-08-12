@@ -7,9 +7,11 @@ namespace App\Http\Controllers\User;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Auth\ListRolesRequest;
 use App\Http\Requests\Auth\SetUserPasswordRequest;
+use App\Http\Requests\User\EditUserDataRequest;
 use App\Http\Requests\User\UserListExportRequest;
 use App\Infrastructure\DTO\UserDto;
 use App\Models\User;
+use App\UseCases\Users\Edit\EditUserDataUC;
 use App\UseCases\Users\Listing\UserListExportUC;
 use App\UseCases\Users\Listing\UserListUC;
 use App\UseCases\Users\Search\UserFindByIdUC;
@@ -24,6 +26,7 @@ class UsersController extends Controller
 		private readonly UserListUC       $userListUC,
 		private readonly UserListExportUC $userListExportUC,
 		private readonly UserFindByIdUC   $userFindByIdUC,
+		private readonly EditUserDataUC   $editUserDataUC,
 	)
 	{
 	}
@@ -70,5 +73,23 @@ class UsersController extends Controller
 		return HttpJson::OK(["role_names" => array_map(function ($role){
 			return $role["name"];
 		}, $roles)]);
+	}
+
+	public function updateUserdata(EditUserDataRequest $request, int $userId): JsonResponse
+	{
+		$data = [
+			'user_id' => $userId,
+			'email' => $request->input('email'),
+			'name' => $request->input('name'),
+			'phone' => $request->input('phone'),
+		];
+
+		$user = $this->editUserDataUC->run($data);
+
+		if(!$user){
+			return HttpJson::KO('email_already_in_use');
+		}
+
+		return HttpJson::OK($user->wrapped('user'));
 	}
 }

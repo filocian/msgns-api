@@ -43,7 +43,8 @@ final class EditUserDataRequest extends FormRequest
 		return [
 			'name' => 'string|required',
 			'email' => 'string|required',
-			'phone' => 'string'
+			'phone' => 'string',
+			'default_locale' => 'string'
 		];
 	}
 }

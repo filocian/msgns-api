@@ -19,7 +19,7 @@ final readonly class EditUserDataUC implements UseCaseContract
 	 *
 	 * @param array|null $data
 	 * @param array{user_id: int, email: string, name: string, phone: string|null}|null $opts
-	 * @return UserDto
+	 * @return UserDto|null
 	 * @throws Exception
 	 */
 	public function run(mixed $data = null, ?array $opts = []): UserDto|null

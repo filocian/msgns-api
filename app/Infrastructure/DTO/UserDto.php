@@ -18,6 +18,7 @@ final class UserDto extends BaseDTO
 	public string|null $phone;
 	public string|null $google_id;
 	public bool $password_reset_required;
+	public string $default_locale;
 	public mixed $roles;
 	public string|null $user_agent;
 	public Carbon | null $email_verified_at;
@@ -35,6 +36,7 @@ final class UserDto extends BaseDTO
 		$this->google_id = $model->google_id;
 		$this->roles = $model->getRoles($model->id);
 		$this->password_reset_required = $model->password_reset_required;
+		$this->default_locale = $model->default_locale;
 		$this->user_agent = $model->user_agent ?? null;
 		$this->email_verified_at = $model->email_verified_at;
 		$this->last_access = $model->last_access ?? null;

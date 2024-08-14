@@ -49,7 +49,7 @@ class UserService {
 	/**
 	 * Update User data: email, name, phone.
 	 *
-	 * @param array{user_id: int, email: string, name: string, phone: string|null} $data
+	 * @param array{user_id: int, email: string, name: string, phone: string|null, default_locale: string|null} $data
 	 * @return UserDto|null
 	 */
 	public function updateUserData(array $data): UserDto | null
@@ -57,7 +57,18 @@ class UserService {
 		$userId = $data['user_id'];
 		$email = $data['email'];
 		$name = $data['name'];
-		$phone = $data['phone'];
+		$newUserdata = [
+			'email' => $email,
+			'name' => $name,
+		];
+
+		if(isset($data['phone'])){
+			$newUserdata['phone'] = $data['phone'];
+		}
+
+		if(isset($data['default_locale'])){
+			$newUserdata['default_locale'] = $this->resolveUserDefaultLocale($data['default_locale']);
+		}
 
 		$user = User::findById($userId);
 
@@ -65,11 +76,7 @@ class UserService {
 			return null;
 		}
 
-		$user->update([
-			'email' => $email,
-			'name' => $name,
-			'phone' => $phone,
-		]);
+		$user->update($newUserdata);
 
 		return UserDto::fromModel($user);
 	}
@@ -77,5 +84,17 @@ class UserService {
 	public function mailExists(string $email): bool
 	{
 		return User::where('email', $email)->exists();
+	}
+
+	public function resolveUserDefaultLocale(string $lang): string
+	{
+		return match ($lang){
+			'ca' => 'ca_ES',
+			'es' => 'es_ES',
+			'fr' => 'fr_FR',
+			'de' => 'de_DE',
+			'it' => 'it_IT',
+			default => 'en_Uk'
+		};
 	}
 }

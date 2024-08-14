@@ -81,7 +81,8 @@ class UsersController extends Controller
 			'user_id' => $userId,
 			'email' => $request->input('email'),
 			'name' => $request->input('name'),
-			'phone' => $request->input('phone'),
+			'phone' => $request->input('phone') ?? null,
+			'default_locale' => $request->input('default_locale') ?? null,
 		];
 
 		$user = $this->editUserDataUC->run($data);

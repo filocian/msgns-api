@@ -48,6 +48,7 @@ final class AuthService
 			'password' => bcrypt($data['password']),
 			'google_id' => $data['google_id'] ?? '',
 			'password_reset_required' => false,
+			'default_locale' => $data['default_locale'],
 			'user_agent' => $data['user_agent'] ?? null,
 			'last_access' => Carbon::now()
 		]);

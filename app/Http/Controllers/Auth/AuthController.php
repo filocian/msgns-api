@@ -10,6 +10,7 @@ use App\Http\Requests\Auth\GoogleLoginRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\LogoutRequest;
 use App\Http\Requests\Auth\SignupRequest;
+use App\Infrastructure\Services\User\UserService;
 use App\UseCases\Auth\CurrentUserUC;
 use App\UseCases\Auth\GoogleLoginUC;
 use App\UseCases\Auth\HasAdminRightsUC;
@@ -29,6 +30,7 @@ final class AuthController extends Controller
 		readonly private LogoutUC $logoutUC,
 		readonly private CurrentUserUC $currentUserUC,
 		readonly private HasAdminRightsUC $hasAdminRightsUC,
+		readonly private UserService $userService,
 	) {}
 
 	public function signUp(SignupRequest $request): JsonResponse
@@ -39,6 +41,7 @@ final class AuthController extends Controller
 			'phone' => $request->get('phone'),
 			'password' => $request->get('password'),
 			'user_agent' => $request->get('user_agent'),
+			'default_locale' => $this->userService->resolveUserDefaultLocale($request->get('language') ?? '')
 		];
 
 		$user = $this->signUpUC->run($data);
@@ -71,7 +74,8 @@ final class AuthController extends Controller
 	{
 		$data = [
 			'token' => 	$request->get('token'),
-			'user_agent' => $request->get('user_agent')
+			'user_agent' => $request->get('user_agent'),
+			'default_locale' => $this->userService->resolveUserDefaultLocale($request->get('language') ?? '')
 		];
 		$user = $this->googleLoginUC->run($data);
 		return HttpJson::OK($user->wrapped('user'));

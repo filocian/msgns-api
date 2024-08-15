@@ -18,7 +18,7 @@ final readonly class GoogleLoginUC implements UseCaseContract
 	) {}
 
 	/**
-	 * @param array{token: string, user_agent: mixed} $data: Google credential JWT token
+	 * @param array{token: string, user_agent: string, default_locale: string} $data: Google credential JWT token
 	 * @param array|null $opts
 	 * @return UserDto
 	 * @throws RandomException
@@ -27,6 +27,7 @@ final readonly class GoogleLoginUC implements UseCaseContract
 	{
 		$token = $data['token'];
 		$user_agent = $data['user_agent'];
+		$user_language = $data['default_locale'];
 		$googleUser = $this->extractDataFromGoogleToken($token);
 
 		if (!$googleUser['google_id']) {
@@ -36,7 +37,11 @@ final readonly class GoogleLoginUC implements UseCaseContract
 		$user = User::findByGoogleId($googleUser['google_id'], $googleUser['email']);
 
 		if (!$user) {
-			$userDto = $this->signup($token);
+			$userDto = $this->signup([
+				'token' => $token,
+				'default_locale' => $user_language,
+				'user_agent' => $user_agent
+			]);
 			$user = User::where('id', $userDto->id)->firstOrFail();
 		}
 
@@ -58,13 +63,16 @@ final readonly class GoogleLoginUC implements UseCaseContract
 	}
 
 	/**
-	 * @param string $data
+	 * @param array{token: string, user_agent: string, default_locale: string} $data: Google credential JWT token
 	 * @return UserDto
 	 * @throws RandomException
 	 */
 	private function signup(mixed $data): UserDto
 	{
-		$googleUser = $this->extractDataFromGoogleToken($data);
+		$token = $data['token'];
+		$defaultLocale = $data['default_locale'];
+		$userAgent = $data['user_agent'];
+		$googleUser = $this->extractDataFromGoogleToken($token);
 
 		if (!$googleUser['google_id']) {
 			throw new UnauthorizedException('Invalid google user id');
@@ -72,6 +80,8 @@ final readonly class GoogleLoginUC implements UseCaseContract
 
 		return UserDto::fromModel($this->authService->signUp([
 			...$googleUser,
+			'default_locale' => $defaultLocale,
+			'user_agent' => $userAgent,
 			'password' => bin2hex(random_bytes(10)),
 		]));
 	}

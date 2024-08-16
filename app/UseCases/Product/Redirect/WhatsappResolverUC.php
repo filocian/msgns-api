@@ -11,7 +11,6 @@ use App\Infrastructure\DTO\Whatsapp\WhatsappMessageDto;
 use App\Models\Product;
 use App\Models\Whatsapp\WhatsappLocale;
 use App\Models\Whatsapp\WhatsappMessage;
-use App\Models\Whatsapp\WhatsappPhone;
 
 final readonly class WhatsappResolverUC implements UseCaseContract
 {
@@ -39,7 +38,7 @@ final readonly class WhatsappResolverUC implements UseCaseContract
 		$locale = $this->parseRequestLocale($browserLocales);
 		$message = $this->resolveProductMessage($productDto->id, $locale);
 
-		if(!$message){
+		if (!$message) {
 			return null;
 		}
 
@@ -55,24 +54,23 @@ final readonly class WhatsappResolverUC implements UseCaseContract
 	private function resolveProductMessage(int $productId, string $browserLocale): ?WhatsappMessageDto
 	{
 		$locale = $this->resolveMessageLocale($browserLocale);
-		$query = WhatsappMessage::query()
-			->where('product_id', '=', $productId);
 
-		if($locale){
-			$query->where('locale_id', '=', $locale->id);
-		} else{
-			$query->where('default', '=', '1');
-		}
-
-		$message = $query->first();
+		$message = WhatsappMessage::where('product_id', $productId)
+			->when($locale, function ($query) use ($locale) {
+				$query->where('locale_id', $locale->id);
+			})
+			->orderByDesc('default')
+			->orderBy('id')
+			->first();
 
 		if (!$message) {
-			$message = WhatsappMessage::query()
-				->where('product_id', '=', $productId)
+			$message = WhatsappMessage::where('product_id', $productId)
+				->orderByDesc('default')
+				->orderBy('id')
 				->first();
 		}
 
-		if(!$message){
+		if (!$message) {
 			return null;
 		}
 
@@ -82,10 +80,10 @@ final readonly class WhatsappResolverUC implements UseCaseContract
 	private function resolveMessageLocale(string $browserLocale): ?WhatsappLocaleDto
 	{
 		$locale = WhatsappLocale::query()
-		->where('code', 'like', '%' . $browserLocale . '%')
-		->first();
+			->where('code', 'like', '%' . $browserLocale . '%')
+			->first();
 
-		if(isset($locale)){
+		if (isset($locale)) {
 			return WhatsappLocaleDto::fromModel($locale);
 		}
 

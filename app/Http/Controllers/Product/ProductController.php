@@ -308,7 +308,7 @@ final class ProductController extends Controller
 		]);
 
 		if(!$phones){
-			return HttpJson::OK(['messages' => []]);
+			return HttpJson::OK(['phones' => []]);
 		}
 
 		return HttpJson::OK($phones->wrapped('phones'));

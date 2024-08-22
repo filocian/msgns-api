@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\UseCases\Product\Redirect;
 
 use App\Exceptions\Product\ProductNotFoundException;
+use App\Helpers\StringHelpers;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Auth\AuthService;
@@ -105,8 +106,9 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	private function resolveIncompleteUrl(ProductDto $productDto, int|null $userId): string
 	{
+		$obfuscatedOwnerEmail = StringHelpers::obfuscateEmail($productDto->user->email);
 		if ($userId == null || $productDto->user->id != $userId) {
-			return env('FRONT_URL') . '/product/pending-configuration';
+			return env('FRONT_URL') . '/product/pending-configuration?email=' . $obfuscatedOwnerEmail;
 		}
 
 		return $this->resolveStepperUrl($productDto);

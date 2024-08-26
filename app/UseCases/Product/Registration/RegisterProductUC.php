@@ -11,6 +11,7 @@ use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -60,6 +61,7 @@ final readonly class RegisterProductUC implements UseCaseContract
 				'user_id' => $userId,
 				'active' => true,
 				'configuration_status' => $configStatus,
+				'assigned_at' => Carbon::now()->toDateTimeString()
 			]);
 
 			$product->refresh();

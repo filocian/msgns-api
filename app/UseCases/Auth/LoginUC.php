@@ -19,10 +19,13 @@ final readonly class LoginUC implements UseCaseContract
 	 * @param array $data : {email: string, password: string}
 	 * @param array|null $opts
 	 * @return UserDto | null
-	 * @throws AuthenticationException
 	 */
 	public function run(mixed $data = null, ?array $opts = null): UserDto | null
 	{
-		return $this->authService->login($data['email'], $data['password']);
+		$email = $data['email'];
+		$password = $data['password'];
+		$userAgent = $data['user_agent'] ?? null;
+
+		return $this->authService->login($email, $password, $userAgent);
 	}
 }

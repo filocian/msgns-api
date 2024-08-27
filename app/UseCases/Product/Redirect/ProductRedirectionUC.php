@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\UseCases\Product\Redirect;
 
 use App\Exceptions\Product\ProductNotFoundException;
+use App\Helpers\StringHelpers;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Auth\AuthService;
@@ -54,22 +55,19 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	{
 		$loggedUserId = $this->authService->id();
 		$productDto = ProductDto::fromModel($product);
-		$hasOwner = boolval($productDto->user);
-		$hasTarget = boolval($productDto->target_url);
-		$configStatus = $productDto->configuration_status ?? ProductConfigurationStatus::$STATUS_NOT_STARTED;
-
-		//Producto virgen -> stepper
-		if (!$hasOwner && !$hasTarget && $configStatus == ProductConfigurationStatus::$STATUS_NOT_STARTED) {
-			return $this->resolveStepperUrl($productDto);
-		}
 
 		//Producto desactivado -> disabled page
 		if (!$productDto->active) {
 			return $this->resolveDisabledUrl($productDto);
 		}
 
+		//Producto virgen -> stepper
+		if ($this->isVirginProduct($productDto)) {
+			return $this->resolveStepperUrl($productDto);
+		}
+
 		//Producto incompleto -> stepper (si owner = loggedUserId) | incomplete info page
-		if ($hasOwner && $configStatus != ProductConfigurationStatus::$STATUS_COMPLETED) {
+		if ($this->isMisconfiguredProduct($productDto) && !$this->canBypassStatusCheck($productDto)) {
 			return $this->resolveIncompleteUrl($productDto, $loggedUserId);
 		}
 
@@ -105,8 +103,9 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	private function resolveIncompleteUrl(ProductDto $productDto, int|null $userId): string
 	{
+		$obfuscatedOwnerEmail = StringHelpers::obfuscateEmail($productDto->user->email);
 		if ($userId == null || $productDto->user->id != $userId) {
-			return env('FRONT_URL') . '/product/pending-configuration';
+			return env('FRONT_URL') . '/product/pending-configuration?email=' . $obfuscatedOwnerEmail;
 		}
 
 		return $this->resolveStepperUrl($productDto);
@@ -115,5 +114,37 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	private function resolveNotFoundUrl(): string
 	{
 		return env('FRONT_URL') . '/product/not-found';
+	}
+
+	private function isVirginProduct(ProductDto $productDto): bool{
+		$hasOwner = boolval($productDto->user);
+		$hasTarget = boolval($productDto->target_url);
+		$configStatus = $productDto->configuration_status ?? ProductConfigurationStatus::$STATUS_NOT_STARTED;
+
+		return !$hasOwner && !$hasTarget && $configStatus == ProductConfigurationStatus::$STATUS_NOT_STARTED;
+	}
+
+	private function isMisconfiguredProduct(ProductDto $productDto): bool
+	{
+		$misconfiguredStatuses = [
+			ProductConfigurationStatus::$STATUS_ASSIGNED,
+			ProductConfigurationStatus::$STATUS_TARGET_SET,
+			ProductConfigurationStatus::$STATUS_BUSINESS_SET,
+		];
+		$configStatus = $productDto->configuration_status ?? ProductConfigurationStatus::$STATUS_NOT_STARTED;
+
+		return in_array($configStatus, $misconfiguredStatuses);
+	}
+
+	private function canBypassStatusCheck(ProductDto $productDto): bool
+	{
+		$hasOwner = boolval($productDto->user);
+		$hasTarget = boolval($productDto->target_url);
+
+		if($productDto->model == 'whatsapp'){
+			$hasTarget = $productDto->configuration_status == ProductConfigurationStatus::$STATUS_TARGET_SET;
+		}
+
+		return $hasOwner && $hasTarget;
 	}
 }

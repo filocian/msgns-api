@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\UserDto;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,26 +25,30 @@ final class User extends Authenticatable implements MustVerifyEmail
 	 *
 	 * @var array<int, string>
 	 */
-	protected $fillable = ['name', 'password_reset_required', 'email', 'password', 'phone', 'google_id', 'active', 'default_locale', 'user_agent'];
+	protected $fillable = [
+		'name',
+		'password_reset_required',
+		'email',
+		'password',
+		'phone',
+		'google_id',
+		'active',
+		'default_locale',
+		'user_agent',
+		'last_access'
+	];
 
 	protected $hidden = ['password', 'remember_token', ];
 
 	protected $casts = [
 		'email_verified_at' => 'datetime',
+		'created_at' => 'datetime',
+		'updated_at' => 'datetime',
+		'last_access' => 'datetime',
 		'password_reset_required' => 'boolean',
 		'password' => 'hashed',
 		'active' => 'boolean',
-		'user_agent' => 'array'
 	];
-
-//	protected static function boot()
-//	{
-//		parent::boot();
-//
-//		self::creating(function ($model) {
-//			$model->uuid = (string) Uuid::uuid4();
-//		});
-//	}
 
 	public function products()
 	{
@@ -113,7 +118,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 
 		$query = self::customUserQuery($options);
 
-		return $query->orderBy('id', 'asc')->paginate($perPage);
+		return $query->paginate($perPage);
 	}
 
 	public static function exportUsers(?array $options = []): Collection
@@ -129,8 +134,16 @@ final class User extends Authenticatable implements MustVerifyEmail
 			'id' => $currentFilters['id'] ?? null,
 			'name' => $currentFilters['name'] ?? null,
 			'email' => $currentFilters['email'] ?? null,
-			'active' => $currentFilters['active'] ?? null,
+			'timezone' => $currentFilters['timezone'] ?? null,
+			'last_access_from' => $currentFilters['last_access_from'] ?? null,
+			'last_access_to' => $currentFilters['last_access_to'] ?? null,
+			'created_at_from' => $currentFilters['created_at_from'] ?? null,
+			'created_at_to' => $currentFilters['created_at_to'] ?? null,
+			'order_by' => $currentFilters['order_by'] ?? null,
+			'order_direction' => $currentFilters['order_direction'] ?? null,
 		];
+
+		$timezone = $filters['timezone'];
 
 		$query = User::query();
 
@@ -144,6 +157,42 @@ final class User extends Authenticatable implements MustVerifyEmail
 
 		if($filters['id']){
 			$query->where('id', $filters['id']);
+		}
+
+		if ($filters['created_at_from'] && $filters['created_at_to']) {
+			$from = $filters['created_at_from'];
+			$to = $filters['created_at_to'];
+
+			if($timezone){
+				$carbonFrom = Carbon::createFromFormat('Y-m-d H:i:s', $from, $timezone);
+				$carbonTo = Carbon::createFromFormat('Y-m-d H:i:s', $to, $timezone);
+				$from = $carbonFrom->setTimezone('UTC')->toDateTimeString();
+				$to = $carbonTo->setTimezone('UTC')->toDateTimeString();
+			}
+
+
+			$query->whereBetween('created_at', [$from, $to]);
+		}
+
+		if ($filters['last_access_from'] && $filters['last_access_to']) {
+			$from = $filters['last_access_from'];
+			$to = $filters['last_access_to'];
+
+			if($timezone){
+				$carbonFrom = Carbon::createFromFormat('Y-m-d H:i:s', $from, $timezone);
+				$carbonTo = Carbon::createFromFormat('Y-m-d H:i:s', $to, $timezone);
+				$from = $carbonFrom->setTimezone('UTC')->toDateTimeString();
+				$to = $carbonTo->setTimezone('UTC')->toDateTimeString();
+			}
+
+
+			$query->whereBetween('last_access', [$from, $to]);
+		}
+
+		if($filters['order_by'] && $filters['order_direction']){
+			$query->orderBy($filters['order_by'], $filters['order_direction']);
+		} else {
+			$query->orderBy('created_at', 'desc');
 		}
 
 		return $query;

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Models\Whatsapp\WhatsappMessage;
 use App\Models\Whatsapp\WhatsappPhone;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,10 +28,12 @@ final class Product extends Model
 		'name',
 		'description',
 		'active',
-		'configuration_status'
+		'configuration_status',
+		'assigned_at'
 	];
 	protected $casts = [
 		'active' => 'bool',
+		'assigned_at' => 'date'
 	];
 
 	public function productType()
@@ -143,7 +146,13 @@ final class Product extends Model
 			'model' => $currentFilters['model'] ?? null,
 			'owner_id' => $currentFilters['owner_id'] ?? null,
 			'owner_email' => $currentFilters['owner_email'] ?? null,
+			'config_status' => $currentFilters['config_status'] ?? null,
 			'active' => $currentFilters['active'] ?? null,
+			'timezone' => $currentFilters['timezone'] ?? null,
+			'assigned_at_from' => $currentFilters['assigned_at_from'] ?? null,
+			'assigned_at_to' => $currentFilters['assigned_at_to'] ?? null,
+			'order_by' => $currentFilters['order_by'] ?? null,
+			'order_direction' => $currentFilters['order_direction'] ?? null,
 		];
 
 		$query = Product::query();
@@ -178,8 +187,34 @@ final class Product extends Model
 			});
 		}
 
+		if ($filters['config_status']) {
+			$query->where('configuration_status', $filters['config_status']);
+		}
+
 		if ($filters['active']) {
-			$query->where('active', $filters['active']);
+			$query->where('active', $filters['active'] == '1' ? 1 : 0);
+		}
+
+		if ($filters['assigned_at_from'] && $filters['assigned_at_to']) {
+			$timezone = $filters['timezone'];
+			$from = $filters['assigned_at_from'];
+			$to = $filters['assigned_at_to'];
+
+			if($timezone){
+				$carbonFrom = Carbon::createFromFormat('Y-m-d H:i:s', $from, $timezone);
+				$carbonTo = Carbon::createFromFormat('Y-m-d H:i:s', $to, $timezone);
+				$from = $carbonFrom->setTimezone('UTC')->toDateTimeString();
+				$to = $carbonTo->setTimezone('UTC')->toDateTimeString();
+			}
+
+
+			$query->whereBetween('assigned_at', [$from, $to]);
+		}
+
+		if($filters['order_by'] && $filters['order_direction']){
+			$query->orderBy($filters['order_by'], $filters['order_direction']);
+		} else {
+			$query->orderBy('assigned_at', 'desc');
 		}
 
 		return $query;

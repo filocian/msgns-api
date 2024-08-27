@@ -82,6 +82,7 @@ Route::prefix('users')->group(function () {
 		Route::put('/{id}/set-roles', [UsersController::class, 'setUserRoles']);
 		Route::put('/{id}/set-password', [PasswordResetController::class, 'setUserPassword']);
 		Route::put('/{id}/set-email-verified', [VerificationController::class, 'setEmailVerified']);
+		Route::put('/{id}/update-profile-data', [UsersController::class, 'updateUserdata']);
 	});
 });
 

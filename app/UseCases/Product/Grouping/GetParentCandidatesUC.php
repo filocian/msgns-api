@@ -1,7 +1,8 @@
 <?php
 
-namespace App\UseCases\Product\Grouping;
+declare(strict_types=1);
 
+namespace App\UseCases\Product\Grouping;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\CollectionDto;
@@ -9,7 +10,8 @@ use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 
-final class GetParentCandidatesUC implements UseCaseContract{
+final class GetParentCandidatesUC implements UseCaseContract
+{
 	public function __construct(
 		private ProductService $productService
 	) {}
@@ -27,7 +29,7 @@ final class GetParentCandidatesUC implements UseCaseContract{
 
 		$child = Product::findById($childId);
 
-		if($child->isPrimaryModel()){
+		if ($child->isPrimaryModel()) {
 			return CollectionDto::fromModelCollection(collect([]), ProductDto::class);
 		}
 

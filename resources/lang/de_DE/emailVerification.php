@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 	'subject' => 'Messagenes - Bestätige deine E-Mail-Adresse',
 	'body' => 'Folge dem Link, um deine E-Mail-Adresse zu bestätigen.',
-	'button' => 'Bestätige deine E-Mail-Adresse'
+	'button' => 'Bestätige deine E-Mail-Adresse',
 ];

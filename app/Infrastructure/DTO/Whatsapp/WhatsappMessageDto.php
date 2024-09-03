@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\DTO\Whatsapp;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
-use App\Infrastructure\DTO\ProductDto;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
-final class WhatsappMessageDto extends BaseDTO{
+final class WhatsappMessageDto extends BaseDTO
+{
 	public int $id;
 	public int $product_id;
 	public WhatsappPhoneDto $phone;

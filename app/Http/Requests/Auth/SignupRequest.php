@@ -11,7 +11,7 @@ final class SignupRequest extends FormRequest
 {
 	protected function prepareForValidation()
 	{
-		Validator::extend('custom_password', function($attribute, $value, $parameters, $validator) {
+		Validator::extend('custom_password', function ($attribute, $value, $parameters, $validator) {
 			return preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?:{}|_<=>-]).*$/', $value);
 		}, 'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character.');
 	}

@@ -56,34 +56,32 @@ use Illuminate\Support\Facades\Http;
 final class ProductController extends Controller
 {
 	public function __construct(
-		private readonly ActivateUC            $ActivateProductUC,
-		private readonly DeactivateUC          $DeactivateProductUC,
-		private readonly AssignToUserUC        $AssignToUserUc,
+		private readonly ActivateUC $ActivateProductUC,
+		private readonly DeactivateUC $DeactivateProductUC,
+		private readonly AssignToUserUC $AssignToUserUc,
 		private readonly AssignToCurrentUserUC $AssignToCurrentUserUC,
-		private readonly FindByIdUC            $FindProductByIdUC,
-		private readonly FindByCurrentUserUC   $FindProductByLoggedUserUC,
-		private readonly ConfigureUC           $ConfigureUC,
-		private readonly RenameUC              $RenameUC,
-		private readonly RegisterProductUC     $RegisterProductUC,
-		private readonly ProductListUC         $productListUC,
-		private readonly ProductListExportUC   $ProductListExportUC,
-		private readonly AddBusinessUC         $AddBusinessUC,
-		private readonly GetGroupCandidatesUC  $GetGroupCandidatesUC,
-		private readonly SetGroupUC            $SetGroupUC,
-		private readonly ProductRedirectionUC  $ProductRedirectionUC,
-		private readonly ListConfigStatusUC    $ListStatusUC,
-		private readonly SetConfigStatusUC     $SetConfigStatusUC,
-		private readonly ListPhonesUC          $ListPhonesUC,
-		private readonly ListMessagesUC        $ListMessagesUC,
-		private readonly SetInitialDataUC      $setInitialDataUC,
-		private readonly AddPhoneUC            $addPhoneUC,
-		private readonly RemovePhoneUC         $removePhoneUC,
-		private readonly AddMessageUC          $addMessageUC,
-		private readonly RemoveMessageUC       $removeMessageUC,
-		private readonly SetDefaultMessageUC   $setDefaultMessageUC,
-	)
-	{
-	}
+		private readonly FindByIdUC $FindProductByIdUC,
+		private readonly FindByCurrentUserUC $FindProductByLoggedUserUC,
+		private readonly ConfigureUC $ConfigureUC,
+		private readonly RenameUC $RenameUC,
+		private readonly RegisterProductUC $RegisterProductUC,
+		private readonly ProductListUC $productListUC,
+		private readonly ProductListExportUC $ProductListExportUC,
+		private readonly AddBusinessUC $AddBusinessUC,
+		private readonly GetGroupCandidatesUC $GetGroupCandidatesUC,
+		private readonly SetGroupUC $SetGroupUC,
+		private readonly ProductRedirectionUC $ProductRedirectionUC,
+		private readonly ListConfigStatusUC $ListStatusUC,
+		private readonly SetConfigStatusUC $SetConfigStatusUC,
+		private readonly ListPhonesUC $ListPhonesUC,
+		private readonly ListMessagesUC $ListMessagesUC,
+		private readonly SetInitialDataUC $setInitialDataUC,
+		private readonly AddPhoneUC $addPhoneUC,
+		private readonly RemovePhoneUC $removePhoneUC,
+		private readonly AddMessageUC $addMessageUC,
+		private readonly RemoveMessageUC $removeMessageUC,
+		private readonly SetDefaultMessageUC $setDefaultMessageUC,
+	) {}
 
 	public function hello(): JsonResponse
 	{
@@ -94,7 +92,9 @@ final class ProductController extends Controller
 	{
 		$apiKey = env('GOOGLE_PLACES_API_KEY');
 		$placeName = $request->input('name');
-		$response = Http::get("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=$placeName&inputtype=textquery&fields=place_id,type,photos,formatted_address,name,rating,opening_hours,geometry&key=$apiKey");
+		$response = Http::get(
+			"https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=$placeName&inputtype=textquery&fields=place_id,type,photos,formatted_address,name,rating,opening_hours,geometry&key=$apiKey"
+		);
 		return $response->json();
 	}
 
@@ -163,8 +163,8 @@ final class ProductController extends Controller
 	public function findById(Request $request, string $id, string|null $password = null): JsonResponse
 	{
 		$product = $this->FindProductByIdUC->run([
-			'id' => (int)$id,
-			'password' => $password
+			'id' => (int) $id,
+			'password' => $password,
 		]);
 
 		return HttpJson::OK($product->wrapped('product'));
@@ -247,7 +247,7 @@ final class ProductController extends Controller
 	public function getGroupCandidates(int $id): JsonResponse
 	{
 		$candidates = $this->GetGroupCandidatesUC->run([
-			'productId' => $id
+			'productId' => $id,
 		]);
 
 		return HttpJson::OK($candidates->wrapped('candidates'));
@@ -260,7 +260,7 @@ final class ProductController extends Controller
 	{
 		$referenceProduct = $this->SetGroupUC->run([
 			'referenceId' => $referenceId,
-			'candidateId' => $candidateId
+			'candidateId' => $candidateId,
 		]);
 
 		return HttpJson::OK($referenceProduct->wrapped('product'));
@@ -292,7 +292,7 @@ final class ProductController extends Controller
 	{
 		$product = $this->SetConfigStatusUC->run([
 			'productId' => $id,
-			'status' => $request->input('status')
+			'status' => $request->input('status'),
 		]);
 
 		return HttpJson::OK($product->wrapped('product'));
@@ -304,10 +304,10 @@ final class ProductController extends Controller
 	public function getProductWhatsappPhones(GetWhatsappDataRequest $request, int $id): JsonResponse
 	{
 		$phones = $this->ListPhonesUC->run([
-			'id' => $id
+			'id' => $id,
 		]);
 
-		if(!$phones){
+		if (!$phones) {
 			return HttpJson::OK(['phones' => []]);
 		}
 
@@ -320,10 +320,10 @@ final class ProductController extends Controller
 	public function getProductWhatsappMessages(GetWhatsappDataRequest $request, int $id): JsonResponse
 	{
 		$messages = $this->ListMessagesUC->run([
-			'id' => $id
+			'id' => $id,
 		]);
 
-		if(!$messages){
+		if (!$messages) {
 			return HttpJson::OK(['messages' => []]);
 		}
 
@@ -386,8 +386,11 @@ final class ProductController extends Controller
 	/**
 	 * Set default product whatsapp message
 	 */
-	public function setDefaultProductWhatsappMessage(SetDefaultWhatsappMessageRequest $request, int $id, int $messageId): JsonResponse
-	{
+	public function setDefaultProductWhatsappMessage(
+		SetDefaultWhatsappMessageRequest $request,
+		int $id,
+		int $messageId
+	): JsonResponse {
 		$message = $this->setDefaultMessageUC->run([
 			'product_id' => $id,
 			'message_id' => $messageId,

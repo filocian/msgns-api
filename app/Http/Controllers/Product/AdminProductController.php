@@ -4,19 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Product;
 
-use App\Exceptions\Product\ProductNotFoundException;
 use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Product\AssignToUserRequest;
-use App\Http\Requests\Product\RegisterProductRequest;
-use App\Http\Requests\Product\StoreProductRequest;
 use App\UseCases\Product\Activation\ActivateUC;
 use App\UseCases\Product\Activation\DeactivateUC;
-use App\UseCases\Product\Assignment\AssignToCurrentUserUC;
 use App\UseCases\Product\Assignment\AssignToUserUC;
-use App\UseCases\Product\Filtering\FindByCurrentUserUC;
 use App\UseCases\Product\Filtering\FindByIdUC;
-use App\UseCases\Product\Listing\ProductListUC;
 use App\UseCases\Product\Grouping\RemoveProductLinkUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

@@ -28,7 +28,7 @@ final class EditUserDataRequest extends FormRequest
 			throw new ModelNotFoundException();
 		}
 
-		if ($user->id != $loggedUserId && !$loggedUser->hasAnyRole([
+		if ($user->id !== $loggedUserId && !$loggedUser->hasAnyRole([
 			StaticRoles::BACKOFFICE_ROLE,
 			StaticRoles::DEV_ROLE,
 		])) {
@@ -44,7 +44,7 @@ final class EditUserDataRequest extends FormRequest
 			'name' => 'string|required',
 			'email' => 'string|required',
 			'phone' => 'string',
-			'default_locale' => 'string'
+			'default_locale' => 'string',
 		];
 	}
 }

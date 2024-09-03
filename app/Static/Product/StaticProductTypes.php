@@ -135,7 +135,7 @@ final class StaticProductTypes
 			'description' => "{$msgnsProduct['type']} $models",
 			'image_ref' => $msgnsProduct['code'],
 			'primary_model' => $msgnsProduct['model'][0],
-			'secondary_model' => $msgnsProduct['model'][1] ?? null
+			'secondary_model' => $msgnsProduct['model'][1] ?? null,
 		];
 	}
 

@@ -18,7 +18,7 @@ final class DatabaseSeeder extends Seeder
 			RolePermissionsSeeder::class,
 			UserSeeder::class,
 			ProductTypesSeeder::class,
-			ProductConfigurationStatusSeeder::class
+			ProductConfigurationStatusSeeder::class,
 		]);
 	}
 }

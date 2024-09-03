@@ -34,9 +34,9 @@ final class RegisterProductRequest extends FormRequest
 			throw new ProductNotFoundException();
 		}
 
-//		if ($product->user_id) {
-//			throw new ProductAlreadyRegistered();
-//		}
+		//		if ($product->user_id) {
+		//			throw new ProductAlreadyRegistered();
+		//		}
 
 		if (!$user->hasAllPermissions([
 			StaticPermissions::SINGLE_PRODUCT_ASSIGNMENT,

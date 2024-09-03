@@ -18,13 +18,13 @@ final readonly class ListMessagesUC implements UseCaseContract
 	 * @param array|null $opts
 	 * @return CollectionDto|null
 	 */
-	public function run(mixed $data = null, ?array $opts = null): CollectionDto | null
+	public function run(mixed $data = null, ?array $opts = null): CollectionDto|null
 	{
 		$productId = $data['id'];
 		$product = Product::findById($productId);
 		$messages = $product->whatsappMessages;
 
-		if($messages->isEmpty()){
+		if ($messages->isEmpty()) {
 			return null;
 		}
 

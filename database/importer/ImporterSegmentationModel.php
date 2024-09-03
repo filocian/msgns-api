@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Importer;
 
 use Illuminate\Database\ConnectionInterface;
 
-class ImporterSegmentationModel
+final class ImporterSegmentationModel
 {
-	protected ConnectionInterface $connection;
-	protected array $usersBusiness;
+	private ConnectionInterface $connection;
+	private array $usersBusiness;
 
 	public function __construct(ConnectionInterface $connection)
 	{
@@ -25,20 +27,19 @@ class ImporterSegmentationModel
 			$sellerTags = $user->sellers_tags;
 			$businessTypes = [];
 
-			if(isset($sellerTags) && $sellerTags != ''){
+			if (isset($sellerTags) && $sellerTags !== '') {
 				$types = explode(',', $sellerTags);
-				foreach($types as $type){
+				foreach ($types as $type) {
 					$businessType = $this->resolveBusinessType($type);
 
-					if(isset($businessType)){
+					if (isset($businessType)) {
 						$businessTypes[] = $businessType;
 					}
-
 				}
 			}
 			return [
 				'id' => $user->id,
-				'businessTypes' => $businessTypes
+				'businessTypes' => $businessTypes,
 			];
 		}, $this->usersBusiness);
 
@@ -56,7 +57,7 @@ class ImporterSegmentationModel
 
 	public function resolveBusinessType($type): ?string
 	{
-		return match($type){
+		return match ($type) {
 			'bar', 'bubble_tea', 'coffee_shop', 'pub', 'restaurant', 'tea_shop', 'food_truck', 'caterer', 'chef', 'winery', 'icecream_shop' => 'bar_restaurant',
 			'hotel', 'hotel_lodging', 'holiday_apartment', 'house_rental_agency', 'apartments', 'boat_rental', 'boat_trip', 'cruise_line', 'travel', 'travel_agency', 'tours', 'camping', 'monument', 'museum', 'tourist_information_center' => 'tourism',
 			'health', 'medical_center', 'hospital', 'hospice', 'psychologist', 'psychology', 'physiotherapy', 'chiropractic_center', 'dental_clinic', 'nursing home', 'acupuncture', 'massage_therapist', 'pulmonologist', 'orthopedic', 'audiologist', 'optical_center', 'dermatologist', 'osteopath', 'pathologist', 'pediatric_center', 'pharmacy', 'plastic_surgery', 'podiatry_clinic' => 'health',

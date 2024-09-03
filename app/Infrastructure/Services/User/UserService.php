@@ -1,35 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\Services\User;
 
-use App\Infrastructure\DTO\CollectionDto;
 use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\UserDto;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-class UserService {
-
-	public function findUsers($opts = []): PaginatorDto {
+final class UserService
+{
+	public function findUsers($opts = []): PaginatorDto
+	{
 		$paginatedUsers = User::findUsers($opts);
 		return PaginatorDto::fromPaginator($paginatedUsers, UserDto::class);
 	}
 
-	public function exportUsers($opts = []): Collection {
+	public function exportUsers($opts = []): Collection
+	{
 		return User::exportUsers($opts);
 	}
 
-	public function findById($opts = []): UserDto {
+	public function findById($opts = []): UserDto
+	{
 		$user = User::findById($opts['id']);
 		return UserDto::fromModel($user);
 	}
 
 	public function updateUserAgent(int $userId, string|null $userAgent): void
 	{
-		$user = User::findById($userId);
+		$user = User::findById((string) $userId);
 
-		if(!$userAgent || $user->user_agent){
+		if (!$userAgent || $user->user_agent) {
 			return;
 		}
 
@@ -40,7 +44,7 @@ class UserService {
 
 	public function updateUserLastAccess(int $userId): void
 	{
-		$user = User::findById($userId);
+		$user = User::findById((string) $userId);
 
 		$user->last_access = Carbon::now();
 		$user->save();
@@ -52,7 +56,7 @@ class UserService {
 	 * @param array{user_id: int, email: string, name: string, phone: string|null, default_locale: string|null} $data
 	 * @return UserDto|null
 	 */
-	public function updateUserData(array $data): UserDto | null
+	public function updateUserData(array $data): UserDto|null
 	{
 		$userId = $data['user_id'];
 		$email = $data['email'];
@@ -62,17 +66,17 @@ class UserService {
 			'name' => $name,
 		];
 
-		if(isset($data['phone'])){
+		if (isset($data['phone'])) {
 			$newUserdata['phone'] = $data['phone'];
 		}
 
-		if(isset($data['default_locale'])){
+		if (isset($data['default_locale'])) {
 			$newUserdata['default_locale'] = $this->resolveUserDefaultLocale($data['default_locale']);
 		}
 
 		$user = User::findById($userId);
 
-		if($user->email != $email && $this->mailExists($email)){
+		if ($user->email !== $email && $this->mailExists($email)) {
 			return null;
 		}
 
@@ -88,7 +92,7 @@ class UserService {
 
 	public function resolveUserDefaultLocale(string $lang): string
 	{
-		return match ($lang){
+		return match ($lang) {
 			'ca' => 'ca_ES',
 			'es' => 'es_ES',
 			'fr' => 'fr_FR',

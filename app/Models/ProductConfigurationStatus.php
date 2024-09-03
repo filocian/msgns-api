@@ -1,20 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
-class ProductConfigurationStatus extends Model
+final class ProductConfigurationStatus extends Model
 {
 	use HasFactory;
 
 	protected $table = 'configuration_status_codes';
-	protected $fillable = [
-		'status_code',
-		'description'
-	];
+	protected $fillable = ['status_code', 'description'];
 
 	public static function list(): Collection
 	{

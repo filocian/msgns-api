@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\Product;
 
-use App\Infrastructure\DTO\CollectionDto;
 use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\ProductDto;
 use App\Models\Product;
@@ -191,7 +190,8 @@ final readonly class ProductService
 		return $parent->getChildCandidates();
 	}
 
-	public function resolveConfigurationStatus(Product $product, string $actionStatus): string{
+	public function resolveConfigurationStatus(Product $product, string $actionStatus): string
+	{
 		$productStatus = $product->configuration_status;
 		$notStarted = ProductConfigurationStatus::$STATUS_NOT_STARTED;
 		$assigned = ProductConfigurationStatus::$STATUS_ASSIGNED;
@@ -199,40 +199,36 @@ final readonly class ProductService
 		$businessSet = ProductConfigurationStatus::$STATUS_BUSINESS_SET;
 		$completed = ProductConfigurationStatus::$STATUS_COMPLETED;
 
-		if($productStatus == $completed){
+		if ($productStatus === $completed) {
 			return $completed;
 		}
 
-		if($productStatus == $notStarted){
-			if($actionStatus == $assigned){
+		if ($productStatus === $notStarted) {
+			if ($actionStatus === $assigned) {
 				return $assigned;
-			} else {
-				return $notStarted;
 			}
+			return $notStarted;
 		}
 
-		if($productStatus == $assigned){
-			if($actionStatus == $targetSet){
+		if ($productStatus === $assigned) {
+			if ($actionStatus === $targetSet) {
 				return $targetSet;
-			} else {
-				return $assigned;
 			}
+			return $assigned;
 		}
 
-		if($productStatus == $targetSet){
-			if($actionStatus == $businessSet){
+		if ($productStatus === $targetSet) {
+			if ($actionStatus === $businessSet) {
 				return $businessSet;
-			} else {
-				return $targetSet;
 			}
+			return $targetSet;
 		}
 
-		if($productStatus == $businessSet){
-			if($actionStatus == $completed){
+		if ($productStatus === $businessSet) {
+			if ($actionStatus === $completed) {
 				return $completed;
-			} else{
-				return $businessSet;
 			}
+			return $businessSet;
 		}
 
 		return $productStatus;

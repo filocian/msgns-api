@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Database\Importer\ImporterNewProductModel;
@@ -7,12 +9,13 @@ use Database\Importer\ImporterProductModel;
 use Database\Importer\ImporterSegmentationModel;
 use Database\Importer\ImporterUserModel;
 use Database\Importer\ImporterWhatsappChannelsModel;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
-class PrepareDatabaseMigration extends Command
+final class PrepareDatabaseMigration extends Command
 {
 	/**
 	 * The name and signature of the console command.
@@ -39,7 +42,7 @@ class PrepareDatabaseMigration extends Command
 		try {
 			// Conéctate a la base de datos SQLite
 			$adminDb = DB::connection('migration_admin_db');
-			$adminDb->statement("CREATE DATABASE IF NOT EXISTS migration_db");
+			$adminDb->statement('CREATE DATABASE IF NOT EXISTS migration_db');
 			$migrationDb = DB::connection('migration_db');
 
 			$this->mountUsersTable($migrationDb);
@@ -64,15 +67,15 @@ class PrepareDatabaseMigration extends Command
 			//$this->info($newProducts->normalize()->export()); No hace falta ya que el seed json ya fué generado
 		} catch (QueryException $e) {
 			$this->error('Error al ejecutar la consulta: ' . $e->getMessage());
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			$this->error('Error: ' . $e->getMessage());
 		}
 	}
 
 	public function mountProductsTable(ConnectionInterface $connection)
 	{
-		$this->info("Mounting Products table...");
-		$connection->statement("DROP TABLE IF EXISTS nfc");
+		$this->info('Mounting Products table...');
+		$connection->statement('DROP TABLE IF EXISTS nfc');
 
 		$sqlSchemePath = database_path('importer/ProductsTable.sql');
 		$sqlDataPath = database_path('sql/Products.sql');
@@ -85,13 +88,13 @@ class PrepareDatabaseMigration extends Command
 
 		$productsSql = file_get_contents($sqlDataPath);
 		$connection->unprepared($productsSql);
-		$this->info("Mounted Products table.");
+		$this->info('Mounted Products table.');
 	}
 
 	public function mountNewProductsTable(ConnectionInterface $connection)
 	{
-		$this->info("Mounting Products table...");
-		$connection->statement("DROP TABLE IF EXISTS new_products");
+		$this->info('Mounting Products table...');
+		$connection->statement('DROP TABLE IF EXISTS new_products');
 
 		$sqlSchemePath = database_path('importer/NewProductsTable.sql');
 		$sqlDataPath = database_path('sql/NewProducts.sql');
@@ -104,59 +107,60 @@ class PrepareDatabaseMigration extends Command
 
 		$productsSql = file_get_contents($sqlDataPath);
 		$connection->unprepared($productsSql);
-		$this->info("Mounted NEW Products table.");
+		$this->info('Mounted NEW Products table.');
 	}
 
 	public function mountUsersTable(ConnectionInterface $connection)
 	{
-		$this->info("Mounting Users table...");
-		$connection->statement("DROP TABLE IF EXISTS users");
+		$this->info('Mounting Users table...');
+		$connection->statement('DROP TABLE IF EXISTS users');
 		$sqlSchemePath = database_path('importer/UsersTable.sql');
 		$connection->unprepared(file_get_contents($sqlSchemePath));
 
 		$usersSqlFilePath = database_path('sql/Users.sql');
 		if (!file_exists($usersSqlFilePath)) {
-			$this->error('El archivo SQL no existe en la ruta especificada: '. $usersSqlFilePath);
+			$this->error('El archivo SQL no existe en la ruta especificada: ' . $usersSqlFilePath);
 			return;
 		}
 
 		$usersSql = file_get_contents($usersSqlFilePath);
 		$connection->unprepared($usersSql);
-		$this->info("Mounted Users table.");
+		$this->info('Mounted Users table.');
 	}
 
 	public function mountWhatsappChannelsTable(ConnectionInterface $connection)
 	{
-		$this->info("Mounting WhatsappChannels table...");
-		$connection->statement("DROP TABLE IF EXISTS whatsapp_channels");
+		$this->info('Mounting WhatsappChannels table...');
+		$connection->statement('DROP TABLE IF EXISTS whatsapp_channels');
 		$sqlSchemePath = database_path('importer/WhatsappChannelsTable.sql');
 		$connection->unprepared(file_get_contents($sqlSchemePath));
 
 		$whatsappChannelsSqlFilePath = database_path('sql/WhatsappChannels.sql');
 		if (!file_exists($whatsappChannelsSqlFilePath)) {
-			$this->error('El archivo SQL no existe en la ruta especificada: '. $whatsappChannelsSqlFilePath);
+			$this->error('El archivo SQL no existe en la ruta especificada: ' . $whatsappChannelsSqlFilePath);
 			return;
 		}
 
 		$usersSql = file_get_contents($whatsappChannelsSqlFilePath);
 		$connection->unprepared($usersSql);
-		$this->info("Mounted WhatsappChannels table.");
+		$this->info('Mounted WhatsappChannels table.');
 	}
 
 	public function sanitizeMigrationData(ConnectionInterface $connection)
 	{
 		$this->info('Sanitizing migration data...');
 
-		$this->info("Removing accounts without products...");
+		$this->info('Removing accounts without products...');
 		$this->removeAccountsWithNoProducts($connection);
-		$this->info("Removed accounts without products.");
+		$this->info('Removed accounts without products.');
 
-		$this->info("Fixing duplicated users and product ownership...");
+		$this->info('Fixing duplicated users and product ownership...');
 		$this->fixDuplicatedUsersAndProductOwnership($connection);
-		$this->info("Fixed duplicated users and product ownership.");
+		$this->info('Fixed duplicated users and product ownership.');
 	}
 
-	public function fixDuplicatedUsersAndProductOwnership(ConnectionInterface $connection){
+	public function fixDuplicatedUsersAndProductOwnership(ConnectionInterface $connection)
+	{
 		$sql = <<<SQL
 			-- Crear tablas de auditoría si no existen
 			DROP TABLE IF EXISTS `audit_users`;
@@ -231,7 +235,8 @@ class PrepareDatabaseMigration extends Command
 		$connection->unprepared($sql);
 	}
 
-	public function removeAccountsWithNoProducts(ConnectionInterface $connection){
+	public function removeAccountsWithNoProducts(ConnectionInterface $connection)
+	{
 		$sql_BU = <<<SQL
 			DELETE FROM `users`
 			WHERE id NOT IN (

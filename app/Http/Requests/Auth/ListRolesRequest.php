@@ -28,10 +28,7 @@ final class ListRolesRequest extends FormRequest
 			throw new ModelNotFoundException();
 		}
 
-		if (!$loggedUser->hasAnyRole([
-			StaticRoles::BACKOFFICE_ROLE,
-			StaticRoles::DEV_ROLE,
-		])) {
+		if (!$loggedUser->hasAnyRole([StaticRoles::BACKOFFICE_ROLE, StaticRoles::DEV_ROLE, ])) {
 			throw new ActionNotAllowedException();
 		}
 

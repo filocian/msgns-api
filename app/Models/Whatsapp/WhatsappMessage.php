@@ -1,23 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Whatsapp;
 
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class WhatsappMessage extends Model
+final class WhatsappMessage extends Model
 {
-    use HasFactory;
+	use HasFactory;
 	protected $table = 'whatsapp_messages';
-	protected $fillable = [
-		'product_id',
-		'phone_id',
-		'locale_id',
-		'message',
-		'default',
-	];
+	protected $fillable = ['product_id', 'phone_id', 'locale_id', 'message', 'default', ];
 	protected $casts = [
 		'default' => 'bool',
 	];

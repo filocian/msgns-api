@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Infrastructure\DTO;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 final class RoleDto extends BaseDTO
@@ -19,5 +18,4 @@ final class RoleDto extends BaseDTO
 		$this->id = $model->id;
 		$this->name = $model->name;
 	}
-
 }

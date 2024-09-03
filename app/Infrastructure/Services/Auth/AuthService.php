@@ -11,6 +11,7 @@ use App\Infrastructure\Services\User\UserService;
 use App\Models\User;
 use App\Static\Permissions\StaticRoles;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -23,9 +24,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class AuthService
 {
-	static private int $VERIFICATION_GRACE_DAYS = 3;
-	static private int $RESET_GRACE_DAYS = 1;
-	static private $ADMIN_ROLES = [StaticRoles::DEV_ROLE, StaticRoles::BACKOFFICE_ROLE];
+	private static int $VERIFICATION_GRACE_DAYS = 3;
+	private static int $RESET_GRACE_DAYS = 1;
+	private static $ADMIN_ROLES = [StaticRoles::DEV_ROLE, StaticRoles::BACKOFFICE_ROLE];
 	private ResendService $mailService;
 	private UserService $userService;
 
@@ -50,7 +51,7 @@ final class AuthService
 			'password_reset_required' => false,
 			'default_locale' => $data['default_locale'],
 			'user_agent' => $data['user_agent'] ?? null,
-			'last_access' => Carbon::now()
+			'last_access' => Carbon::now(),
 		]);
 
 		if (!$user) {
@@ -59,14 +60,14 @@ final class AuthService
 
 		$user->assignRole(StaticRoles::USER_ROLE);
 
-		if ($user->google_id == '') {
+		if ($user->google_id === '') {
 			app()->setLocale($user->default_locale);
 			$verificationToken = $this->generateEmailVerificationToken($user);
 			$html = view('emails.email-verification')->with('verificationToken', $verificationToken)->render();
 
 			try {
 				$this->mailService->send($user->email, __('emailVerification.subject'), $html);
-			} catch (\Exception $error) {
+			} catch (Exception $error) {
 				dd($error->getMessage());
 			}
 		}
@@ -132,7 +133,7 @@ final class AuthService
 		return $socialLoginHandler->signup($data);
 	}
 
-	public function autoLogin(User|UserDto $user, mixed $user_agent=null): void
+	public function autoLogin(User|UserDto $user, mixed $user_agent = null): void
 	{
 		if ($user instanceof UserDto) {
 			$userId = $user->id;
@@ -188,7 +189,7 @@ final class AuthService
 		return $user->createToken(sprintf('%s-%s', $user->email, time()))->plainTextToken;
 	}
 
-	public function getRoles(User $user): Collection|array
+	public function getRoles(User $user): array|Collection
 	{
 		$user ??= $this->user();
 
@@ -208,7 +209,7 @@ final class AuthService
 		$tokenValue = implode(';', [$email, $name, $created_at]);
 		$token = [
 			'value' => Crypt::encrypt($tokenValue),
-			'expiration_date' => $expirationDate->toDateTimeString()
+			'expiration_date' => $expirationDate->toDateTimeString(),
 		];
 
 		return Crypt::encrypt(json_encode($token));
@@ -227,7 +228,7 @@ final class AuthService
 		$name = $user->name;
 		$created_at = $user->created_at;
 
-		return $token['email'] == $email && $token['name'] == $name && $token['created_at'] == $created_at;
+		return $token['email'] === $email && $token['name'] === $name && $token['created_at'] === $created_at;
 	}
 
 	public function parseEmailVerificationToken(string $encryptedToken): array
@@ -243,7 +244,7 @@ final class AuthService
 			'email' => $email,
 			'name' => $name,
 			'created_at' => $created_at,
-			'expiration_date' => $expiration_date
+			'expiration_date' => $expiration_date,
 		];
 	}
 
@@ -257,7 +258,7 @@ final class AuthService
 		$tokenValue = implode(';', [$email, $name, $oldPassword]);
 		$token = [
 			'value' => Crypt::encrypt($tokenValue),
-			'expiration_date' => $expirationDate->toDateTimeString()
+			'expiration_date' => $expirationDate->toDateTimeString(),
 		];
 
 		return Crypt::encrypt(json_encode($token));
@@ -276,7 +277,7 @@ final class AuthService
 		$name = $user->name;
 		$oldPassword = $user->password;
 
-		return $token['email'] == $email && $token['name'] == $name && $token['old_password'] == $oldPassword;
+		return $token['email'] === $email && $token['name'] === $name && $token['old_password'] === $oldPassword;
 	}
 
 	public function parsePasswordResetToken(string $encryptedToken): array
@@ -292,7 +293,7 @@ final class AuthService
 			'email' => $email,
 			'name' => $name,
 			'old_password' => $old_password,
-			'expiration_date' => $expiration_date
+			'expiration_date' => $expiration_date,
 		];
 	}
 

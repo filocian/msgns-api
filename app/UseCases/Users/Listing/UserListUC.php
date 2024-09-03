@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\UseCases\Users\Listing;
 
 use App\Infrastructure\Contracts\UseCaseContract;
@@ -24,7 +26,7 @@ final readonly class UserListUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = []): PaginatorDto
 	{
-//		dd($this->resolveOptions($opts));
+		//		dd($this->resolveOptions($opts));
 		return $this->userService->findUsers($this->resolveOptions($opts));
 	}
 

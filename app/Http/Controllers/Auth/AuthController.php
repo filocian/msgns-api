@@ -19,7 +19,6 @@ use App\UseCases\Auth\LogoutUC;
 use App\UseCases\Auth\SignUpUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 final class AuthController extends Controller
 {
@@ -41,7 +40,7 @@ final class AuthController extends Controller
 			'phone' => $request->get('phone'),
 			'password' => $request->get('password'),
 			'user_agent' => $request->get('user_agent'),
-			'default_locale' => $this->userService->resolveUserDefaultLocale($request->get('language') ?? '')
+			'default_locale' => $this->userService->resolveUserDefaultLocale($request->get('language') ?? ''),
 		];
 
 		$user = $this->signUpUC->run($data);
@@ -57,12 +56,12 @@ final class AuthController extends Controller
 		$data = [
 			'email' => $request->get('email'),
 			'password' => $request->get('password'),
-			'user_agent' => $request->get('user_agent')
+			'user_agent' => $request->get('user_agent'),
 		];
 
 		$userAndRoles = $this->loginUC->run($data);
 
-		if(!$userAndRoles){
+		if (!$userAndRoles) {
 			return HttpJson::KO('invalid_credentials');
 		}
 
@@ -73,9 +72,9 @@ final class AuthController extends Controller
 	public function googleLogin(GoogleLoginRequest $request): JsonResponse
 	{
 		$data = [
-			'token' => 	$request->get('token'),
+			'token' => $request->get('token'),
 			'user_agent' => $request->get('user_agent'),
-			'default_locale' => $this->userService->resolveUserDefaultLocale($request->get('language') ?? '')
+			'default_locale' => $this->userService->resolveUserDefaultLocale($request->get('language') ?? ''),
 		];
 		$user = $this->googleLoginUC->run($data);
 		return HttpJson::OK($user->wrapped('user'));
@@ -97,7 +96,7 @@ final class AuthController extends Controller
 	public function hasAdminRights(int $userId): JsonResponse
 	{
 		$hasAdminRights = $this->hasAdminRightsUC->run([
-			'id' => $userId
+			'id' => $userId,
 		]);
 
 		return HttpJson::OK(['has_admin_rights' => $hasAdminRights]);

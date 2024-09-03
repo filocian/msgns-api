@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Infrastructure\DTO;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,8 +20,8 @@ final class UserDto extends BaseDTO
 	public string $default_locale;
 	public mixed $roles;
 	public string|null $user_agent;
-	public Carbon | null $email_verified_at;
-	public Carbon | null $last_access;
+	public Carbon|null $email_verified_at;
+	public Carbon|null $last_access;
 	public Carbon $created_at;
 	public Carbon $updated_at;
 

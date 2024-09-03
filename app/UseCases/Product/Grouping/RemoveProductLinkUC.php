@@ -1,14 +1,16 @@
 <?php
 
-namespace App\UseCases\Product\Grouping;
+declare(strict_types=1);
 
+namespace App\UseCases\Product\Grouping;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 
-final class RemoveProductLinkUC implements UseCaseContract{
+final class RemoveProductLinkUC implements UseCaseContract
+{
 	public function __construct(
 		private ProductService $productService
 	) {}

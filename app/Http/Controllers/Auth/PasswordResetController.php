@@ -37,9 +37,10 @@ final class PasswordResetController extends Controller
 		$user = User::where('email', $parsedToken['email'])->firstOrFail();
 
 		if(!$this->authService->isValidPasswordResetToken($user, $token)){
-			return HttpJson::OK(
-				'invalid token',
-				Response::HTTP_UNAUTHORIZED
+			return HttpJson::KO(
+				'invalid_reset_password_token',
+				Response::HTTP_BAD_REQUEST,
+				['user_email' => $user->email]
 			);
 		}
 
@@ -53,7 +54,7 @@ final class PasswordResetController extends Controller
 		$user->refresh();
 
 		return HttpJson::OK(
-			'good to go',
+			'password_assigned',
 			Response::HTTP_CREATED
 		);
 	}

@@ -45,9 +45,6 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	public function updateProductUsage(Product $product): void
 	{
-//		$this->productUsageUC->run([
-//			'productModel' => $product,
-//		]);
 		event(new ProductScanned($product));
 	}
 

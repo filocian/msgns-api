@@ -6,6 +6,7 @@ namespace App\Infrastructure\Services\Product;
 
 use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\ProductDto;
+use App\Infrastructure\Services\DynamoDb\DynamoDbService;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -13,7 +14,9 @@ use Illuminate\Support\Collection;
 
 final readonly class ProductService
 {
-	public function __construct() {}
+	public function __construct(private DynamoDbService $dynamoDbService)
+	{
+	}
 
 	/**
 	 * Get Product by productId
@@ -21,7 +24,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function getProductById() {}
+	public function getProductById()
+	{
+	}
 
 	/**
 	 * Get Product[] by productTypeId
@@ -29,7 +34,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function getProductsByTypeId() {}
+	public function getProductsByTypeId()
+	{
+	}
 
 	/**
 	 * Get Product[] by product name
@@ -37,7 +44,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function getProductsByName() {}
+	public function getProductsByName()
+	{
+	}
 
 	/**
 	 * Get Product[] by active state
@@ -45,7 +54,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function getProductsByActiveState() {}
+	public function getProductsByActiveState()
+	{
+	}
 
 	/**
 	 * Search Product[]
@@ -53,7 +64,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function searchProducts() {}
+	public function searchProducts()
+	{
+	}
 
 	/**
 	 * Activate a Product
@@ -61,7 +74,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function activateProduct() {}
+	public function activateProduct()
+	{
+	}
 
 	/**
 	 * Bulk Activate Products
@@ -69,7 +84,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function bulkActivateProduct() {}
+	public function bulkActivateProduct()
+	{
+	}
 
 	/**
 	 * Deactivate a Product
@@ -77,7 +94,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function deactivateProduct() {}
+	public function deactivateProduct()
+	{
+	}
 
 	/**
 	 * Bulk Deactivate Products
@@ -85,7 +104,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function bulkDeactivateProduct() {}
+	public function bulkDeactivateProduct()
+	{
+	}
 
 	/**
 	 * Assigns a Product to a User
@@ -93,7 +114,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function assignProduct() {}
+	public function assignProduct()
+	{
+	}
 
 	/**
 	 * Bulk Assignment of Products to a User
@@ -101,7 +124,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function bulkAssignProduct() {}
+	public function bulkAssignProduct()
+	{
+	}
 
 	/**
 	 * Register a bought product for a User
@@ -109,7 +134,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function registerProduct() {}
+	public function registerProduct()
+	{
+	}
 
 	/**
 	 * Get User Product[]
@@ -140,7 +167,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function getUserProductsByTypeId() {}
+	public function getUserProductsByTypeId()
+	{
+	}
 
 	/**
 	 * Get User Product[] by product name
@@ -148,7 +177,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function getUserProductsByName() {}
+	public function getUserProductsByName()
+	{
+	}
 
 	/**
 	 * Get User Product[] by active state
@@ -156,7 +187,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function getUserProductsByActiveState() {}
+	public function getUserProductsByActiveState()
+	{
+	}
 
 	/**
 	 * Search User Product[]
@@ -164,7 +197,9 @@ final readonly class ProductService
 	 * @param array<Product>|Collection $models
 	 * @return array<ProductDto>
 	 */
-	public function searchUserProducts() {}
+	public function searchUserProducts()
+	{
+	}
 
 	public function setChildProduct(Product $parent, int $childId)
 	{
@@ -232,5 +267,32 @@ final readonly class ProductService
 		}
 
 		return $productStatus;
+	}
+
+	public function getProductUsageOverview(int $userId): array
+	{
+		$products = Product::findProductsByUserId($userId, ['perPage' => 0]);
+		$totalUses = 0;
+		$totalProducts = 0;
+
+		$productsUsage = $products->map(function ($product) use (&$totalUses, &$totalProducts) {
+			$totalUses += $product->usage;
+			$totalProducts += 1;
+			return [
+				'id' => $product->id,
+				'name' => $product->name,
+				'usage' => $product->usage
+			];
+		});
+
+		return [
+			'total_usage' => $totalUses,
+			'total_products' => $totalProducts,
+			'usage_by_product' => $productsUsage
+		];
+	}
+
+	public function testDynamoDB(){
+		$this->dynamoDbService->test();
 	}
 }

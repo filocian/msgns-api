@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\VerificationController;
-use App\Http\Controllers\B4a\B4aController;
+use App\Http\Controllers\B4a\DynamoStatsController;
 use App\Http\Controllers\Product\AdminProductController;
 use App\Http\Controllers\Product\GenerateProductsController;
 use App\Http\Controllers\Product\ProductController;
@@ -48,6 +48,7 @@ Route::prefix('products')->group(function () {
 		Route::post('/{id}/deactivate', [ProductController::class, 'deactivate']);
 		Route::post('/{id}/business/add', [ProductController::class, 'addBusiness']);
 
+		//Product Grouping
 		Route::get('/{id}/group-candidates', [ProductController::class, 'getGroupCandidates']);
 		Route::put('/{referenceId}/group/{candidateId}', [ProductController::class, 'setProductGroup']);
 
@@ -76,6 +77,15 @@ Route::prefix('products')->group(function () {
 	Route::get('/{id}/{password}/get-target', [ProductController::class, 'redirect']);
 });
 
+Route::prefix('stats')->group(function () {
+	Route::middleware('auth:stateful-api')->group(function () {
+		Route::get('/{user_id}/products-usage/overview', [ProductController::class, 'getProductUsageOverview']);
+		Route::get('/{product_id}/get-interval', [DynamoStatsController::class, 'getServerHealth']);
+		Route::get('/{product_id}/get-last-month', [DynamoStatsController::class, 'getLastMonthProductStats']);
+		Route::get('/{product_id}/get-current-month', [DynamoStatsController::class, 'getCurrentMonthProductStats']);
+	});
+});
+
 Route::prefix('users')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
 		Route::get('/', [UsersController::class, 'list']);
@@ -86,15 +96,6 @@ Route::prefix('users')->group(function () {
 		Route::put('/{id}/set-password', [PasswordResetController::class, 'setUserPassword']);
 		Route::put('/{id}/set-email-verified', [VerificationController::class, 'setEmailVerified']);
 		Route::put('/{id}/update-profile-data', [UsersController::class, 'updateUserdata']);
-	});
-});
-
-/**
- * B4A API
- */
-Route::prefix('parse')->group(function () {
-	Route::middleware('auth:stateful-api')->group(function () {
-		Route::get('/health', [B4aController::class, 'getServerHealth']);
 	});
 });
 

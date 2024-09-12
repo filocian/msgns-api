@@ -16,6 +16,7 @@ use App\Http\Requests\Product\RegisterProductRequest;
 use App\Http\Requests\Product\RenameProductRequest;
 use App\Http\Requests\Product\SetProductConfigStatusRequest;
 use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\UsageStatsRequest;
 use App\Http\Requests\Product\Whatsapp\GetWhatsappDataRequest;
 use App\Http\Requests\Product\Whatsapp\RemoveWhatsappMessageRequest;
 use App\Http\Requests\Product\Whatsapp\RemoveWhatsappPhoneRequest;
@@ -40,6 +41,7 @@ use App\UseCases\Product\Listing\ProductListExportUC;
 use App\UseCases\Product\Listing\ProductListUC;
 use App\UseCases\Product\Redirect\ProductRedirectionUC;
 use App\UseCases\Product\Registration\RegisterProductUC;
+use App\UseCases\Product\Stats\UsageOverviewUC;
 use App\UseCases\Product\Whatsapp\AddMessageUC;
 use App\UseCases\Product\Whatsapp\AddPhoneUC;
 use App\UseCases\Product\Whatsapp\ListMessagesUC;
@@ -81,6 +83,7 @@ final class ProductController extends Controller
 		private readonly AddMessageUC $addMessageUC,
 		private readonly RemoveMessageUC $removeMessageUC,
 		private readonly SetDefaultMessageUC $setDefaultMessageUC,
+		private readonly UsageOverviewUC $usageOverviewUC,
 	) {}
 
 	public function hello(): JsonResponse
@@ -413,5 +416,14 @@ final class ProductController extends Controller
 		]);
 
 		return HttpJson::OK($message->wrapped('message'));
+	}
+
+	public function getProductUsageOverview(UsageStatsRequest $request, int $userId): JsonResponse
+	{
+		$usageOverview = $this->usageOverviewUC->run([
+			'user_id' => $userId,
+		]);
+
+		return HttpJson::OK(['usage_overview' => $usageOverview]);
 	}
 }

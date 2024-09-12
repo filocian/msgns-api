@@ -6,12 +6,12 @@ namespace App\UseCases\Product\Redirect;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
-use App\Infrastructure\Services\B4a\B4aService;
+use App\Infrastructure\Services\DynamoDb\DynamoDbService;
 use App\Models\Product;
 
 final readonly class ProductStatisticsUC implements UseCaseContract
 {
-	public function __construct(private B4aService $b4aService) {}
+	public function __construct(private DynamoDbService $dynamoDbService) {}
 
 	/**
 	 * UseCase: Activate a product based on product id and its password
@@ -24,7 +24,6 @@ final readonly class ProductStatisticsUC implements UseCaseContract
 	public function run(mixed $data = null, ?array $opts = null): void
 	{
 		$productModel = $data['productModel'];
-		$productUsageObject = $this->b4aService->createProductUsageObject($productModel);
-		$productUsageObject->save();
+		$this->dynamoDbService->putProductUsage($productModel);
 	}
 }

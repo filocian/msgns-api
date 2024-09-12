@@ -25,7 +25,7 @@ final class UserService
 
 	public function findById($opts = []): UserDto
 	{
-		$user = User::findById($opts['id']);
+		$user = User::findById((string) $opts['id']);
 		return UserDto::fromModel($user);
 	}
 

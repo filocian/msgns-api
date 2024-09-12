@@ -57,7 +57,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		$productDto = ProductDto::fromModel($product);
 
 		//Producto desactivado -> disabled page
-		if (!$productDto->active) {
+		if (!$productDto->active && !$this->isVirginProduct($productDto)) {
 			return $this->resolveDisabledUrl($productDto);
 		}
 

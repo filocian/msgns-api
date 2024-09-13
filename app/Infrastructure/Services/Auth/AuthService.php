@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -158,8 +159,9 @@ final class AuthService
 
 	public function logout(): bool
 	{
+		Log::info(config('session.cookie'));
 		Auth::guard('stateful-api')->logout();
-		Cookie::queue(Cookie::forget(env('SESSION_COOKIE')));
+		Cookie::queue(Cookie::forget(config('session.cookie')));
 		Request::session()->invalidate();
 		Request::session()->regenerateToken();
 

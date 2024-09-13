@@ -34,7 +34,8 @@
 		"files": [
 			"app/Helpers/StringHelpers.php",
 			"app/Helpers/ReflectionHelpers.php",
-			"app/Helpers/ArrayHelpers.php"
+			"app/Helpers/ArrayHelpers.php",
+			"app/Helpers/DateHelpers.php"
 		]
     },
     "autoload-dev": {

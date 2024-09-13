@@ -80,7 +80,7 @@ Route::prefix('products')->group(function () {
 Route::prefix('stats')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
 		Route::get('/{user_id}/products-usage/overview', [ProductController::class, 'getProductUsageOverview']);
-		Route::get('/{product_id}/get-interval', [DynamoStatsController::class, 'getServerHealth']);
+		Route::get('/{product_id}/get-interval', [DynamoStatsController::class, 'getIntervalProductStats']);
 		Route::get('/{product_id}/get-last-month', [DynamoStatsController::class, 'getLastMonthProductStats']);
 		Route::get('/{product_id}/get-current-month', [DynamoStatsController::class, 'getCurrentMonthProductStats']);
 	});

@@ -43,10 +43,10 @@ final readonly class DynamoDbService
 		]);
 	}
 
-	public function getProductUsageForGivenInterval(int $productId, string $startDate, string $endDate, string $timezone)
+	public function getProductUsageForGivenInterval(int $productId, Carbon $startDate, Carbon $endDate, string $timezone)
 	{
-		$from = Carbon::parse($startDate, $timezone)->toDateTimeString();
-		$to = Carbon::parse($endDate, $timezone)->toDateTimeString();
+		$from = normalizeCarbonInstance($startDate)->toDateTimeString();
+		$to = normalizeCarbonInstance($endDate)->toDateTimeString();
 
 		$result = $this->dynamoDbRepo->query(
 			$this->productUsageTable,

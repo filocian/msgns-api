@@ -17,3 +17,18 @@ if (!function_exists('parseLocalizedDateTimeString')) {
 		return Carbon::createFromFormat('Y-m-d H:i:s', $dateTime, $timezone);
 	}
 }
+
+if (!function_exists('normalizeCarbonInstance')) {
+	/**
+	 * Sets the timezone of a given Carbon instance to UTC. Useful for date comparisons in database or system date.
+	 *
+	 * @param Carbon $date
+	 * @return Carbon|null
+	 */
+	function normalizeCarbonInstance(Carbon $date): ?Carbon
+	{
+		$timezone = 'UTC';
+
+		return $date->setTimezone($timezone);
+	}
+}

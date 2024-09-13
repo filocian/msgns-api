@@ -32,7 +32,7 @@ final class Product extends Model
 	];
 	protected $casts = [
 		'active' => 'bool',
-		'assigned_at' => 'date',
+		'assigned_at' => 'datetime',
 	];
 
 	public function productType()

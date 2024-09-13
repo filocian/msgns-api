@@ -25,8 +25,8 @@ final class DynamoStatsController extends Controller
 	public function getLastMonthProductStats(Request $request, int $productId)
 	{
 		$timezone = $request->input('timezone') ?? 'UTC';
-		$startOfPreviousMonth = Carbon::now($timezone)->subMonthNoOverflow()->startOfMonth()->toDateTimeString();
-		$endOfPreviousMonth = Carbon::now($timezone)->subMonthNoOverflow()->endOfMonth()->toDateTimeString();
+		$startOfPreviousMonth = Carbon::now($timezone)->subMonthNoOverflow()->startOfMonth();
+		$endOfPreviousMonth = Carbon::now($timezone)->subMonthNoOverflow()->endOfMonth();
 
 		dd($this->intervalStatsUC->run([
 			'product_id' => $productId,
@@ -39,8 +39,8 @@ final class DynamoStatsController extends Controller
 	public function getCurrentMonthProductStats(Request $request, int $productId)
 	{
 		$timezone = $request->input('timezone') ?? 'UTC';
-		$startOfCurrentMonth = Carbon::now($timezone)->startOfMonth()->toDateTimeString();
-		$endOfCurrentMonth = Carbon::now($timezone)->endOfMonth()->toDateTimeString();
+		$startOfCurrentMonth = Carbon::now($timezone)->startOfMonth();
+		$endOfCurrentMonth = Carbon::now($timezone)->endOfMonth();
 
 		dd($this->intervalStatsUC->run([
 			'product_id' => $productId,
@@ -51,7 +51,16 @@ final class DynamoStatsController extends Controller
 	}
 	public function getIntervalProductStats(Request $request, int $productId)
 	{
+		$timezone = $request->input('timezone') ?? 'UTC';
+		$from = parseLocalizedDateTimeString($request->input('from'));
+		$to = parseLocalizedDateTimeString($request->input('to'));
 
+		dd($this->intervalStatsUC->run([
+			'product_id' => $productId,
+			'from' => $from,
+			'to' => $to,
+			'timezone' => $timezone,
+		]));
 	}
 
 }

@@ -6,6 +6,7 @@ namespace App\UseCases\DynamoDb;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\Services\DynamoDb\DynamoDbService;
+use Carbon\Carbon;
 use Exception;
 
 final readonly class IntervalStatsUC implements UseCaseContract
@@ -13,6 +14,7 @@ final readonly class IntervalStatsUC implements UseCaseContract
 	public function __construct(private DynamoDbService $dynamoDbService) {}
 
 	/**
+     * @param array{product_id: int, from: Carbon, to: Carbon, timezone: string} $data
 	 * @throws Exception
 	 */
 	public function run(mixed $data = null, ?array $opts = null): ?\Aws\Result

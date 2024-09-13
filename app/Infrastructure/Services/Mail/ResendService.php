@@ -13,8 +13,7 @@ final class ResendService
 		string $subject = null,
 		string $body = null,
 		string $from = 'dev@dev.notifications.msgns.rx3d.xyz'
-	)
-	{
+	) {
 		Resend::emails()->send([
 			'from' => env('MAIL_FROM_ADDRESS'),
 			'to' => [$to],
@@ -22,6 +21,4 @@ final class ResendService
 			'html' => $body,
 		]);
 	}
-
-
 }

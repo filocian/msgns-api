@@ -1,14 +1,16 @@
 <?php
 
-namespace App\UseCases\Product\Grouping;
+declare(strict_types=1);
 
+namespace App\UseCases\Product\Grouping;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 
-final class SetGroupUC implements UseCaseContract{
+final class SetGroupUC implements UseCaseContract
+{
 	public function __construct(
 		private ProductService $productService
 	) {}
@@ -28,9 +30,9 @@ final class SetGroupUC implements UseCaseContract{
 		$referenceProduct = Product::findById($referenceId);
 		$candidateProduct = Product::findById($candidateId);
 
-		if($referenceProduct->isPrimaryModel()){
+		if ($referenceProduct->isPrimaryModel()) {
 			$referenceProduct->setChildProduct($candidateProduct->id);
-		} else{
+		} else {
 			$referenceProduct->setParentProduct($candidateProduct->id);
 		}
 

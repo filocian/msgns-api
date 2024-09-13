@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Importer;
 
 use Carbon\Carbon;
 use Illuminate\Database\ConnectionInterface;
 
-class ImporterUserModel
+final class ImporterUserModel
 {
-	protected ConnectionInterface $connection;
-	protected array $users;
+	private ConnectionInterface $connection;
+	private array $users;
 
 	public function __construct(ConnectionInterface $connection)
 	{
@@ -35,7 +37,7 @@ class ImporterUserModel
 				'password_reset_required' => true,
 				'last_access' => $this->resolveLastAccess($user->ultima_conexion),
 				'created_at' => $user->fecha_hora,
-				'updated_at' => Carbon::now()->toDateTimeString()
+				'updated_at' => Carbon::now()->toDateTimeString(),
 			];
 		}, $this->users);
 
@@ -66,7 +68,7 @@ class ImporterUserModel
 
 	public function resolveLastAccess(string $lastAccess)
 	{
-		if($lastAccess == '1970-01-01 00:00:00'){
+		if ($lastAccess === '1970-01-01 00:00:00') {
 			$lastAccess = null;
 		}
 
@@ -81,14 +83,14 @@ class ImporterUserModel
 		$initalEmail = $email;
 		$emailParts = explode('@', $email);
 
-		if (count($emailParts) != 2) {
+		if (count($emailParts) !== 2) {
 			return $email;
 		}
 
 		$domain = $emailParts[1];
 		$domainParts = explode('.', $domain);
 
-		if (count($domainParts) != 2) {
+		if (count($domainParts) !== 2) {
 			return $email;
 		}
 
@@ -114,7 +116,7 @@ class ImporterUserModel
 
 		// Reemplazar errores conocidos en dominios @gmail
 		foreach ($wrongGmail as $wrongCase) {
-			if (str_contains($domainName, $wrongCase) && strlen($domainName) == 5) {
+			if (str_contains($domainName, $wrongCase) && strlen($domainName) === 5) {
 				$email = str_replace($wrongCase, 'gmail', $email);
 				$hasFix = true;
 			}

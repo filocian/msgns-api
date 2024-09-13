@@ -26,7 +26,7 @@ final readonly class SetConfigStatusUC implements UseCaseContract
 		$product = Product::findById($productId);
 
 		$product->update([
-			'configuration_status' => $status
+			'configuration_status' => $status,
 		]);
 
 		return ProductDto::fromModel($product);

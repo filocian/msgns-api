@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 
-class ProdDbTestSeeder extends Seeder
+final class ProdDbTestSeeder extends Seeder
 {
 	/**
 	 * Run the database seeds.
@@ -20,7 +20,7 @@ class ProdDbTestSeeder extends Seeder
 			ImportedProductSeeder::class,
 			ImportedSegmentationSeeder::class,
 			ImportedWhatsappSeeder::class,
-			ImportedNewProductSeeder::class
+			ImportedNewProductSeeder::class,
 		]);
 	}
 }

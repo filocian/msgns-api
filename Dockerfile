@@ -25,6 +25,12 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql zip exif pcntl gd
 
+RUN pear update-channels
+RUN pecl update-channels
+
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
 # Instalar composer
 RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
     && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \

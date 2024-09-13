@@ -30,7 +30,7 @@ final readonly class AddMessageUC implements UseCaseContract
 			'phone_id' => $phoneId,
 			'locale_id' => $localeId,
 			'message' => $message,
-			'default' => $default
+			'default' => $default,
 		]);
 
 		return WhatsappMessageDto::fromModel($savedMessage);

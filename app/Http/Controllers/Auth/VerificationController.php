@@ -6,12 +6,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
-use App\Http\Requests\Auth\SetEmailVerifiedRequest;
 use App\Http\Requests\Auth\SendEmailVerificationRequest;
+use App\Http\Requests\Auth\SetEmailVerifiedRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Mail\ResendService;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
@@ -71,9 +72,9 @@ final class VerificationController extends Controller
 		$verificationToken = $this->authService->generateEmailVerificationToken($user);
 		$html = view('emails.email-verification')->with('verificationToken', $verificationToken)->render();
 
-		try{
+		try {
 			$this->mailService->send($email, __('emailVerification.subject'), $html);
-		} catch (\Exception $error){
+		} catch (Exception $error) {
 			return HttpJson::KO(
 				$error->getMessage(),
 				Response::HTTP_BAD_REQUEST

@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Importer;
 
+use Exception;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Collection;
 use Nette\FileNotFoundException;
 
-class ImporterProductModel
+final class ImporterProductModel
 {
-	protected ConnectionInterface $connection;
-	protected array $products;
+	private ConnectionInterface $connection;
+	private array $products;
 	private Collection|null $productIdentificationCache = null;
 	private $cacheCount = 0;
 
@@ -41,7 +44,7 @@ class ImporterProductModel
 					'usage' => $product->visits,
 					'name' => $product->title,
 					'description' => $product->description,
-//					'configuration_status' => $product->account_id ? 'completed' : 'not-started',
+					//					'configuration_status' => $product->account_id ? 'completed' : 'not-started',
 					'configuration_status' => $this->resolveProductStatus($product),
 					'active' => boolval($product->active),
 					'created_at' => $product->fecha_hora,
@@ -49,7 +52,7 @@ class ImporterProductModel
 			}, $this->products);
 
 			$this->products = $products;
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			dd($e->getMessage());
 		}
 
@@ -68,17 +71,17 @@ class ImporterProductModel
 	public function resolveProductStatus(mixed $product): string
 	{
 		$assigned = boolval($product->account_id);
-		if($product->elem_type == 'whatsapp' && $assigned){
+		if ($product->elem_type === 'whatsapp' && $assigned) {
 			return 'completed';
 		}
 
 		$hasTarget = boolval($product->target_url);
 
-		if($assigned && $hasTarget){
+		if ($assigned && $hasTarget) {
 			return 'completed';
 		}
 
-		if($assigned && ! $hasTarget){
+		if ($assigned && !$hasTarget) {
 			return 'assigned';
 		}
 
@@ -88,11 +91,11 @@ class ImporterProductModel
 	public function resolveProductCode(int $productId, string $productElemType, string $productBkg)
 	{
 		$productFound = $this->productIdentificationCache->first(function ($item) use ($productId) {
-			return $item['product_id'] == $productId;
+			return $item['product_id'] === $productId;
 		});
 
 		if ($productFound) {
-			if($productFound['product_type'] == 'P-GW-IN-RC'){
+			if ($productFound['product_type'] === 'P-GW-IN-RC') {
 				return 'P-GW-IG-RC';
 			}
 
@@ -168,7 +171,7 @@ class ImporterProductModel
 		}
 
 		$header = null;
-		$data = array();
+		$data = [];
 
 		if (($handle = fopen($filePath, 'r')) !== false) {
 			while (($row = fgetcsv($handle, 1000, ',')) !== false) {

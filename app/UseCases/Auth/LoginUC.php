@@ -7,7 +7,6 @@ namespace App\UseCases\Auth;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Services\Auth\AuthService;
-use Illuminate\Auth\AuthenticationException;
 
 final readonly class LoginUC implements UseCaseContract
 {
@@ -20,7 +19,7 @@ final readonly class LoginUC implements UseCaseContract
 	 * @param array|null $opts
 	 * @return UserDto | null
 	 */
-	public function run(mixed $data = null, ?array $opts = null): UserDto | null
+	public function run(mixed $data = null, ?array $opts = null): UserDto|null
 	{
 		$email = $data['email'];
 		$password = $data['password'];

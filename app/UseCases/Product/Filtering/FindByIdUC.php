@@ -26,7 +26,7 @@ final readonly class FindByIdUC implements UseCaseContract
 		$productId = $data['id'];
 		$productPassword = $data['password'];
 
-		if($productPassword){
+		if ($productPassword) {
 			return $this->findByIdAndPassword($productId, $productPassword);
 		}
 

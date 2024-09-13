@@ -32,7 +32,7 @@ final class ImportedNewProductSeeder extends Seeder
 			$products[] = [
 				'id' => $product->id,
 				'product_type_id' => $product->product_type_id,
-				'user_id' => $product->user_id == 0 ? null : $product->user_id,
+				'user_id' => $product->user_id === 0 ? null : $product->user_id,
 				'model' => $product->model,
 				'password' => $product->password,
 				'target_url' => $product->target_url,
@@ -47,15 +47,15 @@ final class ImportedNewProductSeeder extends Seeder
 
 		$chunks = array_chunk($products, 1000);
 
-//		DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+		//		DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
 
 		foreach ($chunks as $chunk) {
 			Product::insert($chunk);
 		}
 
-//		DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
-//
-//		$maxId = DB::table($this->table)->max('id');
-//		DB::statement("ALTER TABLE $this->table AUTO_INCREMENT = " . ($maxId + 1));
+		//		DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+		//
+		//		$maxId = DB::table($this->table)->max('id');
+		//		DB::statement("ALTER TABLE $this->table AUTO_INCREMENT = " . ($maxId + 1));
 	}
 }

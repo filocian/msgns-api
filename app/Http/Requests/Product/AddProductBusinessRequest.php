@@ -66,7 +66,7 @@ final class AddProductBusinessRequest extends FormRequest
 			'types' => 'array',
 			'place_types' => 'array',
 			'size' => 'string',
-			'not_a_business' => 'boolean'
+			'not_a_business' => 'boolean',
 		];
 	}
 }

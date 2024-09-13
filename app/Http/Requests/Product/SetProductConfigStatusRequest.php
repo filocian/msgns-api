@@ -21,10 +21,7 @@ final class SetProductConfigStatusRequest extends FormRequest
 	{
 		$user = User::find($authService->id());
 
-		if (!$user->hasAnyRole([
-			StaticRoles::BACKOFFICE_ROLE,
-			StaticRoles::DEV_ROLE,
-		])) {
+		if (!$user->hasAnyRole([StaticRoles::BACKOFFICE_ROLE, StaticRoles::DEV_ROLE, ])) {
 			throw new ActionNotAllowedException();
 		}
 
@@ -39,7 +36,7 @@ final class SetProductConfigStatusRequest extends FormRequest
 	public function rules(): array
 	{
 		return [
-			'status' => 'required|string'
+			'status' => 'required|string',
 		];
 	}
 }

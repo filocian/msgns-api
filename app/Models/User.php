@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Infrastructure\DTO\PaginatorDto;
-use App\Infrastructure\DTO\UserDto;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -35,7 +32,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 		'active',
 		'default_locale',
 		'user_agent',
-		'last_access'
+		'last_access',
 	];
 
 	protected $hidden = ['password', 'remember_token', ];
@@ -85,18 +82,17 @@ final class User extends Authenticatable implements MustVerifyEmail
 			->when(!empty($email), function ($query) use ($email) {
 				if ($query->getQuery()->wheres) {
 					return $query->orWhere('email', $email);
-				} else {
-					return $query->where('email', $email);
 				}
+				return $query->where('email', $email);
 			})
 			->first();
 
-		if(!$user){
+		if (!$user) {
 			return null;
 		}
 
 		if (!isset($user->google_id)) {
-			$user ->update([
+			$user->update([
 				'google_id' => $googleId,
 			]);
 
@@ -145,17 +141,17 @@ final class User extends Authenticatable implements MustVerifyEmail
 
 		$timezone = $filters['timezone'];
 
-		$query = User::query();
+		$query = self::query();
 
-		if($filters['name']){
+		if ($filters['name']) {
 			$query->where('name', 'like', '%' . $filters['name'] . '%');
 		}
 
-		if($filters['email']){
+		if ($filters['email']) {
 			$query->where('email', 'like', '%' . $filters['email'] . '%');
 		}
 
-		if($filters['id']){
+		if ($filters['id']) {
 			$query->where('id', $filters['id']);
 		}
 
@@ -163,7 +159,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 			$from = $filters['created_at_from'];
 			$to = $filters['created_at_to'];
 
-			if($timezone){
+			if ($timezone) {
 				$carbonFrom = Carbon::createFromFormat('Y-m-d H:i:s', $from, $timezone);
 				$carbonTo = Carbon::createFromFormat('Y-m-d H:i:s', $to, $timezone);
 				$from = $carbonFrom->setTimezone('UTC')->toDateTimeString();
@@ -178,7 +174,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 			$from = $filters['last_access_from'];
 			$to = $filters['last_access_to'];
 
-			if($timezone){
+			if ($timezone) {
 				$carbonFrom = Carbon::createFromFormat('Y-m-d H:i:s', $from, $timezone);
 				$carbonTo = Carbon::createFromFormat('Y-m-d H:i:s', $to, $timezone);
 				$from = $carbonFrom->setTimezone('UTC')->toDateTimeString();
@@ -189,7 +185,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 			$query->whereBetween('last_access', [$from, $to]);
 		}
 
-		if($filters['order_by'] && $filters['order_direction']){
+		if ($filters['order_by'] && $filters['order_direction']) {
 			$query->orderBy($filters['order_by'], $filters['order_direction']);
 		} else {
 			$query->orderBy('created_at', 'desc');

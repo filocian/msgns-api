@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\UseCases\Product\Configuration;
 
-use App\Exceptions\Product\InvalidProductTypeException;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
@@ -54,7 +53,7 @@ final readonly class RenameUC implements UseCaseContract
 
 		$product->update([
 			'name' => $name,
-			'configuration_status' => $configStatus
+			'configuration_status' => $configStatus,
 		]);
 
 		$product->refresh();

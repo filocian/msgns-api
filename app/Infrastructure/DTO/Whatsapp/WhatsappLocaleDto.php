@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\DTO\Whatsapp;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
-final class WhatsappLocaleDto extends BaseDTO{
+final class WhatsappLocaleDto extends BaseDTO
+{
 	public int $id;
 	public string $code;
 	public Carbon $created_at;

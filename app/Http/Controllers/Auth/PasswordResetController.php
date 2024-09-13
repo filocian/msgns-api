@@ -12,10 +12,8 @@ use App\Http\Requests\Auth\SetUserPasswordRequest;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Mail\ResendService;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 
 final class PasswordResetController extends Controller
@@ -36,7 +34,7 @@ final class PasswordResetController extends Controller
 		$parsedToken = $this->authService->parsePasswordResetToken($token);
 		$user = User::where('email', $parsedToken['email'])->firstOrFail();
 
-		if(!$this->authService->isValidPasswordResetToken($user, $token)){
+		if (!$this->authService->isValidPasswordResetToken($user, $token)) {
 			return HttpJson::KO(
 				'invalid_reset_password_token',
 				Response::HTTP_BAD_REQUEST,
@@ -46,7 +44,7 @@ final class PasswordResetController extends Controller
 
 		$user->password = Hash::make($newPassword);
 
-		if($user->password_reset_required){
+		if ($user->password_reset_required) {
 			$user->password_reset_required = false;
 		}
 

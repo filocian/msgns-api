@@ -40,7 +40,7 @@ final readonly class GoogleLoginUC implements UseCaseContract
 			$userDto = $this->signup([
 				'token' => $token,
 				'default_locale' => $user_language,
-				'user_agent' => $user_agent
+				'user_agent' => $user_agent,
 			]);
 			$user = User::where('id', $userDto->id)->firstOrFail();
 		}
@@ -53,7 +53,7 @@ final readonly class GoogleLoginUC implements UseCaseContract
 			$user->refresh();
 		}
 
-		if(!$user->hasVerifiedEmail()) {
+		if (!$user->hasVerifiedEmail()) {
 			$user->markEmailAsVerified();
 		}
 

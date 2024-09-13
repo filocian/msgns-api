@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\B4a\DynamoStatsController;
 use App\Http\Controllers\Product\AdminProductController;
 use App\Http\Controllers\Product\GenerateProductsController;
 use App\Http\Controllers\Product\ProductController;
@@ -36,7 +37,6 @@ Route::prefix('auth')->group(function () {
  */
 Route::prefix('products')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
-
 		Route::get('/', [ProductController::class, 'list']);
 		Route::get('/export', [ProductController::class, 'productListExport']);
 		Route::post('/generate', [GenerateProductsController::class, 'generateProducts']);
@@ -48,6 +48,7 @@ Route::prefix('products')->group(function () {
 		Route::post('/{id}/deactivate', [ProductController::class, 'deactivate']);
 		Route::post('/{id}/business/add', [ProductController::class, 'addBusiness']);
 
+		//Product Grouping
 		Route::get('/{id}/group-candidates', [ProductController::class, 'getGroupCandidates']);
 		Route::put('/{referenceId}/group/{candidateId}', [ProductController::class, 'setProductGroup']);
 
@@ -60,7 +61,10 @@ Route::prefix('products')->group(function () {
 		Route::post('/{id}/whatsapp/remove/phone', [ProductController::class, 'removeProductWhatsappPhone']);
 		Route::post('/{id}/whatsapp/add/message', [ProductController::class, 'addProductWhatsappMessage']);
 		Route::post('/{id}/whatsapp/remove/message', [ProductController::class, 'removeProductWhatsappMessage']);
-		Route::put('/{id}/whatsapp/default/message/{message_id}', [ProductController::class, 'setDefaultProductWhatsappMessage']);
+		Route::put(
+			'/{id}/whatsapp/default/message/{message_id}',
+			[ProductController::class, 'setDefaultProductWhatsappMessage']
+		);
 
 		//ADMIN EndPoints
 		Route::post('/{id}/assign', [AdminProductController::class, 'assignToUser']);
@@ -71,6 +75,15 @@ Route::prefix('products')->group(function () {
 
 	Route::get('/{id}/{password?}', [ProductController::class, 'findById']);
 	Route::get('/{id}/{password}/get-target', [ProductController::class, 'redirect']);
+});
+
+Route::prefix('stats')->group(function () {
+	Route::middleware('auth:stateful-api')->group(function () {
+		Route::get('/{user_id}/products-usage/overview', [ProductController::class, 'getProductUsageOverview']);
+		Route::get('/{product_id}/get-interval', [DynamoStatsController::class, 'getIntervalProductStats']);
+		Route::get('/{product_id}/get-last-month', [DynamoStatsController::class, 'getLastMonthProductStats']);
+		Route::get('/{product_id}/get-current-month', [DynamoStatsController::class, 'getCurrentMonthProductStats']);
+	});
 });
 
 Route::prefix('users')->group(function () {
@@ -94,4 +107,3 @@ Route::prefix('places')->group(function () {
 		Route::get('/search', [ProductController::class, 'searchPlace']);
 	});
 });
-

@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Importer;
 
 use Illuminate\Database\ConnectionInterface;
 
-class ImporterWhatsappChannelsModel
+final class ImporterWhatsappChannelsModel
 {
-	protected ConnectionInterface $connection;
-	protected array $distinct_product_id;
-	protected array $data_by_product;
+	private ConnectionInterface $connection;
+	private array $distinct_product_id;
+	private array $data_by_product;
 
 	public function __construct(ConnectionInterface $connection)
 	{
@@ -65,7 +67,7 @@ class ImporterWhatsappChannelsModel
 						'locale' => $this->resolveLocale($byPhone->lang_id),
 						'text' => $byPhone->text,
 						'default' => boolval($byPhone->default_translation),
-						'created_at' => $byPhone->fecha_hora
+						'created_at' => $byPhone->fecha_hora,
 					];
 				}
 			}
@@ -73,11 +75,11 @@ class ImporterWhatsappChannelsModel
 
 		$this->data_by_product = array_map(function ($productId) use ($distinctProductPhones, $productMessagesByPhone) {
 			$productPhones = array_filter($distinctProductPhones, function ($phone) use ($productId) {
-				return $phone['product_id'] == $productId->nfc_id;
+				return $phone['product_id'] === $productId->nfc_id;
 			});
 
 			$productMessages = array_filter($productMessagesByPhone, function ($messages) use ($productId) {
-				return $messages['product_id'] == $productId->nfc_id;
+				return $messages['product_id'] === $productId->nfc_id;
 			});
 
 			$phones = array_shift($productPhones);
@@ -90,14 +92,14 @@ class ImporterWhatsappChannelsModel
 					'locale' => $message['locale'],
 					'text' => $message['text'],
 					'default' => $message['default'],
-					'created_at' => $message['created_at']
+					'created_at' => $message['created_at'],
 				];
 			}
 
 			return [
 				'product_id' => $productId->nfc_id,
 				'phones' => $phones['phone_list'],
-				'messages' => $messages
+				'messages' => $messages,
 			];
 		}, $this->distinct_product_id);
 

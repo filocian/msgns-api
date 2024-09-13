@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace App\Infrastructure\DTO;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
-use App\Models\Product;
-use App\Models\ProductBusiness;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 final class GroupedProductDto extends BaseDTO

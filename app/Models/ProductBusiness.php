@@ -1,27 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductBusiness extends Model
+final class ProductBusiness extends Model
 {
-    use HasFactory;
+	use HasFactory;
 	protected $table = 'product_business';
-	protected $fillable = [
-		'product_id',
-		'user_id',
-		'not_a_business',
-		'name',
-		'types',
-		'place_types',
-		'size'
-	];
+	protected $fillable = ['product_id', 'user_id', 'not_a_business', 'name', 'types', 'place_types', 'size'];
 	protected $casts = [
 		'types' => 'array',
 		'place_types' => 'array',
-		'not_a_business' => 'boolean'
+		'not_a_business' => 'boolean',
 	];
 
 	public function product()

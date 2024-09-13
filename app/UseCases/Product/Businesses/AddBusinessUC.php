@@ -13,9 +13,7 @@ use App\Models\ProductConfigurationStatus;
 
 final readonly class AddBusinessUC implements UseCaseContract
 {
-	public function __construct(private ProductService $productService)
-	{
-	}
+	public function __construct(private ProductService $productService) {}
 
 	/**
 	 * UseCase: Assign a product to given user
@@ -32,14 +30,14 @@ final readonly class AddBusinessUC implements UseCaseContract
 
 		];
 
-		if(isset($data['name'])){
+		if (isset($data['name'])) {
 			$businessData['name'] = $data['name'];
 		}
-		if(isset($data['notBusiness'])){
+		if (isset($data['notBusiness'])) {
 			$businessData['not_a_business'] = $data['notBusiness'];
 		}
 
-		if(isset($data['size'])){
+		if (isset($data['size'])) {
 			$businessData['size'] = $data['size'];
 		}
 
@@ -48,7 +46,7 @@ final readonly class AddBusinessUC implements UseCaseContract
 		$business = ProductBusiness::updateOrCreate(
 			[
 				'product_id' => $data['productId'],
-//				'user_id' => $data['userId'],
+				//				'user_id' => $data['userId'],
 			],
 			$businessData
 		);

@@ -36,10 +36,10 @@ final readonly class DynamoDbService
 	public function putProductUsage(Product $product): void
 	{
 		$this->dynamoDbRepo->putItem($this->productUsageTable, [
-			'productId' => ['N' => (string)$product->id],
-			'userId' => ['N' => (string)$product->user_id],
+			'productId' => ['N' => (string) $product->id],
+			'userId' => ['N' => (string) $product->user_id],
 			'scannedAt' => ['S' => Carbon::now()->toDateTimeString()],
-			'productName' => ['S' => (string)$product->name]
+			'productName' => ['S' => (string) $product->name],
 		]);
 	}
 
@@ -52,15 +52,15 @@ final readonly class DynamoDbService
 			$this->productUsageTable,
 			'productId = :product_id AND #ts BETWEEN :start_ts AND :end_ts',
 			[
-				'#ts' => 'scannedAt'
+				'#ts' => 'scannedAt',
 			],
 			[
 				':product_id' => ['N' => (string) $productId],
 				':start_ts' => ['S' => $from],
 				':end_ts' => ['S' => $to],
-			]);
+			]
+		);
 
 		return $result;
 	}
-
 }

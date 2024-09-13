@@ -41,9 +41,9 @@ final readonly class GenerateUC implements UseCaseContract
 				$newProducts[] = $this->buildProduct($productType['typeId'], $template, $productPassword, $lastId);
 				$newProductsURLs[$template->code][] = env('FRONT_URL') . '/product/' . $lastId . '/redirect/' . $productPassword;
 
-				if($template->secondary_model != null){
+				if ($template->secondary_model !== null) {
 					$lastId += 1;
-					$newProducts[] = $this->buildProduct($productType['typeId'], $template, $productPassword, $lastId,  true);
+					$newProducts[] = $this->buildProduct($productType['typeId'], $template, $productPassword, $lastId, true);
 					$newProductsURLs[$template->code][] = env('FRONT_URL') . '/product/' . $lastId . '/redirect/' . $productPassword;
 				}
 			}

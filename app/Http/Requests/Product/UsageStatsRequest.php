@@ -8,12 +8,9 @@ use App\Exceptions\Permissions\ActionNotAllowedException;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Exceptions\Product\ProductNotOwnedException;
 use App\Infrastructure\Services\Auth\AuthService;
-use App\Models\Product;
 use App\Models\User;
-use App\Static\Permissions\StaticPermissions;
 use App\Static\Permissions\StaticRoles;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 
@@ -30,14 +27,14 @@ final class UsageStatsRequest extends FormRequest
 		$currentUserId = $authService->id();
 		$userId = $request->route('user_id');
 
-		if(!$userId || !$currentUserId){
+		if (!$userId || !$currentUserId) {
 			throw new ActionNotAllowedException();
 		}
 
 		$currentUser = User::find($currentUserId);
 		$isSuperUser = $currentUser->hasRole([StaticRoles::DEV_ROLE, StaticRoles::BACKOFFICE_ROLE]);
 
-		if ($userId != $currentUserId && !$isSuperUser) {
+		if ($userId !== $currentUserId && !$isSuperUser) {
 			throw new ActionNotAllowedException();
 		}
 

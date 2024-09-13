@@ -37,7 +37,7 @@ final class DynamoDbRepository
 	{
 		$item = [
 			'TableName' => $tableName,
-			'Item' => $data
+			'Item' => $data,
 		];
 
 		try {
@@ -49,16 +49,20 @@ final class DynamoDbRepository
 		}
 	}
 
-	public function query(string $tableName, string $keyConditionExpression, array $expressionAttributeNames, array $expressionAttributeValues): ?\Aws\Result
-	{
-		try{
+	public function query(
+		string $tableName,
+		string $keyConditionExpression,
+		array $expressionAttributeNames,
+		array $expressionAttributeValues
+	): ?\Aws\Result {
+		try {
 			return $this->client->query([
 				'TableName' => $tableName,
 				'KeyConditionExpression' => $keyConditionExpression,
 				'ExpressionAttributeNames' => $expressionAttributeNames,
-				'ExpressionAttributeValues' => $expressionAttributeValues
+				'ExpressionAttributeValues' => $expressionAttributeValues,
 			]);
-		} catch (DynamoDbException $e){
+		} catch (DynamoDbException $e) {
 			Log::error($e->getMessage());
 		}
 

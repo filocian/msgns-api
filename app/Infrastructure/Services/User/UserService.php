@@ -58,7 +58,7 @@ final class UserService
 	 */
 	public function updateUserData(array $data): UserDto|null
 	{
-		$userId = $data['user_id'];
+		$userId = (string) $data['user_id'];
 		$email = $data['email'];
 		$name = $data['name'];
 		$newUserdata = [

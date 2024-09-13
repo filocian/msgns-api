@@ -9,10 +9,7 @@ use App\Infrastructure\Services\Product\ProductService;
 
 final readonly class UsageOverviewUC implements UseCaseContract
 {
-	public function __construct(private ProductService $productService)
-	{
-
-	}
+	public function __construct(private ProductService $productService) {}
 
 	public function run(mixed $data = null, ?array $opts = null)
 	{

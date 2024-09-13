@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\UseCases\Product\Redirect;
 
 use App\Infrastructure\Contracts\UseCaseContract;
-use App\Infrastructure\DTO\ProductDto;
 use App\Models\Product;
 
 final readonly class ProductUsageUC implements UseCaseContract

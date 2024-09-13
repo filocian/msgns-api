@@ -33,7 +33,7 @@ return [
 		],
 	],
 	'dynamodb' => [
-		'key'    => env('AWS_DYNAMODB_ACCESS_KEY_ID'),
+		'key' => env('AWS_DYNAMODB_ACCESS_KEY_ID'),
 		'secret' => env('AWS_DYNAMODB_SECRET_ACCESS_KEY'),
 		'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
 		'product_usage_table' => env('AWS_DYNAMODB_PRODUCT_USAGE_TABLE'),

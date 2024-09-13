@@ -7,8 +7,8 @@ namespace App\Http\Controllers\B4a;
 use App\Http\Contracts\HttpJson;
 use App\UseCases\DynamoDb\IntervalStatsUC;
 use Carbon\Carbon;
-use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 final class DynamoStatsController extends Controller
 {
@@ -62,5 +62,4 @@ final class DynamoStatsController extends Controller
 			'timezone' => $timezone,
 		]));
 	}
-
 }

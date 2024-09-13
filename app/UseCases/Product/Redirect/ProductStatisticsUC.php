@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\UseCases\Product\Redirect;
 
 use App\Infrastructure\Contracts\UseCaseContract;
-use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\DynamoDb\DynamoDbService;
 use App\Models\Product;
+use Exception;
 
 final readonly class ProductStatisticsUC implements UseCaseContract
 {
@@ -19,7 +19,7 @@ final readonly class ProductStatisticsUC implements UseCaseContract
 	 * @param array{productModel: Product}|null $data
 	 * @param array|null $opts
 	 * @return void
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function run(mixed $data = null, ?array $opts = null): void
 	{

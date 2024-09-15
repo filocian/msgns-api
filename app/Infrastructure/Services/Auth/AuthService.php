@@ -159,7 +159,6 @@ final class AuthService
 
 	public function logout(): bool
 	{
-		Log::info(config('session.cookie'));
 		Auth::guard('stateful-api')->logout();
 		Cookie::queue(Cookie::forget(config('session.cookie')));
 		Request::session()->invalidate();

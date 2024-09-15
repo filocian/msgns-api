@@ -6,7 +6,6 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\ProductBusiness;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -34,19 +33,19 @@ final class ImportedSegmentationSeeder extends Seeder
 		foreach ($businessDataByUser as $userBusiness) {
 			$productsByUser = Product::findProductsByUserId($userBusiness->id);
 
-			if(count($userBusiness->businessTypes) == 0){
+			if (count($userBusiness->businessTypes) === 0) {
 				continue;
 			}
 
-			$resolvedTypes = count($userBusiness->businessTypes) > 0? $userBusiness->businessTypes : [];
+			$resolvedTypes = count($userBusiness->businessTypes) > 0 ? $userBusiness->businessTypes : [];
 
-			if(count($resolvedTypes) > 0){
+			if (count($resolvedTypes) > 0) {
 				$types = array_values(array_unique($resolvedTypes));
 			} else {
 				$types = [];
 			}
 
-			foreach($productsByUser as $product){
+			foreach ($productsByUser as $product) {
 				$productBusiness[] = [
 					'product_id' => $product->id,
 					'user_id' => $userBusiness->id,
@@ -59,15 +58,15 @@ final class ImportedSegmentationSeeder extends Seeder
 
 		$chunks = array_chunk($productBusiness, 1000);
 
-//		DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+		//		DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
 
 		foreach ($chunks as $chunk) {
 			ProductBusiness::insert($chunk);
 		}
 
-//		DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
-//
-//		$maxId = DB::table($this->table)->max('id');
-//		DB::statement("ALTER TABLE $this->table AUTO_INCREMENT = " . ($maxId + 1));
+		//		DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+		//
+		//		$maxId = DB::table($this->table)->max('id');
+		//		DB::statement("ALTER TABLE $this->table AUTO_INCREMENT = " . ($maxId + 1));
 	}
 }

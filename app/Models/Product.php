@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
 
 final class Product extends Model
 {
@@ -29,11 +28,11 @@ final class Product extends Model
 		'description',
 		'active',
 		'configuration_status',
-		'assigned_at'
+		'assigned_at',
 	];
 	protected $casts = [
 		'active' => 'bool',
-		'assigned_at' => 'date'
+		'assigned_at' => 'datetime',
 	];
 
 	public function productType()
@@ -155,7 +154,7 @@ final class Product extends Model
 			'order_direction' => $currentFilters['order_direction'] ?? null,
 		];
 
-		$query = Product::query();
+		$query = self::query();
 
 		if ($filters['id']) {
 			$query->where('id', $filters['id']);
@@ -192,7 +191,7 @@ final class Product extends Model
 		}
 
 		if ($filters['active']) {
-			$query->where('active', $filters['active'] == '1' ? 1 : 0);
+			$query->where('active', $filters['active'] === '1' ? 1 : 0);
 		}
 
 		if ($filters['assigned_at_from'] && $filters['assigned_at_to']) {
@@ -200,7 +199,7 @@ final class Product extends Model
 			$from = $filters['assigned_at_from'];
 			$to = $filters['assigned_at_to'];
 
-			if($timezone){
+			if ($timezone) {
 				$carbonFrom = Carbon::createFromFormat('Y-m-d H:i:s', $from, $timezone);
 				$carbonTo = Carbon::createFromFormat('Y-m-d H:i:s', $to, $timezone);
 				$from = $carbonFrom->setTimezone('UTC')->toDateTimeString();
@@ -211,7 +210,7 @@ final class Product extends Model
 			$query->whereBetween('assigned_at', [$from, $to]);
 		}
 
-		if($filters['order_by'] && $filters['order_direction']){
+		if ($filters['order_by'] && $filters['order_direction']) {
 			$query->orderBy($filters['order_by'], $filters['order_direction']);
 		} else {
 			$query->orderBy('assigned_at', 'desc');
@@ -259,7 +258,7 @@ final class Product extends Model
 
 	public function isPrimaryModel(): bool
 	{
-		return $this->productType->primary_model == $this->model;
+		return $this->productType->primary_model === $this->model;
 	}
 
 	/**
@@ -267,7 +266,7 @@ final class Product extends Model
 	 */
 	public function parentProduct()
 	{
-		return $this->belongsTo(Product::class, 'linked_to_product_id');
+		return $this->belongsTo(self::class, 'linked_to_product_id');
 	}
 
 	/**
@@ -275,7 +274,7 @@ final class Product extends Model
 	 */
 	public function childProduct()
 	{
-		return $this->hasOne(Product::class, 'linked_to_product_id');
+		return $this->hasOne(self::class, 'linked_to_product_id');
 	}
 
 	/**
@@ -320,11 +319,11 @@ final class Product extends Model
 	/**
 	 * Retrieve parent candidates for this product.
 	 *
-	 * @return \Illuminate\Database\Eloquent\Collection
+	 * @return Collection
 	 */
 	public function getParentCandidates()
 	{
-		return Product::whereHas('productType', function ($query) {
+		return self::whereHas('productType', function ($query) {
 			$query->where('code', $this->productType->code)
 				->where('primary_model', $this->productType->primary_model)
 				->whereNotIn('code', ['P-GW-GO-RC', 'P-GM-GO-RC']);
@@ -342,11 +341,11 @@ final class Product extends Model
 	/**
 	 * Retrieve child candidates for this product.
 	 *
-	 * @return \Illuminate\Database\Eloquent\Collection
+	 * @return Collection
 	 */
 	public function getChildCandidates()
 	{
-		return Product::whereHas('productType', function ($query) {
+		return self::whereHas('productType', function ($query) {
 			$query->where('code', $this->productType->code)
 				->where('secondary_model', $this->productType->secondary_model)
 				->whereNotIn('code', ['P-GW-GO-RC', 'P-GM-GO-RC']);

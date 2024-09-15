@@ -32,7 +32,7 @@ final class ImportedProductSeeder extends Seeder
 			$products[] = [
 				'id' => $product->id,
 				'product_type_id' => $product->product_type_id,
-				'user_id' => $product->user_id == 0 ? null : $product->user_id,
+				'user_id' => $product->user_id === 0 ? null : $product->user_id,
 				'model' => $product->model,
 				'password' => $product->password,
 				'target_url' => $product->target_url,

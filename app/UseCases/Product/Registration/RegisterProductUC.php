@@ -61,7 +61,7 @@ final readonly class RegisterProductUC implements UseCaseContract
 				'user_id' => $userId,
 				'active' => true,
 				'configuration_status' => $configStatus,
-				'assigned_at' => Carbon::now()->toDateTimeString()
+				'assigned_at' => Carbon::now()->toDateTimeString(),
 			]);
 
 			$product->refresh();

@@ -4,15 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Product;
-use App\Models\ProductBusiness;
-use App\Models\User;
 use App\Models\Whatsapp\WhatsappLocale;
 use App\Models\Whatsapp\WhatsappMessage;
 use App\Models\Whatsapp\WhatsappPhone;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Nette\FileNotFoundException;
 
 final class ImportedWhatsappSeeder extends Seeder
@@ -31,25 +26,25 @@ final class ImportedWhatsappSeeder extends Seeder
 		$seedFile = file_get_contents($filePath);
 		$whatsappProductData = json_decode($seedFile);
 
-		foreach ($whatsappProductData as $productData){
+		foreach ($whatsappProductData as $productData) {
 			$productPhones = $productData->phones;
 			$productMessages = $productData->messages;
 
-			foreach ($productPhones as $phone){
+			foreach ($productPhones as $phone) {
 				$currentPhone = WhatsappPhone::updateOrCreate([
 					'product_id' => $productData->product_id,
 					'prefix' => $phone->prefix,
-					'phone' => $phone->phone
+					'phone' => $phone->phone,
 				]);
 			}
 
-			foreach ($productMessages as $message){
+			foreach ($productMessages as $message) {
 				$phone = WhatsappPhone::where([
 					'phone' => $message->phone,
-					'prefix' => $message->prefix
+					'prefix' => $message->prefix,
 				])->first();
 				$locale = WhatsappLocale::where([
-					'code' => $message->locale
+					'code' => $message->locale,
 				])->first();
 
 				WhatsappMessage::create([
@@ -57,7 +52,7 @@ final class ImportedWhatsappSeeder extends Seeder
 					'phone_id' => $phone->id,
 					'locale_id' => $locale->id,
 					'message' => $message->text,
-					'default' => $message->default
+					'default' => $message->default,
 				]);
 			}
 		}

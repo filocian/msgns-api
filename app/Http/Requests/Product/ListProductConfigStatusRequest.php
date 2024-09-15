@@ -21,10 +21,7 @@ final class ListProductConfigStatusRequest extends FormRequest
 	{
 		$user = User::find($authService->id());
 
-		if (!$user->hasAnyRole([
-			StaticRoles::BACKOFFICE_ROLE,
-			StaticRoles::DEV_ROLE,
-		])) {
+		if (!$user->hasAnyRole([StaticRoles::BACKOFFICE_ROLE, StaticRoles::DEV_ROLE, ])) {
 			throw new ActionNotAllowedException();
 		}
 

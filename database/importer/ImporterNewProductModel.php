@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Importer;
 
+use Exception;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Collection;
-use Nette\FileNotFoundException;
 
-class ImporterNewProductModel
+final class ImporterNewProductModel
 {
-	protected ConnectionInterface $connection;
-	protected array $products;
+	private ConnectionInterface $connection;
+	private array $products;
 	private Collection|null $productIdentificationCache = null;
 	private $cacheCount = 0;
 
@@ -35,7 +37,7 @@ class ImporterNewProductModel
 					'target_url' => null,
 					'password' => $product->password,
 					'usage' => 0,
-					'name' => explode(' ', $product->description)[1] . ' ('. $product->id .')',
+					'name' => explode(' ', $product->description)[1] . ' (' . $product->id . ')',
 					'description' => $product->description,
 					'configuration_status' => 'not-started',
 					'active' => true,
@@ -44,7 +46,7 @@ class ImporterNewProductModel
 			}, $this->products);
 
 			$this->products = $products;
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			dd($e->getMessage());
 		}
 

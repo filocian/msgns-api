@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace App\UseCases\Product\Redirect;
 
 use App\Infrastructure\Contracts\UseCaseContract;
-use App\Infrastructure\DTO\ProductDto;
 use App\Models\Product;
 
 final readonly class ProductUsageUC implements UseCaseContract
 {
-	public function __construct()
-	{
-	}
+	public function __construct() {}
 
 	/**
 	 * UseCase: Activate a product based on product id and its password
@@ -24,8 +21,7 @@ final readonly class ProductUsageUC implements UseCaseContract
 	public function run(mixed $data = null, ?array $opts = null): void
 	{
 		$productModel = $data['productModel'];
-		$productDto = ProductDto::fromModel($productModel);
-		$productModel->usage = $productDto->usage + 1;
+		$productModel->usage = $productModel->usage + 1;
 		$productModel->save();
 	}
 }

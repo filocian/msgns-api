@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\UseCases\Users\Search;
 
 use App\Infrastructure\Contracts\UseCaseContract;
-use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Services\User\UserService;
 use Exception;

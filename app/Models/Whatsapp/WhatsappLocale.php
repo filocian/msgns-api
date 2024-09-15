@@ -1,20 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Whatsapp;
 
-use App\Models\Product;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class WhatsappLocale extends Model
+final class WhatsappLocale extends Model
 {
-    use HasFactory;
+	use HasFactory;
 
 	protected $table = 'whatsapp_locales';
-	protected $fillable = [
-		'code',
-	];
+	protected $fillable = ['code', ];
 
 	public function whatsappMessages()
 	{

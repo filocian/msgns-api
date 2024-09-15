@@ -1,12 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\UseCases\Product\Listing;
 
 use App\Infrastructure\Contracts\UseCaseContract;
-use App\Infrastructure\DTO\CollectionDto;
-use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\Services\Product\ProductService;
-use Illuminate\Database\Eloquent\Collection;
 
 final class ProductListExportUC implements UseCaseContract
 {

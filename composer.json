@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "aws/aws-sdk-php": "^3.321",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
@@ -33,7 +34,8 @@
 		"files": [
 			"app/Helpers/StringHelpers.php",
 			"app/Helpers/ReflectionHelpers.php",
-			"app/Helpers/ArrayHelpers.php"
+			"app/Helpers/ArrayHelpers.php",
+			"app/Helpers/DateHelpers.php"
 		]
     },
     "autoload-dev": {

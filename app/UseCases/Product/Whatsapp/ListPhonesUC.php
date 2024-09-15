@@ -18,13 +18,13 @@ final readonly class ListPhonesUC implements UseCaseContract
 	 * @param array|null $opts
 	 * @return CollectionDto|null
 	 */
-	public function run(mixed $data = null, ?array $opts = null): CollectionDto | null
+	public function run(mixed $data = null, ?array $opts = null): CollectionDto|null
 	{
 		$productId = $data['id'];
 		$product = Product::findById($productId);
 		$phones = $product->whatsappPhones;
 
-		if($phones->isEmpty()){
+		if ($phones->isEmpty()) {
 			return null;
 		}
 

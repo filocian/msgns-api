@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Nette\FileNotFoundException;
@@ -42,7 +41,7 @@ final class ImportedUserSeeder extends Seeder
 				'password_reset_required' => true,
 				'last_access' => $account->last_access,
 				'created_at' => $account->created_at,
-				'updated_at' => $account->updated_at
+				'updated_at' => $account->updated_at,
 			];
 		}
 

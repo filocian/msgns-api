@@ -36,10 +36,7 @@ final class AssignToUserRequest extends FormRequest
 			throw new ProductNotFoundException();
 		}
 
-		if (!$loggedUser->hasAnyRole([
-			StaticRoles::BACKOFFICE_ROLE,
-			StaticRoles::DEV_ROLE,
-		])) {
+		if (!$loggedUser->hasAnyRole([StaticRoles::BACKOFFICE_ROLE, StaticRoles::DEV_ROLE, ])) {
 			throw new ActionNotAllowedException();
 		}
 

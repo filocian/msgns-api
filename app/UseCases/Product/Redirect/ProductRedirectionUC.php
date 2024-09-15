@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace App\UseCases\Product\Redirect;
 
-use App\Exceptions\Product\ProductNotFoundException;
+use App\Events\ProductScanned;
 use App\Helpers\StringHelpers;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
+use Exception;
 
 final readonly class ProductRedirectionUC implements UseCaseContract
 {
 	public function __construct(
-		private AuthService    $authService,
+		private AuthService $authService,
 		private ProductUsageUC $productUsageUC,
 		private WhatsappResolverUC $whatsappResolverUC
-	)
-	{
-	}
+	) {}
 
 	/**
 	 * UseCase: Activate a product based on product id and its password
@@ -31,13 +30,13 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = null): string|null
 	{
-		$productId = (int)$data['id'];
+		$productId = (int) $data['id'];
 		$productPassword = $data['password'];
 		$browserLocale = $data['browserLocales'];
 
 		try {
 			$product = Product::findByConfigPair($productId, 'password', $productPassword);
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			return $this->resolveNotFoundUrl();
 		}
 
@@ -46,9 +45,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	public function updateProductUsage(Product $product): void
 	{
-		$this->productUsageUC->run([
-			'productModel' => $product
-		]);
+		event(new ProductScanned($product));
 	}
 
 	private function resolveTargetUrl(Product $product, string $browserLocale = null): string
@@ -73,13 +70,13 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 		$target_url = $productDto->target_url;
 
-		if($productDto->model == 'whatsapp'){
+		if ($productDto->model === 'whatsapp') {
 			$whatsappUrl = $this->whatsappResolverUC->run([
 				'productModel' => $product,
-				'browserLocales' => $browserLocale
+				'browserLocales' => $browserLocale,
 			]);
 
-			if(!$whatsappUrl){
+			if (!$whatsappUrl) {
 				return $this->resolveIncompleteUrl($productDto, $loggedUserId);
 			}
 
@@ -104,7 +101,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	private function resolveIncompleteUrl(ProductDto $productDto, int|null $userId): string
 	{
 		$obfuscatedOwnerEmail = StringHelpers::obfuscateEmail($productDto->user->email);
-		if ($userId == null || $productDto->user->id != $userId) {
+		if ($userId === null || $productDto->user->id !== $userId) {
 			return env('FRONT_URL') . '/product/pending-configuration?email=' . $obfuscatedOwnerEmail;
 		}
 
@@ -116,12 +113,13 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		return env('FRONT_URL') . '/product/not-found';
 	}
 
-	private function isVirginProduct(ProductDto $productDto): bool{
+	private function isVirginProduct(ProductDto $productDto): bool
+	{
 		$hasOwner = boolval($productDto->user);
 		$hasTarget = boolval($productDto->target_url);
 		$configStatus = $productDto->configuration_status ?? ProductConfigurationStatus::$STATUS_NOT_STARTED;
 
-		return !$hasOwner && !$hasTarget && $configStatus == ProductConfigurationStatus::$STATUS_NOT_STARTED;
+		return !$hasOwner && !$hasTarget && $configStatus === ProductConfigurationStatus::$STATUS_NOT_STARTED;
 	}
 
 	private function isMisconfiguredProduct(ProductDto $productDto): bool
@@ -141,8 +139,8 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		$hasOwner = boolval($productDto->user);
 		$hasTarget = boolval($productDto->target_url);
 
-		if($productDto->model == 'whatsapp'){
-			$hasTarget = $productDto->configuration_status == ProductConfigurationStatus::$STATUS_TARGET_SET;
+		if ($productDto->model === 'whatsapp') {
+			$hasTarget = $productDto->configuration_status === ProductConfigurationStatus::$STATUS_TARGET_SET;
 		}
 
 		return $hasOwner && $hasTarget;

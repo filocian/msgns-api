@@ -13,7 +13,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 final class UpdateProductUsageJob implements ShouldQueue
 {
@@ -33,8 +32,6 @@ final class UpdateProductUsageJob implements ShouldQueue
 	 */
 	public function handle(ProductUsageUC $productUsageUC, ProductStatisticsUC $productStatisticsUC): void
 	{
-		Log::info('dfssd');
-
 		$productUsageUC->run([
 			'productModel' => $this->product,
 		]);

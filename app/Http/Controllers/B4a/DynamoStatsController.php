@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace App\Http\Controllers\B4a;
 
 use App\Http\Contracts\HttpJson;
+use App\Infrastructure\Services\DynamoDb\DynamoDbService;
+use App\Models\Product;
 use App\UseCases\DynamoDb\IntervalStatsUC;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 final class DynamoStatsController extends Controller
 {
 	public function __construct(
-		private readonly IntervalStatsUC $intervalStatsUC
+		private readonly IntervalStatsUC $intervalStatsUC,
+		private DynamoDbService $dynamoDbService
 	) {}
 
-	public function getServerHealth(): \Illuminate\Http\JsonResponse
+	public function getServerHealth(): JsonResponse
 	{
 		$health = $this->intervalStatsUC->run();
 		return HttpJson::OK(['alive' => $health]);
@@ -49,17 +53,40 @@ final class DynamoStatsController extends Controller
 			'timezone' => $timezone,
 		]));
 	}
-	public function getIntervalProductStats(Request $request, int $productId)
+
+	public function getIntervalProductStats(Request $request, int $productId): JsonResponse
 	{
 		$timezone = $request->input('timezone') ?? 'UTC';
-		$from = parseLocalizedDateTimeString($request->input('from'));
-		$to = parseLocalizedDateTimeString($request->input('to'));
+		$from = parseLocalizedDateTimeString($request->input('from'), $timezone);
+		$to = parseLocalizedDateTimeString($request->input('to'), $timezone);
 
-		dd($this->intervalStatsUC->run([
+		$result = $this->intervalStatsUC->run([
 			'product_id' => $productId,
 			'from' => $from,
 			'to' => $to,
 			'timezone' => $timezone,
-		]));
+		]);
+
+		return HttpJson::OK($result->wrapped('stats'));
+	}
+
+	public function seedTestData(int $productId)
+	{
+		$product = Product::findById($productId);
+		$today = Carbon::now();
+		$pastDay = $today->copy()->subDays(100);
+		$marks = [];
+
+		//last month
+		for ($x = 1; $x <= 100; $x++) {
+			$day = $pastDay->copy()->addDays($x);
+			for ($y = 0; $y < 5; $y++) {
+				$mark = $day->copy()->addHours(rand(1, 23))->toDateTimeString();
+				$marks[] = $mark;
+				$this->dynamoDbService->putProductUsage($product, $mark);
+			}
+		}
+
+		dd($marks);
 	}
 }

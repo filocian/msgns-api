@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\DynamoDb;
 
+use App\Infrastructure\DTO\Stats\DailyStatsDto;
 use App\Infrastructure\Repositories\DynamoDb\DynamoDbRepository;
 use App\Models\Product;
 use Carbon\Carbon;
@@ -33,12 +34,12 @@ final readonly class DynamoDbService
 		dd($this->dynamoDbRepo->listTables());
 	}
 
-	public function putProductUsage(Product $product): void
+	public function putProductUsage(Product $product, string $timestamp = null): void
 	{
 		$this->dynamoDbRepo->putItem($this->productUsageTable, [
 			'productId' => ['N' => (string) $product->id],
 			'userId' => ['N' => (string) $product->user_id],
-			'scannedAt' => ['S' => Carbon::now()->toDateTimeString()],
+			'scannedAt' => ['S' => $timestamp ?? Carbon::now()->toDateTimeString()],
 			'productName' => ['S' => (string) $product->name],
 		]);
 	}
@@ -61,6 +62,13 @@ final readonly class DynamoDbService
 			]
 		);
 
-		return $result;
+		return new DailyStatsDto([
+			'from' => denormalizeCarbonInstance($from, $timezone),
+			'to' => denormalizeCarbonInstance($to, $timezone),
+			'productId' => $productId,
+			'scannedAt' => array_map(function ($item) use ($timezone) {
+				return denormalizeCarbonInstance($item['scannedAt']['S'], $timezone);
+			}, $result['Items']),
+		]);
 	}
 }

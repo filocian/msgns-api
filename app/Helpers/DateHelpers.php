@@ -32,3 +32,19 @@ if (!function_exists('normalizeCarbonInstance')) {
 		return $date->setTimezone($timezone);
 	}
 }
+
+if (!function_exists('denormalizeCarbonInstance')) {
+	/**
+	 * Sets the timezone of a given Carbon instance to given timezone.
+	 *
+	 * @param string $datetime
+	 * @param string $timezone
+	 * @return Carbon|null
+	 */
+	function denormalizeCarbonInstance(string $datetime, string $timezone): ?Carbon
+	{
+		$carbonDatetime = parseLocalizedDateTimeString($datetime);
+
+		return $carbonDatetime->setTimezone($timezone);
+	}
+}

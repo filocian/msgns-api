@@ -83,6 +83,7 @@ Route::prefix('stats')->group(function () {
 		Route::get('/{product_id}/get-interval', [DynamoStatsController::class, 'getIntervalProductStats']);
 		Route::get('/{product_id}/get-last-month', [DynamoStatsController::class, 'getLastMonthProductStats']);
 		Route::get('/{product_id}/get-current-month', [DynamoStatsController::class, 'getCurrentMonthProductStats']);
+		Route::post('/{product_id}/seed', [DynamoStatsController::class, 'seedTestData']);
 	});
 });
 

@@ -42,8 +42,9 @@ final class AccountStatsDto extends BaseDTO
 			$productUsage = $items->filter(function ($item) use ($product) {
 				return (int) $item['productId']['N'] === (int) $product->id;
 			});
-			$productUsage->each(function ($item) use(&$productScans, $timezone){
-				$productScans[] =  denormalizeCarbonInstance($item['scannedAt']['S'], $timezone);;
+			$productUsage->each(function ($item) use (&$productScans, $timezone) {
+				$productScans[] = denormalizeCarbonInstance($item['scannedAt']['S'], $timezone);
+				;
 			});
 
 			$this->uses_by_product[] = [

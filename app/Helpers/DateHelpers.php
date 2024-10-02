@@ -16,7 +16,7 @@ if (!function_exists('parseLocalizedDateTimeString')) {
 	{
 		$time = $dateTime;
 
-		if(str_contains($dateTime, '.')) {
+		if (str_contains($dateTime, '.')) {
 			$time = explode('.', $dateTime)[0];
 		}
 

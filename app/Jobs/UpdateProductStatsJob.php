@@ -13,6 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 final class UpdateProductStatsJob implements ShouldQueue
 {
@@ -30,7 +31,7 @@ final class UpdateProductStatsJob implements ShouldQueue
 	 *
 	 * @var int|array
 	 */
-	public int|array $backoff = 10;
+	public array|int $backoff = 10;
 
 
 	/**
@@ -51,7 +52,7 @@ final class UpdateProductStatsJob implements ShouldQueue
 			$productStatisticsUC->run([
 				'productModel' => $this->product,
 			]);
-		} catch (\Throwable $e) {
+		} catch (Throwable $e) {
 			Log::error('Error UpdateProductStatsJob: ' . $e->getMessage());
 			$this->fail($e);
 		}

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\Product;
-use App\UseCases\Product\Redirect\ProductStatisticsUC;
 use App\UseCases\Product\Redirect\ProductUsageUC;
 use Exception;
 use Illuminate\Bus\Queueable;

@@ -14,7 +14,13 @@ if (!function_exists('parseLocalizedDateTimeString')) {
 	 */
 	function parseLocalizedDateTimeString(string $dateTime, string $timezone = 'UTC'): ?Carbon
 	{
-		return Carbon::createFromFormat('Y-m-d H:i:s', $dateTime, $timezone);
+		$time = $dateTime;
+
+		if(str_contains($dateTime, '.')) {
+			$time = explode('.', $dateTime)[0];
+		}
+
+		return Carbon::createFromFormat('Y-m-d H:i:s', $time, $timezone);
 	}
 }
 

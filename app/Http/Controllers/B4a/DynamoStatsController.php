@@ -7,6 +7,7 @@ namespace App\Http\Controllers\B4a;
 use App\Http\Contracts\HttpJson;
 use App\Infrastructure\Services\DynamoDb\DynamoDbService;
 use App\Models\Product;
+use App\UseCases\DynamoDb\AccountIntervalStatsUC;
 use App\UseCases\DynamoDb\IntervalStatsUC;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -17,7 +18,8 @@ final class DynamoStatsController extends Controller
 {
 	public function __construct(
 		private readonly IntervalStatsUC $intervalStatsUC,
-		private DynamoDbService $dynamoDbService
+		private readonly AccountIntervalStatsUC $accountIntervalStatsUC,
+		private readonly DynamoDbService $dynamoDbService
 	) {}
 
 	public function getServerHealth(): JsonResponse
@@ -62,6 +64,22 @@ final class DynamoStatsController extends Controller
 
 		$result = $this->intervalStatsUC->run([
 			'product_id' => $productId,
+			'from' => $from,
+			'to' => $to,
+			'timezone' => $timezone,
+		]);
+
+		return HttpJson::OK($result->wrapped('stats'));
+	}
+
+	public function getIntervalAccountStats(Request $request, int $userId): JsonResponse
+	{
+		$timezone = $request->input('timezone') ?? 'UTC';
+		$from = parseLocalizedDateTimeString($request->input('from'), $timezone);
+		$to = parseLocalizedDateTimeString($request->input('to'), $timezone);
+
+		$result = $this->accountIntervalStatsUC->run([
+			'user_id' => $userId,
 			'from' => $from,
 			'to' => $to,
 			'timezone' => $timezone,

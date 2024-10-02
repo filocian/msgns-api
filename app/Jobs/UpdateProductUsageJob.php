@@ -30,13 +30,9 @@ final class UpdateProductUsageJob implements ShouldQueue
 	 * Execute the job.
 	 * @throws Exception
 	 */
-	public function handle(ProductUsageUC $productUsageUC, ProductStatisticsUC $productStatisticsUC): void
+	public function handle(ProductUsageUC $productUsageUC): void
 	{
 		$productUsageUC->run([
-			'productModel' => $this->product,
-		]);
-
-		$productStatisticsUC->run([
 			'productModel' => $this->product,
 		]);
 	}

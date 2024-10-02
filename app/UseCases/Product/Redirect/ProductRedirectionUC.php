@@ -17,7 +17,6 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 {
 	public function __construct(
 		private AuthService $authService,
-		private ProductUsageUC $productUsageUC,
 		private WhatsappResolverUC $whatsappResolverUC
 	) {}
 

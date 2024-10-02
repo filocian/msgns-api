@@ -25,6 +25,7 @@ final class DynamoDbRepository
 				'key' => config('services.dynamodb.key'),
 				'secret' => config('services.dynamodb.secret'),
 			],
+			'retries' => 0,
 		]);
 	}
 
@@ -41,9 +42,11 @@ final class DynamoDbRepository
 		];
 
 		try {
-			$this->client->putItem($item);
+			$res = $this->client->putItem($item);
+			Log::info(json_encode([$res, $item]));
 		} catch (DynamoDbException $e) {
 			Log::error($e->getMessage());
+			throw $e;
 		}
 	}
 
@@ -57,6 +60,26 @@ final class DynamoDbRepository
 			return $this->client->query([
 				'TableName' => $tableName,
 				'KeyConditionExpression' => $keyConditionExpression,
+				'ExpressionAttributeNames' => $expressionAttributeNames,
+				'ExpressionAttributeValues' => $expressionAttributeValues,
+			]);
+		} catch (DynamoDbException $e) {
+			Log::error($e->getMessage());
+		}
+
+		return null;
+	}
+
+	public function scan(
+		string $tableName,
+		string $filterExpression,
+		array $expressionAttributeNames,
+		array $expressionAttributeValues
+	): ?\Aws\Result {
+		try {
+			return $this->client->scan([
+				'TableName' => $tableName,
+				'FilterExpression' => $filterExpression,
 				'ExpressionAttributeNames' => $expressionAttributeNames,
 				'ExpressionAttributeValues' => $expressionAttributeValues,
 			]);

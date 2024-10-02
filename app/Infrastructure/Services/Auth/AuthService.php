@@ -201,12 +201,12 @@ final class AuthService
 
 	public function generateEmailVerificationToken(User $user): string
 	{
-		$email = $user->email;
-		$name = $user->name;
-		$created_at = $user->created_at;
+		$userDto = UserDto::fromModel($user);
+		$email = $userDto->email;
+		$created_at = $userDto->created_at->toDateTimeString();
 		$now = Carbon::now();
 		$expirationDate = $now->addDays(self::$VERIFICATION_GRACE_DAYS);
-		$tokenValue = implode(';', [$email, $name, $created_at]);
+		$tokenValue = implode(';', [$email, $created_at]);
 		$token = [
 			'value' => Crypt::encrypt($tokenValue),
 			'expiration_date' => $expirationDate->toDateTimeString(),
@@ -224,11 +224,11 @@ final class AuthService
 			return false;
 		}
 
-		$email = $user->email;
-		$name = $user->name;
-		$created_at = $user->created_at;
+		$userDto = UserDto::fromModel($user);
+		$email = $userDto->email;
+		$created_at = $userDto->created_at->toDateTimeString();
 
-		return $token['email'] === $email && $token['name'] === $name && $token['created_at'] === $created_at;
+		return $token['email'] === $email && $token['created_at'] === $created_at;
 	}
 
 	public function parseEmailVerificationToken(string $encryptedToken): array
@@ -237,12 +237,10 @@ final class AuthService
 		$tokenValue = explode(';', Crypt::decrypt($token->value));
 		$expiration_date = Carbon::parse($token->expiration_date);
 		$email = $tokenValue[0];
-		$name = $tokenValue[1];
-		$created_at = $tokenValue[2];
+		$created_at = $tokenValue[1];
 
 		return [
 			'email' => $email,
-			'name' => $name,
 			'created_at' => $created_at,
 			'expiration_date' => $expiration_date,
 		];
@@ -250,12 +248,12 @@ final class AuthService
 
 	public function generatePasswordResetToken(User $user): string
 	{
-		$email = $user->email;
-		$name = $user->name;
-		$oldPassword = $user->password;
+		$userDto = UserDto::fromModel($user);
+		$email = $userDto->email;
+		$created_at = $userDto->created_at->toDateTimeString();
 		$now = Carbon::now();
 		$expirationDate = $now->addDays(self::$RESET_GRACE_DAYS);
-		$tokenValue = implode(';', [$email, $name, $oldPassword]);
+		$tokenValue = implode(';', [$email, $created_at]);
 		$token = [
 			'value' => Crypt::encrypt($tokenValue),
 			'expiration_date' => $expirationDate->toDateTimeString(),
@@ -273,11 +271,11 @@ final class AuthService
 			return false;
 		}
 
-		$email = $user->email;
-		$name = $user->name;
-		$oldPassword = $user->password;
+		$userDto = UserDto::fromModel($user);
+		$email = $userDto->email;
+		$created_at = $userDto->created_at->toDateTimeString();
 
-		return $token['email'] === $email && $token['name'] === $name && $token['old_password'] === $oldPassword;
+		return $token['email'] === $email && $token['created_at'] === $created_at;
 	}
 
 	public function parsePasswordResetToken(string $encryptedToken): array
@@ -286,13 +284,11 @@ final class AuthService
 		$tokenValue = explode(';', Crypt::decrypt($token->value));
 		$expiration_date = Carbon::parse($token->expiration_date);
 		$email = $tokenValue[0];
-		$name = $tokenValue[1];
-		$old_password = $tokenValue[2];
+		$created_at = $tokenValue[1];
 
 		return [
 			'email' => $email,
-			'name' => $name,
-			'old_password' => $old_password,
+			'created_at' => $created_at,
 			'expiration_date' => $expiration_date,
 		];
 	}

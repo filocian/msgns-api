@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\ProductScanned;
+use App\Jobs\UpdateProductStatsJob;
 use App\Jobs\UpdateProductUsageJob;
 
 final class UpdateProductUsage
@@ -23,5 +24,6 @@ final class UpdateProductUsage
 	public function handle(ProductScanned $event): void
 	{
 		UpdateProductUsageJob::dispatch($event->product);
+		UpdateProductStatsJob::dispatch($event->product);
 	}
 }

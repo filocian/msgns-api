@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\Product;
-use App\UseCases\Product\Redirect\ProductStatisticsUC;
 use App\UseCases\Product\Redirect\ProductUsageUC;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -30,13 +29,9 @@ final class UpdateProductUsageJob implements ShouldQueue
 	 * Execute the job.
 	 * @throws Exception
 	 */
-	public function handle(ProductUsageUC $productUsageUC, ProductStatisticsUC $productStatisticsUC): void
+	public function handle(ProductUsageUC $productUsageUC): void
 	{
 		$productUsageUC->run([
-			'productModel' => $this->product,
-		]);
-
-		$productStatisticsUC->run([
 			'productModel' => $this->product,
 		]);
 	}

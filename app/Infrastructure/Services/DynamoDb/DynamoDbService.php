@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\DynamoDb;
 
-use App\Infrastructure\DTO\Stats\DailyStatsDto;
+use App\Infrastructure\DTO\Stats\AccountStatsDto;
+use App\Infrastructure\DTO\Stats\IntervalStatsDto;
 use App\Infrastructure\Repositories\DynamoDb\DynamoDbRepository;
 use App\Models\Product;
 use Carbon\Carbon;
@@ -39,13 +40,18 @@ final readonly class DynamoDbService
 		$this->dynamoDbRepo->putItem($this->productUsageTable, [
 			'productId' => ['N' => (string) $product->id],
 			'userId' => ['N' => (string) $product->user_id],
-			'scannedAt' => ['S' => $timestamp ?? Carbon::now()->toDateTimeString()],
+			//			'scannedAt' => ['S' => $timestamp ?? Carbon::now()->toDateTimeString()],
+			'scannedAt' => ['S' => $timestamp ?? Carbon::now()->format('Y-m-d H:i:s.u')],
 			'productName' => ['S' => (string) $product->name],
 		]);
 	}
 
-	public function getProductUsageForGivenInterval(int $productId, Carbon $startDate, Carbon $endDate, string $timezone)
-	{
+	public function getProductUsageForGivenInterval(
+		int $productId,
+		Carbon $startDate,
+		Carbon $endDate,
+		string $timezone
+	): IntervalStatsDto {
 		$from = normalizeCarbonInstance($startDate)->toDateTimeString();
 		$to = normalizeCarbonInstance($endDate)->toDateTimeString();
 
@@ -62,13 +68,44 @@ final readonly class DynamoDbService
 			]
 		);
 
-		return new DailyStatsDto([
+		return new IntervalStatsDto([
 			'from' => denormalizeCarbonInstance($from, $timezone),
 			'to' => denormalizeCarbonInstance($to, $timezone),
 			'productId' => $productId,
 			'scannedAt' => array_map(function ($item) use ($timezone) {
 				return denormalizeCarbonInstance($item['scannedAt']['S'], $timezone);
 			}, $result['Items']),
+		]);
+	}
+
+	public function getAccountUsageForGivenInterval(
+		int $userId,
+		Carbon $startDate,
+		Carbon $endDate,
+		string $timezone
+	): AccountStatsDto {
+		$from = normalizeCarbonInstance($startDate)->toDateTimeString();
+		$to = normalizeCarbonInstance($endDate)->toDateTimeString();
+
+		$result = $this->dynamoDbRepo->scan(
+			$this->productUsageTable,
+			'userId = :user_id AND #ts BETWEEN :start_ts AND :end_ts',
+			[
+				'#ts' => 'scannedAt',
+			],
+			[
+				':user_id' => ['N' => (string) $userId],
+				':start_ts' => ['S' => $from],
+				':end_ts' => ['S' => $to],
+			]
+		);
+
+		return new AccountStatsDto([
+			'userId' => $userId,
+			'from' => denormalizeCarbonInstance($from, $timezone),
+			'to' => denormalizeCarbonInstance($to, $timezone),
+			'items' => $result['Items'],
+			'timezone' => $timezone,
 		]);
 	}
 }

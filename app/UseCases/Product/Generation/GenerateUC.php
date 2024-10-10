@@ -8,9 +8,11 @@ use App\Helpers\StringHelpers;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Models\ProductType;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Random\RandomException;
 
 final readonly class GenerateUC implements UseCaseContract
 {
@@ -19,7 +21,8 @@ final readonly class GenerateUC implements UseCaseContract
 	 *
 	 * @param mixed $data
 	 * @param array|null $opts
-	 * @return string
+	 * @return array
+	 * @throws RandomException
 	 */
 	public function run(mixed $data = null, ?array $opts = null): array
 	{
@@ -33,18 +36,21 @@ final readonly class GenerateUC implements UseCaseContract
 		foreach ($productsToGenerate as $productType) {
 			$template = $productTypeTemplates->find($productType['typeId']);
 			$quantity = $productType['quantity'];
+			$size = $productType['size'] ?? null;
 			$newProductsURLs[$template->code] = [];
 
 			for ($x = 0; $x < $quantity; $x++) {
 				$lastId += 1;
-				$productPassword = $this->generateProductPassword();
-				$newProducts[] = $this->buildProduct($productType['typeId'], $template, $productPassword, $lastId);
-				$newProductsURLs[$template->code][] = env('FRONT_URL') . '/product/' . $lastId . '/redirect/' . $productPassword;
+				$product = $this->buildProduct($productType['typeId'], $template, $lastId, false, $size);
+				$newProducts[] = $product;
+				$newProductsURLs[$template->code][] = env('FRONT_URL') . '/product/' . $lastId . '/redirect/' . $product['password'];
 
+				// Doble cara
 				if ($template->secondary_model !== null) {
 					$lastId += 1;
-					$newProducts[] = $this->buildProduct($productType['typeId'], $template, $productPassword, $lastId, true);
-					$newProductsURLs[$template->code][] = env('FRONT_URL') . '/product/' . $lastId . '/redirect/' . $productPassword;
+					$product = $this->buildProduct($productType['typeId'], $template, $lastId, true, $size);
+					$newProducts[] = $product;
+					$newProductsURLs[$template->code][] = env('FRONT_URL') . '/product/' . $lastId . '/redirect/' . $product['password'];
 				}
 			}
 		}
@@ -78,24 +84,51 @@ final readonly class GenerateUC implements UseCaseContract
 
 		return StringHelpers::generateAlphaNumericString(env('DEFAULT_PRODUCT_PASSWORD_LENGTH', 12));
 	}
+
+	/**
+	 * @throws Exception|RandomException
+	 */
+	private function generateUuid(): string
+	{
+		try{
+			return StringHelpers::generateUuidV4();
+		} catch (RandomException $e){
+			throw new RandomException('Error generating UUID');
+		} catch (Exception $e) {
+			throw new Exception('Error generating UUID');
+		}
+
+	}
+
+	/**
+	 * @throws RandomException
+	 */
 	private function buildProduct(
 		int $productTypeId,
 		Model $productTemplate,
-		string $productPassword,
 		int $lastId,
-		bool $isSecondaryModel = false
+		bool $isSecondaryModel = false,
+		?string $size = null
 	): array {
 		$now = Carbon::now();
 		$model = $isSecondaryModel ? $productTemplate->secondary_model : $productTemplate->primary_model;
+		$productPassword = str_starts_with($productTemplate->code, 'B-')
+			? $this->generateUuid()
+			: $this->generateProductPassword();
+		$name = str_starts_with($productTemplate->code, 'B-')
+			? $productTemplate->name
+			: $model;
+
 		return [
 			'product_type_id' => $productTypeId,
 			'model' => $model,
 			'password' => $productPassword,
-			'name' => $model . ' (' . $lastId . ')',
+			'name' => $name . ' (' . $lastId . ')',
 			'description' => $productTemplate->description,
 			'active' => 1,
 			'created_at' => $now,
 			'updated_at' => $now,
+			'size' => $size
 		];
 	}
 }

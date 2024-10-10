@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Helpers;
 
+use Exception;
+use Random\RandomException;
+
 final class StringHelpers
 {
 	public static function generateAlphaNumericString($length): string
@@ -49,5 +52,25 @@ final class StringHelpers
 		$obfuscated_email = $obfuscated_username . '@' . $obfuscated_domain_name . $domain_extension;
 
 		return $obfuscated_email;
+	}
+
+	/**
+	 * Generate a UUID version 4.
+	 *
+	 * @return string
+	 * @throws Exception|RandomException if unable to generate random bytes.
+	 */
+	public static function generateUuidV4(): string
+	{
+		// Genera 16 bytes (128 bits) de datos aleatorios
+		$data = random_bytes(16);
+
+		// Configura la versión a 4 (0100)
+		$data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
+		// Configura los bits de variante a 10xx
+		$data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
+
+		// Formatea los bytes en el estándar UUID
+		return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 	}
 }

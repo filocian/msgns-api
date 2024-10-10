@@ -13,6 +13,16 @@ Route::get('/nfc/{data}', [RedirectionController::class, 'legacyRedirect']);
 Route::get('/product/{id}/redirect/{password}', [RedirectionController::class, 'v2Redirect']);
 
 /**
+ * Bracelet Test
+ */
+Route::get('bracelet/test/{id}', function ($id){
+	$product = \App\Models\Product::findById($id);
+	$productDto = \App\Infrastructure\DTO\ProductDto::fromModel($product);
+
+	dump($productDto);
+});
+
+/**
  * B4A API
  */
 Route::prefix('jobs')->group(function () {

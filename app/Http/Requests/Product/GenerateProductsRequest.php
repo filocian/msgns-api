@@ -39,6 +39,7 @@ final class GenerateProductsRequest extends FormRequest
 			'types.*' => 'required|array',
 			'types.*.typeId' => 'required|integer|min:1',
 			'types.*.quantity' => 'required|integer|min:1',
+			'types.*.size' => 'sometimes|string',
 		];
 	}
 }

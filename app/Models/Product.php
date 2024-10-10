@@ -29,6 +29,7 @@ final class Product extends Model
 		'active',
 		'configuration_status',
 		'assigned_at',
+		'size',
 	];
 	protected $casts = [
 		'active' => 'bool',

@@ -16,7 +16,7 @@ Route::get('/product/{id}/redirect/{password}', [RedirectionController::class, '
  * Bracelet Test
  */
 Route::get('bracelet/test/{id}', function ($id) {
-	$product = App\Models\Product::findById($id);
+	$product = App\Models\Product::findById((int) $id);
 	$productDto = App\Infrastructure\DTO\ProductDto::fromModel($product);
 
 	dump($productDto);

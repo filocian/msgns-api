@@ -19,6 +19,7 @@ final class DatabaseSeeder extends Seeder
 			UserSeeder::class,
 			ProductTypesSeeder::class,
 			ProductConfigurationStatusSeeder::class,
+			AddFirstBraceletProductTypes::class,
 		]);
 	}
 }

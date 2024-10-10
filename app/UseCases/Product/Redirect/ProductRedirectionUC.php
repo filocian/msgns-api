@@ -52,6 +52,10 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		$loggedUserId = $this->authService->id();
 		$productDto = ProductDto::fromModel($product);
 
+		if ($this->isBraceletProduct($productDto)) {
+			return $this->resolveBraceletUrl($productDto);
+		}
+
 		//Producto desactivado -> disabled page
 		if (!$productDto->active && !$this->isVirginProduct($productDto)) {
 			return $this->resolveDisabledUrl($productDto);
@@ -143,5 +147,15 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		}
 
 		return $hasOwner && $hasTarget;
+	}
+
+	private function isBraceletProduct(ProductDto $productDto): bool
+	{
+		return str_starts_with($productDto->type->code, 'B-');
+	}
+
+	private function resolveBraceletUrl(ProductDto $productDto): string
+	{
+		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
 	}
 }

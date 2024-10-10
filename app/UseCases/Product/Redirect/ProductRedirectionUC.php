@@ -52,7 +52,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		$loggedUserId = $this->authService->id();
 		$productDto = ProductDto::fromModel($product);
 
-		if($this->isBraceletProduct($productDto)){
+		if ($this->isBraceletProduct($productDto)) {
 			return $this->resolveBraceletUrl($productDto);
 		}
 

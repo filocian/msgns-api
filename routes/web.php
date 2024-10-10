@@ -15,9 +15,9 @@ Route::get('/product/{id}/redirect/{password}', [RedirectionController::class, '
 /**
  * Bracelet Test
  */
-Route::get('bracelet/test/{id}', function ($id){
-	$product = \App\Models\Product::findById($id);
-	$productDto = \App\Infrastructure\DTO\ProductDto::fromModel($product);
+Route::get('bracelet/test/{id}', function ($id) {
+	$product = App\Models\Product::findById($id);
+	$productDto = App\Infrastructure\DTO\ProductDto::fromModel($product);
 
 	dump($productDto);
 });

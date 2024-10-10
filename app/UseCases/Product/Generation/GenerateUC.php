@@ -43,14 +43,18 @@ final readonly class GenerateUC implements UseCaseContract
 				$lastId += 1;
 				$product = $this->buildProduct($productType['typeId'], $template, $lastId, false, $size);
 				$newProducts[] = $product;
-				$newProductsURLs[$template->code][] = env('FRONT_URL') . '/product/' . $lastId . '/redirect/' . $product['password'];
+				$newProductsURLs[$template->code][] = env(
+					'FRONT_URL'
+				) . '/product/' . $lastId . '/redirect/' . $product['password'];
 
 				// Doble cara
 				if ($template->secondary_model !== null) {
 					$lastId += 1;
 					$product = $this->buildProduct($productType['typeId'], $template, $lastId, true, $size);
 					$newProducts[] = $product;
-					$newProductsURLs[$template->code][] = env('FRONT_URL') . '/product/' . $lastId . '/redirect/' . $product['password'];
+					$newProductsURLs[$template->code][] = env(
+						'FRONT_URL'
+					) . '/product/' . $lastId . '/redirect/' . $product['password'];
 				}
 			}
 		}
@@ -90,14 +94,13 @@ final readonly class GenerateUC implements UseCaseContract
 	 */
 	private function generateUuid(): string
 	{
-		try{
+		try {
 			return StringHelpers::generateUuidV4();
-		} catch (RandomException $e){
+		} catch (RandomException $e) {
 			throw new RandomException('Error generating UUID');
 		} catch (Exception $e) {
 			throw new Exception('Error generating UUID');
 		}
-
 	}
 
 	/**
@@ -128,7 +131,7 @@ final readonly class GenerateUC implements UseCaseContract
 			'active' => 1,
 			'created_at' => $now,
 			'updated_at' => $now,
-			'size' => $size
+			'size' => $size,
 		];
 	}
 }

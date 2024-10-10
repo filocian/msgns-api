@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class AddFirstBraceletProductTypes extends Seeder
+final class AddFirstBraceletProductTypes extends Seeder
 {
 	protected $table = 'product_types';
 

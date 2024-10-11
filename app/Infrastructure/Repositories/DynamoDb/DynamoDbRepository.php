@@ -42,8 +42,7 @@ final class DynamoDbRepository
 		];
 
 		try {
-			$res = $this->client->putItem($item);
-			Log::info(json_encode([$res, $item]));
+			$this->client->putItem($item);
 		} catch (DynamoDbException $e) {
 			Log::error($e->getMessage());
 			throw $e;

@@ -40,7 +40,6 @@ final readonly class DynamoDbService
 		$this->dynamoDbRepo->putItem($this->productUsageTable, [
 			'productId' => ['N' => (string) $product->id],
 			'userId' => ['N' => (string) $product->user_id],
-			//			'scannedAt' => ['S' => $timestamp ?? Carbon::now()->toDateTimeString()],
 			'scannedAt' => ['S' => $timestamp ?? Carbon::now()->format('Y-m-d H:i:s.u')],
 			'productName' => ['S' => (string) $product->name],
 		]);

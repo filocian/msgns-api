@@ -107,4 +107,16 @@ final readonly class DynamoDbService
 			'timezone' => $timezone,
 		]);
 	}
+
+	public function deleteProductStats(int $productId): void
+	{
+		$tableName = $this->productUsageTable;
+		$keyConditionExpression = 'productId = :product_id';
+		$expressionAttributeValues = [
+			':product_id' => ['N' => (string) $productId],
+		];
+		$keyNames = ['productId', 'scannedAt'];
+
+		$this->dynamoDbRepo->batchDelete($tableName, $keyConditionExpression, $expressionAttributeValues, $keyNames);
+	}
 }

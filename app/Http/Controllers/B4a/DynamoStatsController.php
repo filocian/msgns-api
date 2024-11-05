@@ -98,10 +98,11 @@ final class DynamoStatsController extends Controller
 		//last month
 		for ($x = 1; $x <= 100; $x++) {
 			$day = $pastDay->copy()->addDays($x);
-			for ($y = 0; $y < 5; $y++) {
-				$mark = $day->copy()->addHours(rand(1, 23))->toDateTimeString();
+			for ($y = 0; $y < 30; $y++) {
+				$mark = $day->copy()->addHours(rand(1, 23))->format('Y-m-d H:i:s.u');
 				$marks[] = $mark;
 				$this->dynamoDbService->putProductUsage($product, $mark);
+				usleep(1000);
 			}
 		}
 

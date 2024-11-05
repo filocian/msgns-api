@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\Product;
 
+use App\Exceptions\Product\InvalidProductTypeException;
+use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\DynamoDb\DynamoDbService;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -256,6 +259,41 @@ final readonly class ProductService
 			'total_products' => $totalProducts,
 			'usage_by_product' => $productsUsage,
 		];
+	}
+
+	/**
+	 * @param int $productId
+	 * @return ProductDto
+	 * @throws ProductNotFoundException
+	 * @throws InvalidProductTypeException
+	 */
+	public function resetProduct(int $productId): ProductDto
+	{
+		try {
+			$product = Product::findById($productId);
+		} catch (ModelNotFoundException $e) {
+			throw new ProductNotFoundException();
+		}
+
+		$productDto = ProductDto::fromModel($product);
+
+		if (str_starts_with($productDto->type->code, 'B-')) {
+			throw new InvalidProductTypeException();
+		}
+
+
+		$product->update([
+			'user_id' => null,
+			'linked_to_product_id' => null,
+			'usage' => 0,
+			'assigned_at' => null,
+			'configuration_status' => ProductConfigurationStatus::$STATUS_NOT_STARTED,
+			'target_url' => null,
+		]);
+
+		$product->refresh();
+
+		return ProductDto::fromModel($product);
 	}
 
 	public function testDynamoDB()

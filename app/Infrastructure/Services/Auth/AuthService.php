@@ -7,6 +7,7 @@ namespace App\Infrastructure\Services\Auth;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Factory\SocialLoginFactory;
 use App\Infrastructure\Services\Mail\ResendService;
+use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Infrastructure\Services\User\UserService;
 use App\Models\User;
 use App\Static\Permissions\StaticRoles;
@@ -29,11 +30,13 @@ final class AuthService
 	private static $ADMIN_ROLES = [StaticRoles::DEV_ROLE, StaticRoles::BACKOFFICE_ROLE];
 	private ResendService $mailService;
 	private UserService $userService;
+	private MPLogger $mpLogger;
 
-	public function __construct(ResendService $mailService, UserService $userService)
+	public function __construct(ResendService $mailService, UserService $userService, MPLogger $mpLogger)
 	{
 		$this->mailService = $mailService;
 		$this->userService = $userService;
+		$this->mpLogger = $mpLogger;
 	}
 
 	/**
@@ -55,6 +58,10 @@ final class AuthService
 		]);
 
 		if (!$user) {
+			$this->mpLogger->critical('USER_SIGNUP', 'USER SIGNUP', 'user signup failed', [
+				'user_email' => $data['email'],
+			]);
+
 			throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
 		}
 
@@ -68,9 +75,18 @@ final class AuthService
 			try {
 				$this->mailService->send($user->email, __('emailVerification.subject'), $html);
 			} catch (Exception $error) {
-				dd($error->getMessage());
+				$this->mpLogger->critical('USER_SIGNUP', 'USER SIGNUP EMAIL VERIFY', 'user signup email verification send failed', [
+					'user_email' => $data['email'],
+					'exception_message' => $error->getMessage(),
+				]);
+
+				throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
 			}
 		}
+
+		$this->mpLogger->info('USER_SIGNUP', 'USER SIGNUP', 'user signe up successfully', [
+			'user_email' => $data['email'],
+		]);
 
 		return $user;
 	}
@@ -86,14 +102,26 @@ final class AuthService
 		$user = User::query()->where('email', $email)->first();
 
 		if (!$user) {
+			$this->mpLogger->critical('LOGIN', 'USER LOGIN ERROR', 'no user found', [
+				'email' => $email,
+			]);
+
 			return null;
 		}
 
 		if ($user->password_reset_required) {
+			$this->mpLogger->warn('LOGIN', 'PASSWORD RESET REQUIRED', 'user requires pass reset', [
+				'email' => $email,
+			]);
+
 			return UserDto::fromModel($user);
 		}
 
 		if (!Auth::attempt(['email' => $email, 'password' => $password])) {
+			$this->mpLogger->critical('LOGIN', 'USER LOGIN ERROR', 'invalid credentials', [
+				'email' => $email,
+			]);
+
 			return null;
 		}
 
@@ -107,6 +135,11 @@ final class AuthService
 
 		$this->userService->updateUserAgent($user->id, $user_agent);
 		$this->userService->updateUserLastAccess($user->id);
+
+		$this->mpLogger->info('LOGIN', 'USER LOGGED IN', 'user logged in successfully', [
+			'email' => $email,
+			'user_id' => $user->id,
+		]);
 
 		return UserDto::fromModel($user);
 	}

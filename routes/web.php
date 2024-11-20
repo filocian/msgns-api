@@ -6,7 +6,7 @@ use App\Http\Controllers\Product\Web\RedirectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-	return view('welcome');
+	return redirect()->away('https://messagenes.com');
 });
 
 Route::get('/nfc/{data}', [RedirectionController::class, 'legacyRedirect']);

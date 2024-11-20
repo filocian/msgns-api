@@ -11,6 +11,7 @@ use App\Http\Requests\Auth\SetEmailVerifiedRequest;
 use App\Http\Requests\Auth\VerifyEmailRequest;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Mail\ResendService;
+use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -20,11 +21,13 @@ final class VerificationController extends Controller
 {
 	private ResendService $mailService;
 	private AuthService $authService;
+	private MPLogger $mpLogger;
 
-	public function __construct(ResendService $mailService, AuthService $authService)
+	public function __construct(ResendService $mailService, AuthService $authService, MPLogger $mpLogger)
 	{
 		$this->mailService = $mailService;
 		$this->authService = $authService;
+		$this->mpLogger = $mpLogger;
 	}
 
 	public function verify(VerifyEmailRequest $request): JsonResponse
@@ -42,6 +45,10 @@ final class VerificationController extends Controller
 		}
 
 		if (!$this->authService->isValidEmailVerificationToken($user, $token)) {
+			$this->mpLogger->error('EMAIL_VERIFICATION', 'EMAIL VERIFICATION ERROR', 'invalid email verification token', [
+				'user_id' => $user->id ?? null,
+			]);
+
 			return HttpJson::KO(
 				'invalid_token',
 				Response::HTTP_BAD_REQUEST
@@ -49,6 +56,10 @@ final class VerificationController extends Controller
 		}
 
 		$userDto = $this->authService->setEmailVerified($user->id);
+
+		$this->mpLogger->info('EMAIL_VERIFICATION', 'EMAIL VERIFICATION SUCCESSFUL', 'email verification successful', [
+			'user_id' => $user->id ?? null,
+		]);
 
 		return HttpJson::OK(
 			$userDto->wrapped('user'),

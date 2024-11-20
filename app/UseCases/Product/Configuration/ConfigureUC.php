@@ -8,6 +8,7 @@ use App\Exceptions\Product\InvalidProductTypeException;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
+use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 final readonly class ConfigureUC implements UseCaseContract
 {
-	public function __construct(private ProductService $productService) {}
+	public function __construct(private ProductService $productService, private MPLogger $mpLogger) {}
 
 	/**
 	 * UseCase: Configure a single product based on its id
@@ -48,13 +49,35 @@ final readonly class ConfigureUC implements UseCaseContract
 	{
 		try {
 			$product = Product::findById($productId);
+
+			$this->mpLogger->info('PRODUCT_CONFIGURATION', 'PRODUCT CONFIGURATION APPLIED', 'product configuration applied', [
+				'product_id' => $productId,
+				'target_url' => $target_url,
+			]);
 		} catch (ModelNotFoundException $e) {
+			$this->mpLogger->error(
+				'PRODUCT_CONFIGURATION',
+				'ERROR APPLYING PRODUCT CONFIGURATION',
+				'product configuration error',
+				[
+				'product_id' => $productId,
+				'target_url' => $target_url,
+				'exception_message' => $e->getMessage(),
+			]
+			);
+
 			throw new ProductNotFoundException();
 		}
 
 		try {
 			$productType = ProductType::findById($product->product_type_id);
 		} catch (ModelNotFoundException $e) {
+			$this->mpLogger->error('PRODUCT_RESET', 'ERROR APPLYING PRODUCT CONFIGURATION', 'invalid product type', [
+				'product_id' => $productId,
+				'target_url' => $target_url,
+				'exception_message' => $e->getMessage(),
+			]);
+
 			throw new InvalidProductTypeException();
 		}
 

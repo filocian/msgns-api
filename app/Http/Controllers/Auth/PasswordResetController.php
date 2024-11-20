@@ -11,6 +11,7 @@ use App\Http\Requests\Auth\SendPasswordResetRequest;
 use App\Http\Requests\Auth\SetUserPasswordRequest;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Mail\ResendService;
+use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -20,11 +21,13 @@ final class PasswordResetController extends Controller
 {
 	private ResendService $mailService;
 	private AuthService $authService;
+	private MPLogger $mpLogger;
 
-	public function __construct(ResendService $mailService, AuthService $authService)
+	public function __construct(ResendService $mailService, AuthService $authService, MPLogger $mpLogger)
 	{
 		$this->mailService = $mailService;
 		$this->authService = $authService;
+		$this->mpLogger = $mpLogger;
 	}
 
 	public function resetPassword(PasswordResetRequest $request): JsonResponse
@@ -35,6 +38,10 @@ final class PasswordResetController extends Controller
 		$user = User::where('email', $parsedToken['email'])->firstOrFail();
 
 		if (!$this->authService->isValidPasswordResetToken($user, $token)) {
+			$this->mpLogger->error('PASSWORD_RESET', 'PASSWORD RESET ERROR', 'invalid password reset token', [
+				'user_id' => $user->id ?? null,
+			]);
+
 			return HttpJson::KO(
 				'invalid_reset_password_token',
 				Response::HTTP_BAD_REQUEST,
@@ -50,6 +57,10 @@ final class PasswordResetController extends Controller
 
 		$user->save();
 		$user->refresh();
+
+		$this->mpLogger->info('PASSWORD_RESET', 'PASSWORD RESET SUCCESSFUL', 'password reset successful', [
+			'user_id' => $user->id ?? null,
+		]);
 
 		return HttpJson::OK(
 			'password_assigned',

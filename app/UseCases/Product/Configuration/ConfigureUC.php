@@ -60,10 +60,10 @@ final readonly class ConfigureUC implements UseCaseContract
 				'ERROR APPLYING PRODUCT CONFIGURATION',
 				'product configuration error',
 				[
-				'product_id' => $productId,
-				'target_url' => $target_url,
-				'exception_message' => $e->getMessage(),
-			]
+					'product_id' => $productId,
+					'target_url' => $target_url,
+					'exception_message' => $e->getMessage(),
+				]
 			);
 
 			throw new ProductNotFoundException();

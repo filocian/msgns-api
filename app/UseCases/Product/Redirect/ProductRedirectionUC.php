@@ -92,9 +92,9 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 					'WHATSAPP PRODUCT MISCONFIGURED',
 					'whatsapp product misconfigured redirection',
 					[
-					'product_id' => $productDto->id,
-					'user_id' => $loggedUserId,
-				]
+						'product_id' => $productDto->id,
+						'user_id' => $loggedUserId,
+					]
 				);
 
 				return $this->resolveIncompleteUrl($productDto, $loggedUserId);

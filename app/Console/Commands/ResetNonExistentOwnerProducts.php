@@ -42,15 +42,25 @@ final class ResetNonExistentOwnerProducts extends Command
             ->whereDoesntHave('user')
             ->get();
 
+        if(count($products ?? []) < 1){
+            $this->mpLogger->info('PRODUCT_OWNER_INVALID_PURGE', 'NO INVALID OWNERS FOUND', 'no products with invalid owner found', [
+                'products_restarted' => $affectedProducts,
+            ]);
+
+            Log::info('COMMAND INVALID OWNER => no products with invalid owner found');
+
+            return;
+        }
+
         foreach ($products as $product) {
-            //$this->resetUC->run(['id' => $product->id]);
+            $this->resetUC->run(['id' => $product->id]);
             $affectedProducts[] = $product->id;
         }
 
-        $this->mpLogger->info('PRODUCT_OWNER_INVALID_PURGE', 'PURGED STUC ON ASSIGNED PRODUCTS', 'products restarted', [
+        $this->mpLogger->warn('PRODUCT_OWNER_INVALID_PURGE', 'PURGED STUC ON ASSIGNED PRODUCTS', 'products restarted', [
             'products_restarted' => $affectedProducts,
         ]);
 
-		Log::info('Reset non-existent owner-products');
+		Log::alert('COMMAND INVALID OWNER => reset non-existent owner-products');
 	}
 }

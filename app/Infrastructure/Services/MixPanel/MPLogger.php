@@ -14,8 +14,14 @@ final class MPLogger
 	public static string $WARN = 'WARN';
 	public static string $ERROR = 'ERROR';
 	public static string $CRITICAL = 'CRITICAL';
+	private string|null $systemAlias = 'SYS@API';
 
 	public function __construct(private readonly MixPanelService $mixPanelService) {}
+
+	public function setSystemAlias(string $alias): void
+	{
+		$this->systemAlias = $alias;
+	}
 
 	public function info(string $eventName, string $title, string $message, array|null $data = null): void
 	{
@@ -47,10 +53,10 @@ final class MPLogger
 
 	private function getSharedData(): array
 	{
-		$userId = 'null';
+		$userId = $this->systemAlias;
 
 		if(Auth::user()){
-			$userId = (string) Auth::user()->getAuthIdentifier();
+			$userId = ((string) Auth::user()->getAuthIdentifier()) . '@USER';
 		}
 
 		$timestamp = Carbon::now()->toDateTimeString();

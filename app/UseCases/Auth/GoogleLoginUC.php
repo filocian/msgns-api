@@ -65,7 +65,7 @@ final readonly class GoogleLoginUC implements UseCaseContract
 
 		$this->authService->autoLogin($user, $user_agent);
 
-		$this->mpLogger->critical('LOGIN', 'GOOGLE LOGIN', 'Logged In', [
+		$this->mpLogger->info('LOGIN', 'GOOGLE LOGIN', 'Logged In', [
 			'user_data' => $user,
 		]);
 

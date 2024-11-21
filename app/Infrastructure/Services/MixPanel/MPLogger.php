@@ -55,7 +55,7 @@ final class MPLogger
 	{
 		$userId = $this->systemAlias;
 
-		if(Auth::user()){
+		if (Auth::user()) {
 			$userId = ((string) Auth::user()->getAuthIdentifier()) . '@USER';
 		}
 

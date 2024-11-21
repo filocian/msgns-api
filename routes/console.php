@@ -10,5 +10,5 @@ Artisan::command('inspire', function () {
 	$this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Schedule::command('app:reset-stuck-on-assigned-products-after-one-week')->everyMinute();
-Schedule::command('app:reset-non-existent-owner-products')->everyMinute();
+Schedule::command('app:reset-stuck-on-assigned-products-after-one-week')->sundays()->at('08:00');
+Schedule::command('app:reset-non-existent-owner-products')->sundays()->at('07:50');

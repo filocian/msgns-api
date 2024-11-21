@@ -36,7 +36,7 @@ final class ResetStuckOnAssignedProductsAfterOneWeek extends Command
 	 */
 	public function handle()
 	{
-        $deadline = Carbon::now()->subDays(7);
+        $deadline = Carbon::now()->subSecond();
         $affectedProducts = [];
 
         $products = Product::where('configuration_status', 'assigned')

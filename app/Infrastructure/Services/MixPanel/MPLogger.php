@@ -47,7 +47,12 @@ final class MPLogger
 
 	private function getSharedData(): array
 	{
-		$userId = (string) Auth::user()->getAuthIdentifier() ?? 'null';
+		$userId = 'null';
+
+		if(Auth::user()){
+			$userId = (string) Auth::user()->getAuthIdentifier();
+		}
+
 		$timestamp = Carbon::now()->toDateTimeString();
 
 		return ['DISTINCT_ID' => $userId, 'TIMESTAMP' => $timestamp, 'SOURCE' => 'API'];

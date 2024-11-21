@@ -4,11 +4,19 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Infrastructure\Services\MixPanel\MPLogger;
+use App\Models\Product;
+use App\UseCases\Product\Configuration\ResetUC;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 final class ResetStuckOnAssignedProductsAfterOneWeek extends Command
 {
+    public function __construct(private ResetUC $resetUC, private MPLogger $mpLogger){
+        parent::__construct();
+    }
+
 	/**
 	 * The name and signature of the console command.
 	 *
@@ -28,6 +36,22 @@ final class ResetStuckOnAssignedProductsAfterOneWeek extends Command
 	 */
 	public function handle()
 	{
-		Log::info('Reset stuck on assigned products after 7 days');
+        $deadline = Carbon::now()->subDays(7);
+        $affectedProducts = [];
+
+        $products = Product::where('assigned_at', '<=', $deadline)
+            ->where('configuration_status', 'assigned')
+            ->get();
+
+        foreach ($products as $product) {
+            //$this->resetUC->run(['id' => $product->id]);
+            $affectedProducts[] = $product->id;
+        }
+
+        $this->mpLogger->info('ASSIGNED_PURGE', 'PURGED STUCK ON ASSIGNED PRODUCTS', 'products restarted', [
+            'products_restarted' => $affectedProducts,
+        ]);
+
+        Log::info('Reset stuck on assigned products after 7 days');
 	}
 }

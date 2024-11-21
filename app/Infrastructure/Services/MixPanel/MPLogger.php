@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Services\MixPanel;
 
 use App\Infrastructure\DTO\MixPanel\MPMessageDto;
-use App\Infrastructure\Services\Auth\AuthService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 final class MPLogger
 {
@@ -15,7 +15,7 @@ final class MPLogger
 	public static string $ERROR = 'ERROR';
 	public static string $CRITICAL = 'CRITICAL';
 
-	public function __construct(private readonly AuthService $authService, private readonly MixPanelService $mixPanelService) {}
+	public function __construct(private readonly MixPanelService $mixPanelService) {}
 
 	public function info(string $eventName, string $title, string $message, array|null $data = null): void
 	{
@@ -47,7 +47,7 @@ final class MPLogger
 
 	private function getSharedData(): array
 	{
-		$userId = $this->authService->id();
+		$userId = (string) Auth::user()->getAuthIdentifier() ?? 'null';
 		$timestamp = Carbon::now()->toDateTimeString();
 
 		return ['DISTINCT_ID' => $userId, 'TIMESTAMP' => $timestamp, 'SOURCE' => 'API'];

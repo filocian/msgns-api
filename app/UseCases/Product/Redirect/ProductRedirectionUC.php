@@ -14,7 +14,6 @@ use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
 use App\Static\Product\Fancelet\FanceletFrontEndUrls;
 use Exception;
-use function PHPUnit\Framework\stringContains;
 
 final readonly class ProductRedirectionUC implements UseCaseContract
 {
@@ -178,8 +177,10 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		$productTypeCode = $productDto->type->code;
 		$productTypeDefinition = substr($productTypeCode, 0, 4);
 		return match ($productTypeDefinition) {
-			'B-LO' => env('FRONT_URL') . FanceletFrontEndUrls::$LOB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
+			'B-LO' => env(
+				'FRONT_URL'
+			) . FanceletFrontEndUrls::$LOB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
 		};
-//		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
+		//		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
 	}
 }

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\DTO\Fancelet;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
 use App\Infrastructure\DTO\ProductDto;
 use Illuminate\Database\Eloquent\Model;
 
-class FanceletContentGalleryDto extends BaseDTO
+final class FanceletContentGalleryDto extends BaseDTO
 {
 	public int $gallery_id;
 	public ProductDto $product;

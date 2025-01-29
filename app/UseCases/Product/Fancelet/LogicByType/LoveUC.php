@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\UseCases\Product\Fancelet\LogicByType;
 
 use App\Infrastructure\Contracts\UseCaseContract;
@@ -8,12 +10,9 @@ use App\Infrastructure\Services\Product\Fancelet\FanceletService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class LoveUC implements UseCaseContract
+final class LoveUC implements UseCaseContract
 {
-	public function __construct(private readonly FanceletService $fanceletService)
-	{
-
-	}
+	public function __construct(private readonly FanceletService $fanceletService) {}
 	public function run(mixed $data = null, ?array $opts = null)
 	{
 		$productId = $data['product_id'];
@@ -27,7 +26,7 @@ class LoveUC implements UseCaseContract
 			->get()
 			->toArray();
 
-		$image = $images[rand(0, count($images)-1)];
+		$image = $images[rand(0, count($images) - 1)];
 		$text = DB::table('fancelet_content_texts')
 			->select('*')
 			->where('gallery_id', $contentGalleryDto->gallery_id)
@@ -37,8 +36,8 @@ class LoveUC implements UseCaseContract
 
 		return new FanceletContentDto([
 			'product' => $contentGalleryDto->product,
-			'images' =>	[$image],
-			'texts' =>	$text,
+			'images' => [$image],
+			'texts' => $text,
 		]);
 	}
 }

@@ -1,15 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\UseCases\Product\Fancelet\Actions;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 
-readonly class LoveFanceletActionUC implements UseCaseContract
+final readonly class LoveFanceletActionUC implements UseCaseContract
 {
-	public function __construct(private FanceletMessageActionUC $actionUC)
-	{
-
-	}
+	public function __construct(private FanceletMessageActionUC $actionUC) {}
 
 	public function run(mixed $data = null, ?array $opts = null)
 	{
@@ -21,7 +20,7 @@ readonly class LoveFanceletActionUC implements UseCaseContract
 			'product_id' => $productId,
 			'product_password' => $productPassword,
 			'message' => $comment,
-			'target_table' => 'fancelet_actions_registry'
+			'target_table' => 'fancelet_actions_registry',
 		]);
 	}
 }

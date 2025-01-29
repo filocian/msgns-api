@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace App\UseCases\Product\Fancelet\Actions;
 
 use App\Infrastructure\Contracts\UseCaseContract;
-use App\Infrastructure\DTO\Stats\IntervalStatsDto;
-use App\Infrastructure\Services\DynamoDb\DynamoDbService;
 use App\Infrastructure\Services\Product\Fancelet\FanceletService;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Facades\DB;
 
 final readonly class FanceletMessageActionUC implements UseCaseContract
@@ -26,10 +23,10 @@ final readonly class FanceletMessageActionUC implements UseCaseContract
 		$message = $data['message'];
 		$targetTable = $data['target_table'];
 
-		DB::transaction(function () use($productId, $productPassword, $message, $targetTable) {
+		DB::transaction(function () use ($productId, $productPassword, $message, $targetTable) {
 			$entry = DB::table($targetTable)->where('product_id', $productId)->first();
 
-			if(!$entry){
+			if (!$entry) {
 				DB::table($targetTable)->insert([
 					'product_id' => $productId,
 					'action' => 'message',

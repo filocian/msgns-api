@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\UseCases\Product\Fancelet\Comments;
 
 use App\Infrastructure\Contracts\UseCaseContract;
@@ -7,7 +9,7 @@ use App\Infrastructure\Services\Product\Fancelet\FanceletService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class FanceletCommentUC implements UseCaseContract
+final class FanceletCommentUC implements UseCaseContract
 {
 	public function __construct(private FanceletService $fanceletService) {}
 
@@ -21,10 +23,10 @@ class FanceletCommentUC implements UseCaseContract
 		$message = $data['message'];
 		$targetTable = 'fancelet_comments_registry';
 
-		DB::transaction(function () use($productId, $productPassword, $message, $targetTable) {
+		DB::transaction(function () use ($productId, $productPassword, $message, $targetTable) {
 			$entry = DB::table($targetTable)->where('product_id', $productId)->first();
 
-			if(!$entry){
+			if (!$entry) {
 				DB::table($targetTable)->insert([
 					'product_id' => $productId,
 					'created_at' => Carbon::now()->format('Y-m-d H:i:s.u'),

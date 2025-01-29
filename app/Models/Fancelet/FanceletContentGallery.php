@@ -1,19 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Fancelet;
 
 use App\Models\ProductType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FanceletContentGallery extends Model
+final class FanceletContentGallery extends Model
 {
 	use HasFactory;
 
 	protected $table = 'fancelet_content_gallery';
-	protected $fillable = [
-		'product_type_id',
-	];
+	protected $fillable = ['product_type_id', ];
 	protected $casts = [
 		'created_at' => 'datetime',
 		'updated_at' => 'datetime',

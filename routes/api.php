@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\B4a\DynamoStatsController;
 use App\Http\Controllers\Product\AdminProductController;
+use App\Http\Controllers\Product\FanceletController;
 use App\Http\Controllers\Product\GenerateProductsController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\User\UsersController;
@@ -76,6 +77,24 @@ Route::prefix('products')->group(function () {
 
 	Route::get('/{id}/{password?}', [ProductController::class, 'findById']);
 	Route::get('/{id}/{password}/get-target', [ProductController::class, 'redirect']);
+});
+
+Route::prefix('fancelets')->group(function () {
+	Route::prefix('get-content')->group(function () {
+		Route::get('/lo/{id}/{password}', [FanceletController::class, 'getLoveContent']);
+	});
+
+	Route::prefix('action')->group(function () {
+		Route::post('/lo/message', [FanceletController::class, 'loveAction']);
+	});
+
+	Route::prefix('comments')->group(function () {
+		Route::post('/send', [FanceletController::class, 'sendComment']);
+		Route::get('/get', [FanceletController::class, 'loveAction']);
+	});
+
+	Route::post('like/{id}/{password}/{contentType}/{contentId}', [FanceletController::class, 'addContentLike']);
+	Route::get('can-like/{id}/{contentType}/{contentId}', [FanceletController::class, 'canLike']);
 });
 
 Route::prefix('stats')->group(function () {

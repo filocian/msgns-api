@@ -15,10 +15,12 @@ final readonly class DynamoDbService
 {
 	public string $productUsageTable;
 	public string $productConfigHistoryTable;
+	public string $fanceletCommentsTable;
 
 	public function __construct(private DynamoDbRepository $dynamoDbRepo)
 	{
 		$this->productUsageTable = config('services.dynamodb.product_usage_table');
+		$this->fanceletCommentsTable = config('services.dynamodb.fancelet_comments_table');
 		$this->productConfigHistoryTable = config('services.dynamodb.$product_config_history_table');
 	}
 
@@ -118,5 +120,15 @@ final readonly class DynamoDbService
 		$keyNames = ['productId', 'scannedAt'];
 
 		$this->dynamoDbRepo->batchDelete($tableName, $keyConditionExpression, $expressionAttributeValues, $keyNames);
+	}
+
+	public function addFanceletComment(int $productId, string $productPassword, string $comment): void
+	{
+		$this->dynamoDbRepo->putItem($this->fanceletCommentsTable, [
+			'ProductId' => ['N' => (string) $productId],
+			'FanceletGroup' => ['S' => $productPassword],
+			'comment' => ['S' => $comment],
+			'Timestamp' => ['S' => $timestamp ?? Carbon::now()->format('Y-m-d H:i:s.u')],
+		]);
 	}
 }

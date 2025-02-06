@@ -199,4 +199,9 @@ final class User extends Authenticatable implements MustVerifyEmail
 		$user = self::where('id', $userId)->firstOrFail();
 		return $user->getRoleNames();
 	}
+
+	public function ghlContact()
+	{
+		return $this->hasOne(GHLContact::class, 'user_id', 'id');
+	}
 }

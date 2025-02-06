@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\GoHighLevelOAuthController;
 use App\Http\Controllers\Product\Web\RedirectionController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,4 +32,11 @@ Route::prefix('jobs')->group(function () {
 
 		App\Jobs\TestJob::dispatch();
 	});
+});
+
+/**
+ * GHL External API
+ */
+Route::prefix('crm')->group(function () {
+	Route::get('oauth/callback', [GoHighLevelOAuthController::class, 'authCode']);
 });

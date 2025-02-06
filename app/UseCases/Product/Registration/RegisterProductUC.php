@@ -12,6 +12,7 @@ use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
+use App\UseCases\Ghl\CreateGHLAssignedProductOpportunityUC;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,6 +23,7 @@ final readonly class RegisterProductUC implements UseCaseContract
 		private AuthService $authService,
 		private ProductService $productService,
 		private MPLogger $mpLogger,
+		private CreateGHLAssignedProductOpportunityUC $createGHLAssignedProductOpportunityUC,
 	) {}
 
 	/**
@@ -72,6 +74,8 @@ final readonly class RegisterProductUC implements UseCaseContract
 				'user_id' => $userId,
 				'product_id' => $productId,
 			]);
+
+			$this->createGHLAssignedProductOpportunityUC->run(['product' => $product]);
 
 			return ProductDto::fromModel($product);
 		} catch (ModelNotFoundException $e) {

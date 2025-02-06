@@ -11,7 +11,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-final class ProductScanned
+final class ProductConfiguredEvent
 {
 	use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -30,6 +30,6 @@ final class ProductScanned
 	 */
 	public function broadcastOn(): array
 	{
-		return [new PrivateChannel('product-usage'), ];
+		return [new PrivateChannel('product-configured'), ];
 	}
 }

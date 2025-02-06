@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\UseCases\Auth;
 
+use App\Events\UserSignedUpEvent;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Services\Auth\AuthService;
@@ -21,6 +22,10 @@ final readonly class SignUpUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = null): UserDto
 	{
-		return UserDto::fromModel($this->authService->signUp($data));
+		$user = $this->authService->signUp($data);
+		$userDto = UserDto::fromModel($user);
+		event(new UserSignedUpEvent($user));
+
+		return $userDto;
 	}
 }

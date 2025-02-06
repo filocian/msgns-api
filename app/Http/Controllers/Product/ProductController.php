@@ -103,6 +103,7 @@ final class ProductController extends Controller
 
 	public function list(Request $request): JsonResponse
 	{
+		dd('list');
 		$products = $this->productListUC->run($request->all(), $request->all());
 		return HttpJson::OK($products->wrapped('products'));
 	}

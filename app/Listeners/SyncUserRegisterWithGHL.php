@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\ProductScannedEvent;
+use App\Events\UserSignedUpEvent;
+use App\Jobs\CreateGHLContactJob;
 use App\Jobs\UpdateProductStatsJob;
 use App\Jobs\UpdateProductUsageJob;
 
-final class UpdateProductUsage
+final class SyncUserRegisterWithGHL
 {
 	/**
 	 * Create the event listener.
@@ -21,9 +23,8 @@ final class UpdateProductUsage
 	/**
 	 * Handle the event.
 	 */
-	public function handle(ProductScannedEvent $event): void
+	public function handle(UserSignedUpEvent $event): void
 	{
-		UpdateProductUsageJob::dispatch($event->product);
-		UpdateProductStatsJob::dispatch($event->product);
+		CreateGHLContactJob::dispatch($event);
 	}
 }

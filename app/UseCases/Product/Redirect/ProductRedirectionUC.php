@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\UseCases\Product\Redirect;
 
-use App\Events\ProductScanned;
+use App\Events\ProductScannedEvent;
 use App\Helpers\StringHelpers;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
@@ -47,7 +47,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	public function updateProductUsage(Product $product): void
 	{
-		event(new ProductScanned($product));
+		event(new ProductScannedEvent($product));
 	}
 
 	private function resolveTargetUrl(Product $product, string $browserLocale = null): string

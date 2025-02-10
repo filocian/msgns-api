@@ -21,8 +21,8 @@ final class GhlOAuthService
 	{
 		$url = 'https://services.leadconnectorhq.com/oauth/token';
 		$data = [
-			'client_id' => '679904d3b09ca8492a46f0e6-m6i6znlo',
-			'client_secret' => '07b9e851-efd9-4a4e-99b7-dcf076d59fb2',
+			'client_id' => env('GHL_OAUTH_CLIENT_ID'),
+			'client_secret' => env('GHL_OAUTH_CLIENT_SECRET'),
 			'grant_type' => 'authorization_code',
 			'code' => $access_code,
 		];

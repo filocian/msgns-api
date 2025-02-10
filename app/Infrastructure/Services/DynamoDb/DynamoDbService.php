@@ -143,7 +143,8 @@ final readonly class DynamoDbService
 			],
 			[
 				':group_id' => ['S' => $groupId],
-			]
+			],
+			'DESC'
 		);
 
 		return new FanceletGroupCommentsDto($groupId, $result['Items']);

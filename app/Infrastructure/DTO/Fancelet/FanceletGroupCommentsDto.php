@@ -17,9 +17,9 @@ final class FanceletGroupCommentsDto extends BaseDTO
 		$this->comments = [];
 
 		foreach ($dynamoDbCommentsResponseItems as $comment) {
-			$authorId = (int) $comment["ProductId"]["N"];
-			$message = (string) $comment["comment"]["S"];
-			$timestamp = (string) $comment["Timestamp"]["S"];
+			$authorId = (int) $comment['ProductId']['N'];
+			$message = (string) $comment['comment']['S'];
+			$timestamp = (string) $comment['Timestamp']['S'];
 
 			$this->comments[] = new FanceletCommentDto($authorId, $message, $timestamp);
 		}

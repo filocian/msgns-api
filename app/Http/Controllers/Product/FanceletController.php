@@ -12,6 +12,7 @@ use App\UseCases\Product\Fancelet\Actions\LoveFanceletActionUC;
 use App\UseCases\Product\Fancelet\Comments\FanceletCommentUC;
 use App\UseCases\Product\Fancelet\Likes\FanceletContentLikeUC;
 use App\UseCases\Product\Fancelet\LogicByType\LoveUC;
+use App\UseCases\Product\Grouping\SetFanceletGroupUC;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,8 @@ final class FanceletController extends Controller
 		private readonly LoveFanceletActionUC $loveActionUC,
 		private readonly FanceletContentLikeUC $contentLikeUC,
 		private readonly FanceletCommentUC $fanceletCommentUC,
-		private readonly FanceletService $fanceletService
+		private readonly FanceletService $fanceletService,
+		private readonly SetFanceletGroupUC $setFanceletGroupUC,
 	) {}
 
 	public function getLoveContent(int $productId, string $password): JsonResponse
@@ -74,14 +76,32 @@ final class FanceletController extends Controller
 		return HttpJson::OK('fancelet_message_sent');
 	}
 
+	public function groupFancelets(Request $request): JsonResponse
+	{
+		$productId = $request->get('parent_product_id');
+		$productPasswordId = $request->get('parent_product_password');
+		$childrenProductId = $request->get('children_product_ids');
+
+		try {
+			$this->setFanceletGroupUC->run([
+				'parent_product_id' => (int) $productId,
+				'parent_product_password' => (string) $productPasswordId,
+				'children_product_ids' => $childrenProductId,
+			]);
+		} catch (Exception $exception) {
+			return HttpJson::KO('unable_to_group_fancelets', 500, [$exception->getMessage()]);
+		}
+
+		return HttpJson::OK('fancelet_grouped');
+	}
+
 	public function addContentLike(
 		FanceletCanLikeRequest $request,
 		int $productId,
 		string $productPass,
 		string $contentType,
 		int $contentId
-	): JsonResponse
-	{
+	): JsonResponse {
 		$content = $this->contentLikeUC->run([
 			'product_id' => $productId,
 			'content_id' => $contentId,

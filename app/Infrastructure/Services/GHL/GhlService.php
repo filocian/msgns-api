@@ -7,8 +7,8 @@ namespace App\Infrastructure\Services\GHL;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Services\Auth\GhlOAuthService;
-use App\Static\GHL\StaticGHLOpportunities;
-use App\UseCases\Ghl\CreateGHLContactUC;
+use App\Models\GHLContact;
+use App\Models\GHLOpportunity;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -16,51 +16,90 @@ use Illuminate\Support\Facades\Http;
 final class GhlService
 {
 	private string $api_version = '2021-07-28';
+
 	public function __construct(
 		private readonly GhlOAuthService $ghlOAuthService,
-		private readonly CreateGHLContactUC $createGHLContactUC,
-	)
-	{
-	}
+	) {}
 
 	/**
 	 * @throws ConnectionException
 	 * @throws Exception
 	 */
-	public function createContact(UserDto $user): array
+	public function updateOrCreateContact(UserDto $userDto): array
 	{
 		$this->ghlOAuthService->refreshAccessToken();
-		$url = "https://services.leadconnectorhq.com/contacts/upsert";
+		$url = 'https://services.leadconnectorhq.com/contacts/upsert';
+		$lang = match ($userDto->default_locale) {
+			'en_UK' => 'English',
+			'ca_ES' => 'Català',
+			'es_ES' => 'Español',
+			'fr_FR' => 'Francés',
+			'de_DE' => 'Alemán',
+			'it_IT' => 'Italiano',
+		};
 		$data = [
-			'email' => $user->email,
-			'name' => $user->name,
+			'email' => $userDto->email,
+			'name' => $userDto->name,
+			'phone' => $userDto->phone,
 			'customFields' => [
 				[
+					'key' => 'phone',
+					'field_value' => $userDto->phone ?? '',
+				],
+				[
 					'key' => 'idioma',
-					'field_value' => 'Clingon'
-				]
-			]
+					'field_value' => $lang,
+				],
+			],
 		];
 
-		return $this->post($url, $data)->json();
+		$response = $this->post($url, $data)->json();
+
+		$ghlId = $response['contact']['id'];
+		GHLContact::updateOrCreate([
+				'user_id' => $userDto->id,
+			], [
+				'contact_id' => $ghlId,
+			]);
+
+		return $response;
 	}
 
 	/**
+	 * @param array{pipelineId: string, stageId: string, status: string, name: string} $data
+	 *
 	 * @throws ConnectionException
 	 */
-	public function createProductAssignedOpportunity(ProductDto|null $productDto): string
-	{
+	public function createOrUpdateOpportunity(
+		ProductDto|null $productDto,
+		array $data,
+		string|null $opportunityId = null
+	): string {
+		$contactId = $productDto->user->getContactId();
+
+		if (!$contactId) {
+			$contactId = $this->updateOrCreateContact($productDto->user)['contact']['id'];
+		}
+
 		$this->ghlOAuthService->refreshAccessToken();
-		$url = "https://services.leadconnectorhq.com/opportunities/";
-		$data = [
-			'pipelineId' => StaticGHLOpportunities::$PRODUCT_PIPELINE_ID,
-			'pipelineStageId' => StaticGHLOpportunities::$PRODUCT_ASSIGNED_STAGE_ID,
-			'name' => 'Oportunidad - producto asignadoprueba',
-			'status' => 'open',
-			'contactId' => $productDto->user->getContactId()
+		$url = 'https://services.leadconnectorhq.com/opportunities/upsert';
+		$opportunityData = [
+			'pipelineId' => $data['pipelineId'],
+			'pipelineStageId' => $data['stageId'],
+			'name' => $data['name'],
+			'status' => $data['status'],
+			'contactId' => $contactId,
 		];
 
-		$response = $this->post($url, $data);
+		$response = $this->post($url, $opportunityData);
+
+		$ghlId = $response->json()['opportunity']['id'];
+		GHLOpportunity::updateOrCreate([
+				'product_id' => $productDto->id,
+			], [
+				'opportunity_id' => $ghlId,
+			]);
+
 		return $response->body();
 	}
 
@@ -72,17 +111,5 @@ final class GhlService
 			'Authorization' => 'Bearer ' . $tokens['access_token'],
 			'Version' => $this->api_version,
 		])->post($url, array_merge($data, ['locationId' => $tokens['location_id']]));
-	}
-
-	public function resolveContactIdFromProductDto(ProductDto $productDto)
-	{
-		$contactId = $productDto->user->getContactId();
-		$userDto = $productDto->user;
-
-		if(!$contactId){
-			$userDto = $this->createGHLContactUC->run(['user_dto' => $productDto->user]);
-		}
-
-		return $userDto->getContactId();
 	}
 }

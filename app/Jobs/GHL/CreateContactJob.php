@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Jobs;
+namespace App\Jobs\GHL;
 
-use App\Events\UserSignedUpEvent;
-use App\UseCases\Ghl\CreateGHLContactUC;
+use App\Events\User\UserSignedUpEvent;
+use App\UseCases\GHL\UpdateOrCreateContactUC;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-final class CreateGHLContactJob implements ShouldQueue
+final class CreateContactJob implements ShouldQueue
 {
 	use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -29,10 +29,10 @@ final class CreateGHLContactJob implements ShouldQueue
 	 * Execute the job.
 	 * @throws Exception
 	 */
-	public function handle(CreateGHLContactUC $createGHLContactUC): void
+	public function handle(UpdateOrCreateContactUC $createGHLContactUC): void
 	{
-//		$createGHLContactUC->run([
-//			'user' => $this->event->user,
-//		]);
+		$createGHLContactUC->run([
+			'user' => $this->event->user,
+		]);
 	}
 }

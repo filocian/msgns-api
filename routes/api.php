@@ -39,7 +39,6 @@ Route::prefix('auth')->group(function () {
 Route::prefix('products')->group(function () {
 	Route::middleware('auth:stateful-api')->group(function () {
 		Route::get('/', [ProductController::class, 'list']);
-//		Route::get('/', function (){dd('list');});
 		Route::get('/export', [ProductController::class, 'productListExport']);
 		Route::post('/generate', [GenerateProductsController::class, 'generateProducts']);
 		Route::get('/mine', [ProductController::class, 'mine']);

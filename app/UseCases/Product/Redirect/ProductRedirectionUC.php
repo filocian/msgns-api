@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\UseCases\Product\Redirect;
 
-use App\Events\ProductScannedEvent;
+use App\Events\Product\ProductScannedEvent;
 use App\Helpers\StringHelpers;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;

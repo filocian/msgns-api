@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Jobs;
+namespace App\Jobs\Product;
 
-use App\Events\ProductAssignedEvent;
-use App\UseCases\Ghl\CreateGHLContactUC;
+use App\Models\Product;
+use App\UseCases\Product\Redirect\ProductUsageUC;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,14 +13,14 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-final class CreateGHLOpportunityJob implements ShouldQueue
+final class UpdateProductUsageJob implements ShouldQueue
 {
 	use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
 	/**
 	 * Create a new job instance.
 	 */
-	public function __construct(public ProductAssignedEvent $event)
+	public function __construct(public Product $product)
 	{
 		//
 	}
@@ -29,10 +29,10 @@ final class CreateGHLOpportunityJob implements ShouldQueue
 	 * Execute the job.
 	 * @throws Exception
 	 */
-	public function handle(CreateGHLContactUC $createGHLContactUC): void
+	public function handle(ProductUsageUC $productUsageUC): void
 	{
-		$createGHLContactUC->run([
-			'user' => $this->event->product,
+		$productUsageUC->run([
+			'productModel' => $this->product,
 		]);
 	}
 }

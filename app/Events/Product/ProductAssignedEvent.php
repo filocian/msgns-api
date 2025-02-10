@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Events;
+namespace App\Events\Product;
 
-use App\Models\User;
+use App\Models\Product;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-final class UserSignedUpEvent
+final class ProductAssignedEvent
 {
 	use Dispatchable, InteractsWithSockets, SerializesModels;
 
 	/**
 	 * Create a new event instance.
 	 */
-	public function __construct(public User $user)
+	public function __construct(public Product $product)
 	{
 		//
 	}
@@ -30,6 +30,6 @@ final class UserSignedUpEvent
 	 */
 	public function broadcastOn(): array
 	{
-		return [new PrivateChannel('user-signed-up'), ];
+		return [new PrivateChannel('product-assigned'), ];
 	}
 }

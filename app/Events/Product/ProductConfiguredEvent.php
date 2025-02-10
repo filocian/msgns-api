@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Events;
+namespace App\Events\Product;
 
 use App\Models\Product;
 use Illuminate\Broadcasting\Channel;

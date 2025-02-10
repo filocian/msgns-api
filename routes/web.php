@@ -38,5 +38,10 @@ Route::prefix('jobs')->group(function () {
  * GHL External API
  */
 Route::prefix('crm')->group(function () {
+	Route::get('oauth/connect', function (){
+		$url = str_replace('<<CLIENT_ID>>', env('GHL_OAUTH_CLIENT_ID'), env('GHL_OAUTH_URL'));
+
+		return redirect()->away($url);
+	});
 	Route::get('oauth/callback', [GoHighLevelOAuthController::class, 'authCode']);
 });

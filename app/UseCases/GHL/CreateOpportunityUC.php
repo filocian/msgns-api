@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\UseCases\Ghl;
+namespace App\UseCases\GHL;
 
-use App\Events\ProductAssignedEvent;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\GHL\GhlService;
 use App\Models\Product;
+use App\Static\GHL\StaticGHLOpportunities;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Log;
 
-final readonly class CreateGHLAssignedProductOpportunityUC implements UseCaseContract
+final readonly class CreateOpportunityUC implements UseCaseContract
 {
 	public function __construct(
 		private GhlService $ghlService,
@@ -29,13 +28,11 @@ final readonly class CreateGHLAssignedProductOpportunityUC implements UseCaseCon
 		$product = $data['product'];
 		$productDto = ProductDto::fromModel($product);
 
-		$contactId = $this->ghlService->resolveContactIdFromProductDto($productDto);
-
-		$response = $this->ghlService->createProductAssignedOpportunity($productDto);
-		event(new ProductAssignedEvent($product));
-
-		Log::info(json_encode(['contact_id' => $contactId]));
-
-		return $response;
+		return $this->ghlService->createOrUpdateOpportunity($productDto, [
+			'pipelineId' => StaticGHLOpportunities::$PRODUCT_PIPELINE_ID,
+			'stageId' => StaticGHLOpportunities::$PRODUCT_ASSIGNED_STAGE_ID,
+			'name' => $productDto->type->code . " - $productDto->model ($productDto->id)",
+			'status' => 'open',
+		]);
 	}
 }

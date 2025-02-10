@@ -7,7 +7,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration {
-	protected string $table = 'ghl_oauth';
+	protected string $table = 'ghl_opportunity_data';
 	/**
 	 * Run the migrations.
 	 */
@@ -15,8 +15,8 @@ return new class() extends Migration {
 	{
 		Schema::create($this->table, function (Blueprint $table) {
 			$table->id();
-			$table->string('token_type');
-			$table->text('token');
+			$table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null');
+			$table->string('opportunity_id');
 			$table->timestamps();
 		});
 	}

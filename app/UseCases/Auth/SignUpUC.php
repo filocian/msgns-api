@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\UseCases\Auth;
 
-use App\Events\UserSignedUpEvent;
+use App\Events\User\UserSignedUpEvent;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Services\Auth\AuthService;

@@ -21,21 +21,15 @@ final class GHLOpportunity extends Model
 	 *
 	 * @var array<int, string>
 	 */
-	protected $fillable = [
-		'product_id',
-		'user_id',
-		'stage_key',
-		'pipeline_id',
-		'stage_id',
-	];
+	protected $fillable = ['product_id', 'opportunity_id', ];
 
 	protected $casts = [
 		'created_at' => 'datetime',
 		'updated_at' => 'datetime',
 	];
 
-	public function contact()
+	public function product()
 	{
-		return $this->belongsTo(GHLContact::class);
+		return $this->belongsTo(Product::class);
 	}
 }

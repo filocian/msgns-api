@@ -20,10 +20,7 @@ final class GHLContact extends Model
 	 *
 	 * @var array<int, string>
 	 */
-	protected $fillable = [
-		'contact_id',
-		'user_id',
-	];
+	protected $fillable = ['contact_id', 'user_id', ];
 
 	protected $casts = [
 		'created_at' => 'datetime',

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\UseCases\Product\Registration;
 
+use App\Events\Product\ProductAssignedEvent;
+use App\Events\Product\ProductAssignmentErrorEvent;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Auth\AuthService;
-use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
-use App\UseCases\Ghl\CreateGHLAssignedProductOpportunityUC;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,8 +22,6 @@ final readonly class RegisterProductUC implements UseCaseContract
 	public function __construct(
 		private AuthService $authService,
 		private ProductService $productService,
-		private MPLogger $mpLogger,
-		private CreateGHLAssignedProductOpportunityUC $createGHLAssignedProductOpportunityUC,
 	) {}
 
 	/**
@@ -70,20 +68,11 @@ final readonly class RegisterProductUC implements UseCaseContract
 
 			$product->refresh();
 
-			$this->mpLogger->info('PRODUCT_ASSIGNATION', 'PRODUCT ASSIGNATION OCCURRED', 'product assigned to a user', [
-				'user_id' => $userId,
-				'product_id' => $productId,
-			]);
-
-			$this->createGHLAssignedProductOpportunityUC->run(['product' => $product]);
+			event(new ProductAssignedEvent($product));
 
 			return ProductDto::fromModel($product);
 		} catch (ModelNotFoundException $e) {
-			$this->mpLogger->error('PRODUCT_ASSIGNATION', 'ERROR ASSIGNING', 'error assigning a product to a user', [
-				'user_id' => $userId,
-				'product_id' => $productId,
-				'exception_message' => $e->getMessage(),
-			]);
+			event(new ProductAssignmentErrorEvent($productId, $userId, $e->getMessage()));
 
 			throw new ProductNotFoundException();
 		}

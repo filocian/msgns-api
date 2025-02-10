@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Events;
+namespace App\Events\Product;
 
 use App\Models\Product;
 use Illuminate\Broadcasting\Channel;
@@ -11,7 +11,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-final class ProductAssignedEvent
+final class ProductScannedEvent
 {
 	use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -30,6 +30,6 @@ final class ProductAssignedEvent
 	 */
 	public function broadcastOn(): array
 	{
-		return [new PrivateChannel('product-assigned'), ];
+		return [new PrivateChannel('product-usage'), ];
 	}
 }

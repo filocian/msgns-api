@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Infrastructure\DTO;
 
 use App\Infrastructure\Contracts\DTO\Abstract\BaseDTO;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 final class UserDto extends BaseDTO
 {
-	private User $model;
+	private Model $model;
 	public int $id;
 	public string $name;
 	public string $email;

@@ -4,37 +4,21 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\Auth;
 
-use App\Infrastructure\DTO\UserDto;
-use App\Infrastructure\Factory\SocialLoginFactory;
-use App\Infrastructure\Services\Mail\ResendService;
-use App\Infrastructure\Services\MixPanel\MPLogger;
-use App\Infrastructure\Services\User\UserService;
-use App\Models\User;
-use App\Static\Permissions\StaticRoles;
-use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Request;
-use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class GhlOAuthService
 {
-	public function __construct(){}
+	public function __construct() {}
 
 	/**
 	 * @throws ConnectionException
 	 * @throws Exception
 	 */
-	public function getAccessToken(string $access_code): string {
+	public function getAccessToken(string $access_code): string
+	{
 		$url = 'https://services.leadconnectorhq.com/oauth/token';
 		$data = [
 			'client_id' => '679904d3b09ca8492a46f0e6-m6i6znlo',
@@ -56,16 +40,16 @@ final class GhlOAuthService
 			}
 
 			return 'ok';
-		} else {
-			return $response->body(); // Muestra el contenido en caso de error
 		}
+		return $response->body(); // Muestra el contenido en caso de error
 	}
 
 	/**
 	 * @throws ConnectionException
 	 * @throws Exception
 	 */
-	public function refreshAccessToken(): string {
+	public function refreshAccessToken(): string
+	{
 		$url = 'https://services.leadconnectorhq.com/oauth/token';
 		$refresh_token = $this->retrieveAccessToken()['refresh_token'];
 		$data = [
@@ -88,9 +72,8 @@ final class GhlOAuthService
 			}
 
 			return 'ok';
-		} else {
-			return $response->body(); // Muestra el contenido en caso de error
 		}
+		return $response->body(); // Muestra el contenido en caso de error
 	}
 
 	/**

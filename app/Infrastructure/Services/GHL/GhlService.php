@@ -57,10 +57,10 @@ final class GhlService
 
 		$ghlId = $response['contact']['id'];
 		GHLContact::updateOrCreate([
-				'user_id' => $userDto->id,
-			], [
-				'contact_id' => $ghlId,
-			]);
+			'user_id' => $userDto->id,
+		], [
+			'contact_id' => $ghlId,
+		]);
 
 		return $response;
 	}
@@ -95,10 +95,10 @@ final class GhlService
 
 		$ghlId = $response->json()['opportunity']['id'];
 		GHLOpportunity::updateOrCreate([
-				'product_id' => $productDto->id,
-			], [
-				'opportunity_id' => $ghlId,
-			]);
+			'product_id' => $productDto->id,
+		], [
+			'opportunity_id' => $ghlId,
+		]);
 
 		return $response->body();
 	}

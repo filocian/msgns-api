@@ -12,6 +12,7 @@ use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
+use App\Static\Product\Fancelet\FanceletFrontEndUrls;
 use Exception;
 
 final readonly class ProductRedirectionUC implements UseCaseContract
@@ -173,6 +174,13 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	private function resolveBraceletUrl(ProductDto $productDto): string
 	{
-		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
+		$productTypeCode = $productDto->type->code;
+		$productTypeDefinition = substr($productTypeCode, 0, 4);
+		return match ($productTypeDefinition) {
+			'B-LO' => env(
+				'FRONT_URL'
+			) . FanceletFrontEndUrls::$LOB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
+		};
+		//		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
 	}
 }

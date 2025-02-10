@@ -14,7 +14,7 @@ final class GroupedProductDto extends BaseDTO
 	public UserDto|null $user;
 	public string $model;
 	public string $password;
-	public string $target_url;
+	public string|null $target_url;
 	public ProductBusinessDto|null $business_data;
 	public int $usage;
 	public string $name;
@@ -28,7 +28,7 @@ final class GroupedProductDto extends BaseDTO
 		$this->user = $model->user ? UserDto::fromModel($model->user) : null;
 		$this->model = $model->model;
 		$this->password = $model->password;
-		$this->target_url = $model->target_url;
+		$this->target_url = $model->target_url ?? null;
 		$this->business_data = $model->business ? ProductBusinessDto::fromModel($model->business) : null;
 		$this->usage = $model->usage;
 		$this->name = $model->name;

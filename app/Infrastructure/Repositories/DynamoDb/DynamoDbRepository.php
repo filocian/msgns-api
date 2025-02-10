@@ -53,7 +53,8 @@ final class DynamoDbRepository
 		string $tableName,
 		string $keyConditionExpression,
 		array $expressionAttributeNames,
-		array $expressionAttributeValues
+		array $expressionAttributeValues,
+		string $order = 'ASC'
 	): ?\Aws\Result {
 		try {
 			return $this->client->query([
@@ -61,6 +62,7 @@ final class DynamoDbRepository
 				'KeyConditionExpression' => $keyConditionExpression,
 				'ExpressionAttributeNames' => $expressionAttributeNames,
 				'ExpressionAttributeValues' => $expressionAttributeValues,
+				'ScanIndexForward' => $order === 'ASC',
 			]);
 		} catch (DynamoDbException $e) {
 			Log::error($e->getMessage());

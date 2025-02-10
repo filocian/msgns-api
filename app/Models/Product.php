@@ -276,7 +276,15 @@ final class Product extends Model
 	 */
 	public function childProduct()
 	{
-		return $this->hasOne(self::class, 'linked_to_product_id');
+		return $this->hasOne(self::class, 'linked_to_product_id')->latest();
+	}
+
+	/**
+	 * Get the child product that links to this product.
+	 */
+	public function groupedFancelets()
+	{
+		return $this->hasMany(self::class, 'linked_to_product_id');
 	}
 
 	/**

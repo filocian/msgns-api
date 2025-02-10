@@ -17,6 +17,9 @@ final class CreateLoveFanceletPairingSeeder extends Seeder
 	public function run(): void
 	{
 		$pairs = [
+			[184356, 184357],
+			[184359, 184323],
+			[184355, 184361],
 			[184360, 184354],
 			[184322, 184325],
 			[184327, 184324],

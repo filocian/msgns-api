@@ -93,6 +93,11 @@ Route::prefix('fancelets')->group(function () {
 		Route::get('/get/{group_id}', [FanceletController::class, 'getGroupComments']);
 	});
 
+	Route::prefix('group')->group(function () {
+		Route::post('/', [FanceletController::class, 'groupFancelets']);
+	});
+
+
 	Route::post('like/{id}/{password}/{contentType}/{contentId}', [FanceletController::class, 'addContentLike']);
 	Route::get('can-like/{id}/{contentType}/{contentId}', [FanceletController::class, 'canLike']);
 });

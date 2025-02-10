@@ -18,7 +18,7 @@ final readonly class FanceletMessageActionUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = null): bool
 	{
-		$productId = $data['product_id'];
+		$productId = (int) $data['product_id'];
 		$productPassword = $data['product_password'];
 		$message = $data['message'];
 		$targetTable = $data['target_table'];

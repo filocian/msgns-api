@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 final class UserDto extends BaseDTO
 {
+	private Model $model;
 	public int $id;
 	public string $name;
 	public string $email;
@@ -27,6 +28,7 @@ final class UserDto extends BaseDTO
 
 	public function __construct(Model $model)
 	{
+		$this->model = $model;
 		$this->id = $model->id;
 		$this->name = $model->name;
 		$this->email = $model->email;
@@ -43,8 +45,8 @@ final class UserDto extends BaseDTO
 		$this->updated_at = $model->updated_at;
 	}
 
-	public function getGoogleId()
+	public function getContactId()
 	{
-		return $this->google_id;
+		return $this->model->ghlContact->contact_id ?? null;
 	}
 }

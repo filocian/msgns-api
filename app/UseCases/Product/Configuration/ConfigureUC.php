@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\UseCases\Product\Configuration;
 
+use App\Events\Product\ProductConfiguredEvent;
 use App\Exceptions\Product\InvalidProductTypeException;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
@@ -92,6 +93,8 @@ final readonly class ConfigureUC implements UseCaseContract
 		$product->update($config);
 
 		$product->refresh();
+
+		event(new ProductConfiguredEvent($product));
 
 		return ProductDto::fromModel($product);
 	}

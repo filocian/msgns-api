@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\User;
 
+use App\Events\User\UserDataUpdatedEvent;
 use App\Infrastructure\DTO\PaginatorDto;
 use App\Infrastructure\DTO\UserDto;
 use App\Models\User;
@@ -82,6 +83,8 @@ final class UserService
 
 		$user->update($newUserdata);
 
+		event(new UserDataUpdatedEvent($user));
+
 		return UserDto::fromModel($user);
 	}
 
@@ -98,7 +101,7 @@ final class UserService
 			'fr' => 'fr_FR',
 			'de' => 'de_DE',
 			'it' => 'it_IT',
-			default => 'en_Uk'
+			default => 'en_UK'
 		};
 	}
 }

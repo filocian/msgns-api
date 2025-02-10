@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Services\Product\Fancelet;
 
 use App\Infrastructure\DTO\Fancelet\FanceletContentGalleryDto;
+use App\Infrastructure\DTO\Fancelet\FanceletGroupCommentsDto;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\DynamoDb\DynamoDbService;
 use App\Models\Fancelet\FanceletContentGallery;
@@ -39,5 +40,10 @@ final class FanceletService
 		$this->dynamoDbService->addFanceletComment($productId, $productPassword, $comment);
 
 		return true;
+	}
+
+	public function getGroupComments(string $groupId): FanceletGroupCommentsDto
+	{
+		return $this->dynamoDbService->getFanceletGroupComments($groupId);
 	}
 }

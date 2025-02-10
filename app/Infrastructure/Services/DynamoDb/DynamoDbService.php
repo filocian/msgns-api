@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Services\DynamoDb;
 
+use App\Infrastructure\DTO\Fancelet\FanceletGroupCommentsDto;
 use App\Infrastructure\DTO\Stats\AccountStatsDto;
 use App\Infrastructure\DTO\Stats\IntervalStatsDto;
 use App\Infrastructure\Repositories\DynamoDb\DynamoDbRepository;
@@ -130,5 +131,21 @@ final readonly class DynamoDbService
 			'comment' => ['S' => $comment],
 			'Timestamp' => ['S' => $timestamp ?? Carbon::now()->format('Y-m-d H:i:s.u')],
 		]);
+	}
+
+	public function getFanceletGroupComments(string $groupId): FanceletGroupCommentsDto
+	{
+		$result = $this->dynamoDbRepo->query(
+			$this->fanceletCommentsTable,
+			'#group = :group_id',
+			[
+				'#group' => 'FanceletGroup',
+			],
+			[
+				':group_id' => ['S' => $groupId],
+			]
+		);
+
+		return new FanceletGroupCommentsDto($groupId, $result['Items']);
 	}
 }

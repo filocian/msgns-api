@@ -90,7 +90,7 @@ Route::prefix('fancelets')->group(function () {
 
 	Route::prefix('comments')->group(function () {
 		Route::post('/send', [FanceletController::class, 'sendComment']);
-		Route::get('/get', [FanceletController::class, 'loveAction']);
+		Route::get('/get/{group_id}', [FanceletController::class, 'getGroupComments']);
 	});
 
 	Route::post('like/{id}/{password}/{contentType}/{contentId}', [FanceletController::class, 'addContentLike']);

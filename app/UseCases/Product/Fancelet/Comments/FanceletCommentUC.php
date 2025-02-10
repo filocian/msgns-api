@@ -18,7 +18,7 @@ final class FanceletCommentUC implements UseCaseContract
 	 */
 	public function run(mixed $data = null, ?array $opts = null): bool
 	{
-		$productId = $data['product_id'];
+		$productId = (int) $data['product_id'];
 		$productPassword = $data['product_password'];
 		$message = $data['message'];
 		$targetTable = 'fancelet_comments_registry';

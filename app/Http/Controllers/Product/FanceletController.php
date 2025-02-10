@@ -13,6 +13,7 @@ use App\UseCases\Product\Fancelet\Comments\FanceletCommentUC;
 use App\UseCases\Product\Fancelet\Likes\FanceletContentLikeUC;
 use App\UseCases\Product\Fancelet\LogicByType\LoveUC;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class FanceletController extends Controller
@@ -25,7 +26,7 @@ final class FanceletController extends Controller
 		private readonly FanceletService $fanceletService
 	) {}
 
-	public function getLoveContent(int $productId, string $password)
+	public function getLoveContent(int $productId, string $password): JsonResponse
 	{
 		$content = $this->loveUC->run([
 			'product_id' => $productId,
@@ -35,7 +36,7 @@ final class FanceletController extends Controller
 		return HttpJson::OK($content->wrapped('content'));
 	}
 
-	public function loveAction(Request $request)
+	public function loveAction(Request $request): JsonResponse
 	{
 		$productId = $request->get('product_id');
 		$productPass = $request->get('product_password');
@@ -54,7 +55,7 @@ final class FanceletController extends Controller
 		return HttpJson::OK('fancelet_love_action_message_sent');
 	}
 
-	public function sendComment(Request $request)
+	public function sendComment(Request $request): JsonResponse
 	{
 		$productId = $request->get('product_id');
 		$productPass = $request->get('product_password');
@@ -79,7 +80,8 @@ final class FanceletController extends Controller
 		string $productPass,
 		string $contentType,
 		int $contentId
-	) {
+	): JsonResponse
+	{
 		$content = $this->contentLikeUC->run([
 			'product_id' => $productId,
 			'content_id' => $contentId,
@@ -93,5 +95,12 @@ final class FanceletController extends Controller
 	{
 		$canLike = $this->fanceletService->canLike($productId, $contentId, $contentType);
 		return HttpJson::OK(['can_like' => $canLike]);
+	}
+
+	public function getGroupComments(string $group_id): JsonResponse
+	{
+		$comments = $this->fanceletService->getGroupComments($group_id);
+
+		return HttpJson::OK(['comments' => $comments]);
 	}
 }

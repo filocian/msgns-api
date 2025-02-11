@@ -19,14 +19,16 @@ final class LoveUC implements UseCaseContract
 		$productPassword = $data['password'];
 		$contentGalleryDto = $this->fanceletService->getContentGallery($productId, $productPassword);
 		$yearDay = Carbon::now()->dayOfYear;
+		$monthDay = Carbon::now()->dayOfMonth;
 
 		$images = DB::table('fancelet_content_images')
 			->select('*')
 			->where('gallery_id', $contentGalleryDto->gallery_id)
+			->where('order', $monthDay)
 			->get()
 			->toArray();
 
-		$image = $images[rand(0, count($images) - 1)];
+		$image = $images[0];
 		$text = DB::table('fancelet_content_texts')
 			->select('*')
 			->where('gallery_id', $contentGalleryDto->gallery_id)

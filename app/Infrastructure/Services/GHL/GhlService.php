@@ -30,12 +30,12 @@ final class GhlService
 		$this->ghlOAuthService->refreshAccessToken();
 		$url = 'https://services.leadconnectorhq.com/contacts/upsert';
 		$lang = match ($userDto->default_locale) {
-			'en_UK' => 'English',
 			'ca_ES' => 'Català',
 			'es_ES' => 'Español',
 			'fr_FR' => 'Francés',
 			'de_DE' => 'Alemán',
 			'it_IT' => 'Italiano',
+			default => 'English'
 		};
 		$data = [
 			'email' => $userDto->email,

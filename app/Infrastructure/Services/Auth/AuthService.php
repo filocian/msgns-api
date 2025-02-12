@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -74,13 +75,16 @@ final class AuthService
 
 			try {
 				$this->mailService->send($user->email, __('emailVerification.subject'), $html);
+				Log::info("SignUp By $user->email: Trying Resend");
 			} catch (Exception $error) {
 				$this->mpLogger->critical('USER_SIGNUP', 'USER SIGNUP EMAIL VERIFY', 'user signup email verification send failed', [
 					'user_email' => $data['email'],
 					'exception_message' => $error->getMessage(),
 				]);
 
-				throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
+				Log::info("SignUp By $user->email: Trying Resend");
+
+				//throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
 			}
 		}
 

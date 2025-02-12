@@ -7,6 +7,7 @@ namespace App\UseCases\Auth;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\UserDto;
 use App\Infrastructure\Services\Auth\AuthService;
+use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Models\User;
 use Illuminate\Validation\UnauthorizedException;
 use Random\RandomException;
@@ -14,7 +15,8 @@ use Random\RandomException;
 final readonly class GoogleLoginUC implements UseCaseContract
 {
 	public function __construct(
-		private AuthService $authService
+		private AuthService $authService,
+		private MPLogger $mpLogger,
 	) {}
 
 	/**
@@ -31,6 +33,10 @@ final readonly class GoogleLoginUC implements UseCaseContract
 		$googleUser = $this->extractDataFromGoogleToken($token);
 
 		if (!$googleUser['google_id']) {
+			$this->mpLogger->critical('LOGIN', 'GOOGLE LOGIN', 'Invalid google user id', [
+				'user_data' => $googleUser,
+			]);
+
 			throw new UnauthorizedException('Invalid google user id');
 		}
 
@@ -58,6 +64,10 @@ final readonly class GoogleLoginUC implements UseCaseContract
 		}
 
 		$this->authService->autoLogin($user, $user_agent);
+
+		$this->mpLogger->info('LOGIN', 'GOOGLE LOGIN', 'Logged In', [
+			'user_data' => $user,
+		]);
 
 		return UserDto::fromModel($user);
 	}

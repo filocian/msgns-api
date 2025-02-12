@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\GoHighLevelOAuthController;
 use App\Http\Controllers\Product\Web\RedirectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-	return view('welcome');
+	return redirect()->away('https://messagenes.com');
 });
 
 Route::get('/nfc/{data}', [RedirectionController::class, 'legacyRedirect']);
@@ -31,4 +32,16 @@ Route::prefix('jobs')->group(function () {
 
 		App\Jobs\TestJob::dispatch();
 	});
+});
+
+/**
+ * GHL External API
+ */
+Route::prefix('crm')->group(function () {
+	Route::get('oauth/connect', function () {
+		$url = str_replace('<<CLIENT_ID>>', env('GHL_OAUTH_CLIENT_ID'), env('GHL_OAUTH_URL'));
+
+		return redirect()->away($url);
+	});
+	Route::get('oauth/callback', [GoHighLevelOAuthController::class, 'authCode']);
 });

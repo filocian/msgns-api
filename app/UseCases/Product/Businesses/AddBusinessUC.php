@@ -6,6 +6,7 @@ namespace App\UseCases\Product\Businesses;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
+use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Infrastructure\Services\Product\ProductService;
 use App\Models\Product;
 use App\Models\ProductBusiness;
@@ -13,7 +14,7 @@ use App\Models\ProductConfigurationStatus;
 
 final readonly class AddBusinessUC implements UseCaseContract
 {
-	public function __construct(private ProductService $productService) {}
+	public function __construct(private ProductService $productService, private MPLogger $mpLogger) {}
 
 	/**
 	 * UseCase: Assign a product to given user
@@ -43,13 +44,9 @@ final readonly class AddBusinessUC implements UseCaseContract
 
 		$businessData['user_id'] = $data['userId'];
 
-		$business = ProductBusiness::updateOrCreate(
-			[
-				'product_id' => $data['productId'],
-				//				'user_id' => $data['userId'],
-			],
-			$businessData
-		);
+		$business = ProductBusiness::updateOrCreate([
+			'product_id' => $data['productId'],
+		], $businessData);
 
 		$productId = $data['productId'];
 		$product = Product::findById($productId);
@@ -57,6 +54,11 @@ final readonly class AddBusinessUC implements UseCaseContract
 			->resolveConfigurationStatus($product, ProductConfigurationStatus::$STATUS_BUSINESS_SET);
 		$product->update(['configuration_status' => $configStatus]);
 		$product->refresh();
+
+		$this->mpLogger->info('PRODUCT_BUSINESS', 'PRODUCT BUSINESS SET', 'product business set', [
+			'product_id' => $productId,
+			'business_data' => $businessData,
+		]);
 
 
 		return ProductDto::fromModel($product);

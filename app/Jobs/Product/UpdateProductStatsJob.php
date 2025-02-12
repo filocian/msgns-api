@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Jobs;
+namespace App\Jobs\Product;
 
 use App\Models\Product;
 use App\UseCases\Product\Redirect\ProductStatisticsUC;

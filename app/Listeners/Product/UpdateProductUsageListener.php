@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Listeners;
+namespace App\Listeners\Product;
 
-use App\Events\ProductScanned;
-use App\Jobs\UpdateProductStatsJob;
-use App\Jobs\UpdateProductUsageJob;
+use App\Events\Product\ProductScannedEvent;
+use App\Jobs\Product\UpdateProductStatsJob;
+use App\Jobs\Product\UpdateProductUsageJob;
 
-final class UpdateProductUsage
+final class UpdateProductUsageListener
 {
 	/**
 	 * Create the event listener.
@@ -21,7 +21,7 @@ final class UpdateProductUsage
 	/**
 	 * Handle the event.
 	 */
-	public function handle(ProductScanned $event): void
+	public function handle(ProductScannedEvent $event): void
 	{
 		UpdateProductUsageJob::dispatch($event->product);
 		UpdateProductStatsJob::dispatch($event->product);

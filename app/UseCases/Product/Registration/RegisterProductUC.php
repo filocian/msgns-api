@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\UseCases\Product\Registration;
 
+use App\Events\Product\ProductAssignedEvent;
+use App\Events\Product\ProductAssignmentErrorEvent;
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
@@ -66,8 +68,12 @@ final readonly class RegisterProductUC implements UseCaseContract
 
 			$product->refresh();
 
+			event(new ProductAssignedEvent($product));
+
 			return ProductDto::fromModel($product);
 		} catch (ModelNotFoundException $e) {
+			event(new ProductAssignmentErrorEvent($productId, $userId, $e->getMessage()));
+
 			throw new ProductNotFoundException();
 		}
 	}

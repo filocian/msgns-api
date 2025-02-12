@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace App\UseCases\Product\Redirect;
 
-use App\Events\ProductScanned;
+use App\Events\Product\ProductScannedEvent;
 use App\Helpers\StringHelpers;
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Auth\AuthService;
+use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
+use App\Static\Product\Fancelet\FanceletFrontEndUrls;
 use Exception;
 
 final readonly class ProductRedirectionUC implements UseCaseContract
 {
 	public function __construct(
 		private AuthService $authService,
-		private WhatsappResolverUC $whatsappResolverUC
+		private WhatsappResolverUC $whatsappResolverUC,
+		private MPLogger $mpLogger,
 	) {}
 
 	/**
@@ -44,7 +47,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	public function updateProductUsage(Product $product): void
 	{
-		event(new ProductScanned($product));
+		event(new ProductScannedEvent($product));
 	}
 
 	private function resolveTargetUrl(Product $product, string $browserLocale = null): string
@@ -68,6 +71,11 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 		//Producto incompleto -> stepper (si owner = loggedUserId) | incomplete info page
 		if ($this->isMisconfiguredProduct($productDto) && !$this->canBypassStatusCheck($productDto)) {
+			$this->mpLogger->warn('PRODUCT_REDIRECTION', 'PRODUCT MISCONFIGURED', 'product misconfigured redirection', [
+				'product_id' => $productDto->id,
+				'user_id' => $loggedUserId,
+			]);
+
 			return $this->resolveIncompleteUrl($productDto, $loggedUserId);
 		}
 
@@ -80,6 +88,16 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 			]);
 
 			if (!$whatsappUrl) {
+				$this->mpLogger->warn(
+					'PRODUCT_REDIRECTION',
+					'WHATSAPP PRODUCT MISCONFIGURED',
+					'whatsapp product misconfigured redirection',
+					[
+						'product_id' => $productDto->id,
+						'user_id' => $loggedUserId,
+					]
+				);
+
 				return $this->resolveIncompleteUrl($productDto, $loggedUserId);
 			}
 
@@ -156,6 +174,13 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	private function resolveBraceletUrl(ProductDto $productDto): string
 	{
-		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
+		$productTypeCode = $productDto->type->code;
+		$productTypeDefinition = substr($productTypeCode, 0, 4);
+		return match ($productTypeDefinition) {
+			'B-LO' => env(
+				'FRONT_URL'
+			) . FanceletFrontEndUrls::$LOB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
+		};
+		//		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
 	}
 }

@@ -82,7 +82,7 @@ final class AuthService
 					'exception_message' => $error->getMessage(),
 				]);
 
-				Log::info("SignUp By $user->email: Trying Resend");
+				Log::error("SignUp By $user->email: Error Trying Resend");
 
 				//throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
 			}

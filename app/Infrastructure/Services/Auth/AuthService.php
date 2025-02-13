@@ -75,14 +75,13 @@ final class AuthService
 
 			try {
 				$this->mailService->send($user->email, __('emailVerification.subject'), $html);
-				Log::info("SignUp By $user->email: Trying Resend");
 			} catch (Exception $error) {
 				$this->mpLogger->critical('USER_SIGNUP', 'USER SIGNUP EMAIL VERIFY', 'user signup email verification send failed', [
 					'user_email' => $data['email'],
 					'exception_message' => $error->getMessage(),
 				]);
 
-				Log::error("SignUp By $user->email: Error Trying Resend");
+				Log::error("SignUp By $user->email: Error Trying Resend using" . env('MAIL_FROM_ADDRESS'));
 
 				//throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
 			}

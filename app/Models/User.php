@@ -28,6 +28,7 @@ final class User extends Authenticatable implements MustVerifyEmail
 		'email',
 		'password',
 		'phone',
+		'country',
 		'google_id',
 		'active',
 		'default_locale',

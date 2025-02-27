@@ -79,6 +79,7 @@ final class UsersController extends Controller
 			'email' => $request->input('email'),
 			'name' => $request->input('name'),
 			'phone' => $request->input('phone') ?? null,
+			'country' => $request->input('country') ?? null,
 			'default_locale' => $request->input('default_locale') ?? null,
 		];
 

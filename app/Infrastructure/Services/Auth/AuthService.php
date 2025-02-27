@@ -50,6 +50,7 @@ final class AuthService
 			'name' => $data['name'],
 			'email' => $data['email'],
 			'phone' => $data['phone'] ?? null,
+			'country' => $data['country'] ?? null,
 			'password' => bcrypt($data['password']),
 			'google_id' => $data['google_id'] ?? '',
 			'password_reset_required' => false,

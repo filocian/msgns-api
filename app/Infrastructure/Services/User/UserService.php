@@ -54,7 +54,7 @@ final class UserService
 	/**
 	 * Update User data: email, name, phone.
 	 *
-	 * @param array{user_id: int, email: string, name: string, phone: string|null, default_locale: string|null} $data
+	 * @param array{user_id: int, email: string, name: string, phone: string|null, country: string|null, default_locale: string|null} $data
 	 * @return UserDto|null
 	 */
 	public function updateUserData(array $data): UserDto|null
@@ -69,6 +69,10 @@ final class UserService
 
 		if (isset($data['phone'])) {
 			$newUserdata['phone'] = $data['phone'];
+		}
+
+		if (isset($data['country'])) {
+			$newUserdata['country'] = $data['country'];
 		}
 
 		if (isset($data['default_locale'])) {

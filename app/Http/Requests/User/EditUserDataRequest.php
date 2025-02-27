@@ -45,6 +45,7 @@ final class EditUserDataRequest extends FormRequest
 			'email' => 'string|required',
 			'phone' => 'string',
 			'default_locale' => 'string',
+			'country' => 'string|required',
 		];
 	}
 }

@@ -11,6 +11,7 @@ use App\Infrastructure\Services\Product\Fancelet\FanceletService;
 use App\UseCases\Product\Fancelet\Actions\LoveFanceletActionUC;
 use App\UseCases\Product\Fancelet\Comments\FanceletCommentUC;
 use App\UseCases\Product\Fancelet\Likes\FanceletContentLikeUC;
+use App\UseCases\Product\Fancelet\LogicByType\BibleUC;
 use App\UseCases\Product\Fancelet\LogicByType\LoveUC;
 use App\UseCases\Product\Grouping\SetFanceletGroupUC;
 use Exception;
@@ -21,6 +22,7 @@ final class FanceletController extends Controller
 {
 	public function __construct(
 		private readonly LoveUC $loveUC,
+		private readonly BibleUC $bibleUC,
 		private readonly LoveFanceletActionUC $loveActionUC,
 		private readonly FanceletContentLikeUC $contentLikeUC,
 		private readonly FanceletCommentUC $fanceletCommentUC,
@@ -31,6 +33,16 @@ final class FanceletController extends Controller
 	public function getLoveContent(int $productId, string $password): JsonResponse
 	{
 		$content = $this->loveUC->run([
+			'product_id' => $productId,
+			'password' => $password,
+		]);
+
+		return HttpJson::OK($content->wrapped('content'));
+	}
+
+	public function getBibleContent(int $productId, string $password): JsonResponse
+	{
+		$content = $this->bibleUC->run([
 			'product_id' => $productId,
 			'password' => $password,
 		]);
@@ -57,16 +69,35 @@ final class FanceletController extends Controller
 		return HttpJson::OK('fancelet_love_action_message_sent');
 	}
 
-	public function sendComment(Request $request): JsonResponse
+	public function bibleAction(Request $request): JsonResponse
 	{
 		$productId = $request->get('product_id');
 		$productPass = $request->get('product_password');
 		$message = $request->get('message');
 
 		try {
-			$this->fanceletCommentUC->run([
+			$this->loveActionUC->run([
 				'product_id' => $productId,
 				'product_password' => $productPass,
+				'message' => $message,
+			]);
+		} catch (Exception $exception) {
+			return HttpJson::KO('unable_to_send_fancelet_love_action_message');
+		}
+
+		return HttpJson::OK('fancelet_love_action_message_sent');
+	}
+
+	public function sendComment(Request $request): JsonResponse
+	{
+		$productId = $request->get('product_id');
+		$productGroup = $request->get('product_group');
+		$message = $request->get('message');
+
+		try {
+			$this->fanceletCommentUC->run([
+				'product_id' => $productId,
+				'product_group' => $productGroup,
 				'message' => $message,
 			]);
 		} catch (Exception $exception) {

@@ -56,6 +56,8 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		$productDto = ProductDto::fromModel($product);
 
 		if ($this->isBraceletProduct($productDto)) {
+			$this->updateProductUsage($product);
+
 			return $this->resolveBraceletUrl($productDto);
 		}
 
@@ -180,6 +182,9 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 			'B-LO' => env(
 				'FRONT_URL'
 			) . FanceletFrontEndUrls::$LOB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
+			'B-BI' => env(
+				'FRONT_URL'
+			) . FanceletFrontEndUrls::$BIB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
 		};
 		//		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
 	}

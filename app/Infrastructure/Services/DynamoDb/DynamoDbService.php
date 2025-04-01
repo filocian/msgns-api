@@ -123,11 +123,11 @@ final readonly class DynamoDbService
 		$this->dynamoDbRepo->batchDelete($tableName, $keyConditionExpression, $expressionAttributeValues, $keyNames);
 	}
 
-	public function addFanceletComment(int $productId, string $productPassword, string $comment): void
+	public function addFanceletComment(int $productId, string $productGroup, string $comment): void
 	{
 		$this->dynamoDbRepo->putItem($this->fanceletCommentsTable, [
 			'ProductId' => ['N' => (string) $productId],
-			'FanceletGroup' => ['S' => $productPassword],
+			'FanceletGroup' => ['S' => $productGroup],
 			'comment' => ['S' => $comment],
 			'Timestamp' => ['S' => $timestamp ?? Carbon::now()->format('Y-m-d H:i:s.u')],
 		]);

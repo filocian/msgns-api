@@ -13,6 +13,7 @@ use App\UseCases\Product\Fancelet\Comments\FanceletCommentUC;
 use App\UseCases\Product\Fancelet\Likes\FanceletContentLikeUC;
 use App\UseCases\Product\Fancelet\LogicByType\BibleUC;
 use App\UseCases\Product\Fancelet\LogicByType\LoveUC;
+use App\UseCases\Product\Fancelet\Pairing\AnonymousFanceletPairingUC;
 use App\UseCases\Product\Grouping\SetFanceletGroupUC;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -28,6 +29,7 @@ final class FanceletController extends Controller
 		private readonly FanceletCommentUC $fanceletCommentUC,
 		private readonly FanceletService $fanceletService,
 		private readonly SetFanceletGroupUC $setFanceletGroupUC,
+		private readonly AnonymousFanceletPairingUC $anonymousFanceletPairingUC,
 	) {}
 
 	public function getLoveContent(int $productId, string $password): JsonResponse
@@ -153,5 +155,17 @@ final class FanceletController extends Controller
 		$comments = $this->fanceletService->getGroupComments($group_id);
 
 		return HttpJson::OK(['comments' => $comments]);
+	}
+
+	public function anonymousFanceletPairing(Request $request): JsonResponse	{
+		$masterList = $request->input('master_list');
+		$slaveList = $request->input('slave_list');
+
+		$pairing = $this->anonymousFanceletPairingUC->run([
+			'master_list' => $masterList,
+			'slave_list' =>	$slaveList
+		]);
+
+		return HttpJson::OK(['pairing' => $pairing]);
 	}
 }

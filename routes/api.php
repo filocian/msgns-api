@@ -102,6 +102,11 @@ Route::prefix('fancelets')->group(function () {
 
 	Route::post('like/{id}/{password}/{contentType}/{contentId}', [FanceletController::class, 'addContentLike']);
 	Route::get('can-like/{id}/{contentType}/{contentId}', [FanceletController::class, 'canLike']);
+
+	// ADMIN
+	Route::middleware('auth:stateful-api')->group(function () {
+		Route::post('pair/anonymous', [FanceletController::class, 'anonymousFanceletPairing']);
+	});
 });
 
 Route::prefix('stats')->group(function () {

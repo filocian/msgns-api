@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
 use App\Static\Product\Fancelet\FanceletFrontEndUrls;
 use Exception;
+use Illuminate\Http\Response;
 
 final readonly class ProductRedirectionUC implements UseCaseContract
 {
@@ -50,7 +51,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		event(new ProductScannedEvent($product));
 	}
 
-	private function resolveTargetUrl(Product $product, string $browserLocale = null): string
+	private function resolveTargetUrl(Product $product, string $browserLocale = null): string|Response
 	{
 		$loggedUserId = $this->authService->id();
 		$productDto = ProductDto::fromModel($product);
@@ -103,7 +104,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 				return $this->resolveIncompleteUrl($productDto, $loggedUserId);
 			}
 
-			$target_url = $whatsappUrl;
+			return response()->view('whatsapp.whatsapp-redirection', ['url' => $whatsappUrl]);
 		}
 
 		$this->updateProductUsage($product);

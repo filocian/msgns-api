@@ -16,7 +16,7 @@ final class RedirectionController extends Controller
 		private readonly ProductRedirectionUC $ProductRedirectionUC
 	) {}
 
-	public function legacyRedirect(Request $request, string $data): \Illuminate\Http\RedirectResponse
+	public function legacyRedirect(Request $request, string $data)
 	{
 		$browserLocales = $request->header('Accept-language');
 		$browserLocales = filter_var($browserLocales, FILTER_SANITIZE_FULL_SPECIAL_CHARS); // Sanitiza la cadena
@@ -40,7 +40,11 @@ final class RedirectionController extends Controller
 			'browserLocales' => $browserLocales,
 		]);
 
-		return redirect()->away($productTarget);
+		if (is_string($productTarget)) {
+			return redirect()->away($productTarget);
+		}
+
+		return $productTarget;
 	}
 
 	public function v2Redirect(Request $request, int $id, string $password)
@@ -54,13 +58,11 @@ final class RedirectionController extends Controller
 			'browserLocales' => $browserLocales,
 		]);
 
-		$product = Product::findByConfigPair($id, 'password', $password);
-
-		if ($product->model === 'whatsapp') {
-			return view('whatsapp.whatsapp-redirection')->with('url', $productTarget);
+		if (is_string($productTarget)) {
+			return redirect()->away($productTarget);
 		}
 
-		return redirect()->away($productTarget);
+		return $productTarget;
 	}
 
 	private function parseUrlWithQueryParams(string $urlSegment): array|null

@@ -58,7 +58,7 @@
 </div>
 <script>
 	function openWhatsapp() {
-		window.location.href = "{{ $url }}";
+		window.location.href = "{!! $url !!}";
 	}
 </script>
 </body>

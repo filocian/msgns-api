@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Product\Web;
 
 use App\Http\Contracts\Controller;
+use App\Models\Product;
 use App\UseCases\Product\Redirect\ProductRedirectionUC;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -53,8 +54,13 @@ final class RedirectionController extends Controller
 			'browserLocales' => $browserLocales,
 		]);
 
-		//		return redirect()->away($productTarget);
-		return response('', 302)->header('Location', $productTarget);
+		$product = Product::findByConfigPair($id, 'password', $password);
+
+		if ($product->model === 'whatsapp') {
+			return view('whatsapp.whatsapp-redirection')->with('url', $productTarget);
+		}
+
+		return redirect()->away($productTarget);
 	}
 
 	private function parseUrlWithQueryParams(string $urlSegment): array|null

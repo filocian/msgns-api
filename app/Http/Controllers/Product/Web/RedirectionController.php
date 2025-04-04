@@ -53,7 +53,8 @@ final class RedirectionController extends Controller
 			'browserLocales' => $browserLocales,
 		]);
 
-		return redirect()->away($productTarget);
+		//		return redirect()->away($productTarget);
+		return redirect($productTarget, 302, [], false);
 	}
 
 	private function parseUrlWithQueryParams(string $urlSegment): array|null

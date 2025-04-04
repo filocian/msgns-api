@@ -82,10 +82,12 @@ Route::prefix('products')->group(function () {
 Route::prefix('fancelets')->group(function () {
 	Route::prefix('get-content')->group(function () {
 		Route::get('/lo/{id}/{password}', [FanceletController::class, 'getLoveContent']);
+		Route::get('/bi/{id}/{password}', [FanceletController::class, 'getBibleContent']);
 	});
 
 	Route::prefix('action')->group(function () {
 		Route::post('/lo/message', [FanceletController::class, 'loveAction']);
+		Route::post('/bi/message', [FanceletController::class, 'bibleAction']);
 	});
 
 	Route::prefix('comments')->group(function () {
@@ -93,13 +95,15 @@ Route::prefix('fancelets')->group(function () {
 		Route::get('/get/{group_id}', [FanceletController::class, 'getGroupComments']);
 	});
 
-	Route::prefix('group')->group(function () {
-		Route::post('/', [FanceletController::class, 'groupFancelets']);
-	});
-
-
 	Route::post('like/{id}/{password}/{contentType}/{contentId}', [FanceletController::class, 'addContentLike']);
 	Route::get('can-like/{id}/{contentType}/{contentId}', [FanceletController::class, 'canLike']);
+
+	// ADMIN
+	Route::middleware('auth:stateful-api')->group(function () {
+		Route::prefix('pair')->group(function () {
+			Route::post('/anonymous', [FanceletController::class, 'anonymousFanceletPairing']);
+		});
+	});
 });
 
 Route::prefix('stats')->group(function () {

@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
 use App\Static\Product\Fancelet\FanceletFrontEndUrls;
 use Exception;
+use Illuminate\Http\Response;
 
 final readonly class ProductRedirectionUC implements UseCaseContract
 {
@@ -24,13 +25,13 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	) {}
 
 	/**
-	 * UseCase: Activate a product based on product id and its password
+	 * UseCase: Product redirection
 	 *
 	 * @param array{id: int, password: string, browserLocales: string}|null $data
 	 * @param array|null $opts
-	 * @return ProductDto | null
+	 * @return Response | string | null
 	 */
-	public function run(mixed $data = null, ?array $opts = null): string|null
+	public function run(mixed $data = null, ?array $opts = null): Response|string|null
 	{
 		$productId = (int) $data['id'];
 		$productPassword = $data['password'];
@@ -50,12 +51,14 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		event(new ProductScannedEvent($product));
 	}
 
-	private function resolveTargetUrl(Product $product, string $browserLocale = null): string
+	private function resolveTargetUrl(Product $product, string $browserLocale = null): Response|string
 	{
 		$loggedUserId = $this->authService->id();
 		$productDto = ProductDto::fromModel($product);
 
 		if ($this->isBraceletProduct($productDto)) {
+			$this->updateProductUsage($product);
+
 			return $this->resolveBraceletUrl($productDto);
 		}
 
@@ -101,7 +104,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 				return $this->resolveIncompleteUrl($productDto, $loggedUserId);
 			}
 
-			$target_url = $whatsappUrl;
+			return response()->view('whatsapp.whatsapp-redirection', ['url' => $whatsappUrl]);
 		}
 
 		$this->updateProductUsage($product);
@@ -180,6 +183,9 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 			'B-LO' => env(
 				'FRONT_URL'
 			) . FanceletFrontEndUrls::$LOB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
+			'B-BI' => env(
+				'FRONT_URL'
+			) . FanceletFrontEndUrls::$BIB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
 		};
 		//		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
 	}

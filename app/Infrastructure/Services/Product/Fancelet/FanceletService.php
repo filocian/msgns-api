@@ -12,9 +12,9 @@ use App\Models\Fancelet\FanceletContentGallery;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
-final class FanceletService
+final readonly class FanceletService
 {
-	public function __construct(private readonly DynamoDbService $dynamoDbService) {}
+	public function __construct(private DynamoDbService $dynamoDbService) {}
 	public function getContentGallery(int $productId, string $password): FanceletContentGalleryDto
 	{
 		$product = Product::findByConfigPair($productId, 'password', $password);
@@ -35,9 +35,9 @@ final class FanceletService
 		return $count < 1;
 	}
 
-	public function sendComment(int $productId, string $productPassword, string $comment): bool
+	public function sendComment(int $productId, string $productGroup, string $comment): bool
 	{
-		$this->dynamoDbService->addFanceletComment($productId, $productPassword, $comment);
+		$this->dynamoDbService->addFanceletComment($productId, $productGroup, $comment);
 
 		return true;
 	}

@@ -51,7 +51,7 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 		event(new ProductScannedEvent($product));
 	}
 
-	private function resolveTargetUrl(Product $product, string $browserLocale = null): string|Response
+	private function resolveTargetUrl(Product $product, string $browserLocale = null): Response|string
 	{
 		$loggedUserId = $this->authService->id();
 		$productDto = ProductDto::fromModel($product);

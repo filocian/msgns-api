@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Product\Web;
 
 use App\Http\Contracts\Controller;
-use App\Models\Product;
 use App\UseCases\Product\Redirect\ProductRedirectionUC;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

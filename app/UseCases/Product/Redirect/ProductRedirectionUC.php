@@ -25,13 +25,13 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 	) {}
 
 	/**
-	 * UseCase: Activate a product based on product id and its password
+	 * UseCase: Product redirection
 	 *
 	 * @param array{id: int, password: string, browserLocales: string}|null $data
 	 * @param array|null $opts
-	 * @return ProductDto | null
+	 * @return Response | string | null
 	 */
-	public function run(mixed $data = null, ?array $opts = null): string|null
+	public function run(mixed $data = null, ?array $opts = null): Response|string|null
 	{
 		$productId = (int) $data['id'];
 		$productPassword = $data['password'];

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Product;
 
 use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
+use App\Http\Requests\Product\Fancelet\FanceletAnonymousPairingRequest;
 use App\Http\Requests\Product\Fancelet\FanceletCanLikeRequest;
 use App\Infrastructure\Services\Product\Fancelet\FanceletService;
 use App\UseCases\Product\Fancelet\Actions\LoveFanceletActionUC;
@@ -14,7 +15,6 @@ use App\UseCases\Product\Fancelet\Likes\FanceletContentLikeUC;
 use App\UseCases\Product\Fancelet\LogicByType\BibleUC;
 use App\UseCases\Product\Fancelet\LogicByType\LoveUC;
 use App\UseCases\Product\Fancelet\Pairing\AnonymousFanceletPairingUC;
-use App\UseCases\Product\Grouping\SetFanceletGroupUC;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,7 +28,6 @@ final class FanceletController extends Controller
 		private readonly FanceletContentLikeUC $contentLikeUC,
 		private readonly FanceletCommentUC $fanceletCommentUC,
 		private readonly FanceletService $fanceletService,
-		private readonly SetFanceletGroupUC $setFanceletGroupUC,
 		private readonly AnonymousFanceletPairingUC $anonymousFanceletPairingUC,
 	) {}
 
@@ -109,25 +108,6 @@ final class FanceletController extends Controller
 		return HttpJson::OK('fancelet_message_sent');
 	}
 
-	public function groupFancelets(Request $request): JsonResponse
-	{
-		$productId = $request->get('parent_product_id');
-		$productPasswordId = $request->get('parent_product_password');
-		$childrenProductId = $request->get('children_product_ids');
-
-		try {
-			$this->setFanceletGroupUC->run([
-				'parent_product_id' => (int) $productId,
-				'parent_product_password' => (string) $productPasswordId,
-				'children_product_ids' => $childrenProductId,
-			]);
-		} catch (Exception $exception) {
-			return HttpJson::KO('unable_to_group_fancelets', 500, [$exception->getMessage()]);
-		}
-
-		return HttpJson::OK('fancelet_grouped');
-	}
-
 	public function addContentLike(
 		FanceletCanLikeRequest $request,
 		int $productId,
@@ -157,15 +137,20 @@ final class FanceletController extends Controller
 		return HttpJson::OK(['comments' => $comments]);
 	}
 
-	public function anonymousFanceletPairing(Request $request): JsonResponse	{
-		$masterList = $request->input('master_list');
-		$slaveList = $request->input('slave_list');
+	public function anonymousFanceletPairing(FanceletAnonymousPairingRequest $request): JsonResponse
+	{
+		$pairs = $request->input('pairs');
+		$productTypeId = $request->input('product_type_id');
 
 		$pairing = $this->anonymousFanceletPairingUC->run([
-			'master_list' => $masterList,
-			'slave_list' =>	$slaveList
+			'pairs' => $pairs,
+			'product_type_id' => (int) $productTypeId,
 		]);
 
-		return HttpJson::OK(['pairing' => $pairing]);
+		if ($pairing === null) {
+			return HttpJson::KO('invalid_product_type', 500, ['product_type_id' => $productTypeId]);
+		}
+
+		return HttpJson::OK(['pairing_result' => $pairing]);
 	}
 }

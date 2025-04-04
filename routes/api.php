@@ -95,13 +95,15 @@ Route::prefix('fancelets')->group(function () {
 		Route::get('/get/{group_id}', [FanceletController::class, 'getGroupComments']);
 	});
 
-	Route::prefix('group')->group(function () {
-		Route::post('/', [FanceletController::class, 'groupFancelets']);
-	});
-
-
 	Route::post('like/{id}/{password}/{contentType}/{contentId}', [FanceletController::class, 'addContentLike']);
 	Route::get('can-like/{id}/{contentType}/{contentId}', [FanceletController::class, 'canLike']);
+
+	// ADMIN
+	Route::middleware('auth:stateful-api')->group(function () {
+		Route::prefix('pair')->group(function () {
+			Route::post('/anonymous', [FanceletController::class, 'anonymousFanceletPairing']);
+		});
+	});
 });
 
 Route::prefix('stats')->group(function () {

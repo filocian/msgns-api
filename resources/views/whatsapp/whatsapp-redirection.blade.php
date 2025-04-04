@@ -10,8 +10,14 @@
 
 <script>
 	setTimeout(() => {
-		window.location.href = "{{ $url }}";
-	}, 1500); // 1.5 segundos de delay
+		const newWindow = window.open("{{ $url }}", "_blank");
+
+		// Por si el navegador bloquea el popup
+		if (!newWindow) {
+			window.location.href = "{{ $url }}";
+		}
+
+		}, 1500); // 1.5 segundos de delay
 </script>
 </body>
 </html>

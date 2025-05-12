@@ -18,11 +18,7 @@ final class FanceletCanLikeRequest extends FormRequest
 
 		$canLike = $fanceletService->canLike($productId, $contentId, $contentType);
 
-		return !(!$canLike)
-			 
-		
-
-		;
+		return !(!$canLike);
 	}
 
 	public function rules(): array

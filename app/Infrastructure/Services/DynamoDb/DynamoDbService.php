@@ -123,30 +123,61 @@ final readonly class DynamoDbService
 		$this->dynamoDbRepo->batchDelete($tableName, $keyConditionExpression, $expressionAttributeValues, $keyNames);
 	}
 
-	public function addFanceletComment(int $productId, string $productGroup, string $comment): void
-	{
-		$this->dynamoDbRepo->putItem($this->fanceletCommentsTable, [
-			'ProductId' => ['N' => (string) $productId],
-			'FanceletGroup' => ['S' => $productGroup],
-			'comment' => ['S' => $comment],
-			'Timestamp' => ['S' => $timestamp ?? Carbon::now()->format('Y-m-d H:i:s.u')],
-		]);
+	public function addFanceletComment(
+		int $productId,
+		string $productGroup,
+		string $comment,
+		array|null $tags = null
+	): void {
+		$data =
+			[
+				'ProductId' => ['N' => (string) $productId],
+				'FanceletGroup' => ['S' => $productGroup],
+				'comment' => ['S' => $comment],
+				'Timestamp' => ['S' => $timestamp ?? Carbon::now()->format('Y-m-d H:i:s.u')],
+			];
+
+		if ($tags) {
+			foreach ($tags as $tag) {
+				$data[$tag['name']] = ['S' => $tag['value']];
+			}
+		}
+
+		$this->dynamoDbRepo->putItem($this->fanceletCommentsTable, $data);
 	}
 
-	public function getFanceletGroupComments(string $groupId): FanceletGroupCommentsDto
-	{
+	public function getFanceletGroupComments(
+		string $groupId,
+		array|null $includeTags = null,
+		array|null $filterByTags = null
+	): FanceletGroupCommentsDto {
+		$keyCondition = '#group = :group_id';
+		$attrNames = [
+			'#group' => 'FanceletGroup',
+		];
+
+		$attrValues = [
+			':group_id' => ['S' => $groupId],
+		];
+
+		if ($filterByTags) {
+			foreach ($filterByTags as $tag) {
+				$keyIdentifier = '#' . $tag['name'];
+				$valueIdentifier = ':' . $tag['name'];
+				$keyCondition .= 'AND ' . $keyIdentifier . ' = ' . $valueIdentifier;
+				$attrNames[$keyIdentifier] = ['S' => $tag['value']];
+				$attrValues[$valueIdentifier] = ['S' => $tag['value']];
+			}
+		}
+
 		$result = $this->dynamoDbRepo->query(
 			$this->fanceletCommentsTable,
-			'#group = :group_id',
-			[
-				'#group' => 'FanceletGroup',
-			],
-			[
-				':group_id' => ['S' => $groupId],
-			],
+			$keyCondition,
+			$attrNames,
+			$attrValues,
 			'DESC'
 		);
 
-		return new FanceletGroupCommentsDto($groupId, $result['Items']);
+		return new FanceletGroupCommentsDto($groupId, $result['Items'], $includeTags);
 	}
 }

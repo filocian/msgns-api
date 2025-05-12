@@ -83,11 +83,19 @@ Route::prefix('fancelets')->group(function () {
 	Route::prefix('get-content')->group(function () {
 		Route::get('/lo/{id}/{password}', [FanceletController::class, 'getLoveContent']);
 		Route::get('/bi/{id}/{password}', [FanceletController::class, 'getBibleContent']);
+		Route::get('/ip/{id}/{password}', [FanceletController::class, 'getInnerPeaceContent']);
+		Route::get('/yo/{id}/{password}', [FanceletController::class, 'getYogaContent']);
+	});
+
+	Route::prefix('videos')->group(function () {
+		Route::post('/set-viewed/{video_id}', [FanceletController::class, 'setVideoViewed']);
 	});
 
 	Route::prefix('action')->group(function () {
 		Route::post('/lo/message', [FanceletController::class, 'loveAction']);
 		Route::post('/bi/message', [FanceletController::class, 'bibleAction']);
+		Route::post('/ip/mail', [FanceletController::class, 'innerPeaceAction']);
+		Route::post('/yo/mail', [FanceletController::class, 'yogaAction']);
 	});
 
 	Route::prefix('comments')->group(function () {

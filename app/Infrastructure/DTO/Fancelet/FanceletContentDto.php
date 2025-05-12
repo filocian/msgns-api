@@ -14,6 +14,7 @@ final class FanceletContentDto extends BaseDTO
 	public array|null $texts;
 	public array|null $videos;
 	public array|null $audios;
+	public array|null $metadata;
 
 	public function __construct(array $data)
 	{
@@ -22,5 +23,6 @@ final class FanceletContentDto extends BaseDTO
 		$this->texts = $data['texts'] ?? null;
 		$this->videos = $data['videos'] ?? null;
 		$this->audios = $data['audios'] ?? null;
+		$this->metadata = $data['metadata'] ?? null;
 	}
 }

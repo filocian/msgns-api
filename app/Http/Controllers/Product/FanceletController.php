@@ -12,11 +12,13 @@ use App\Http\Requests\Product\Fancelet\FanceletRegisteredUserRequest;
 use App\Infrastructure\Services\Product\Fancelet\FanceletService;
 use App\UseCases\Product\Fancelet\Actions\InnerPeaceFanceletActionUC;
 use App\UseCases\Product\Fancelet\Actions\LoveFanceletActionUC;
+use App\UseCases\Product\Fancelet\Actions\YogaFanceletActionUC;
 use App\UseCases\Product\Fancelet\Comments\FanceletCommentUC;
 use App\UseCases\Product\Fancelet\Likes\FanceletContentLikeUC;
 use App\UseCases\Product\Fancelet\LogicByType\BibleUC;
 use App\UseCases\Product\Fancelet\LogicByType\InnerPeaceUC;
 use App\UseCases\Product\Fancelet\LogicByType\LoveUC;
+use App\UseCases\Product\Fancelet\LogicByType\YogaUC;
 use App\UseCases\Product\Fancelet\Pairing\AnonymousFanceletPairingUC;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -28,8 +30,10 @@ final class FanceletController extends Controller
 		private readonly LoveUC $loveUC,
 		private readonly BibleUC $bibleUC,
 		private readonly InnerPeaceUC $innerPeaceUC,
+		private readonly YogaUC $yogaUC,
 		private readonly LoveFanceletActionUC $loveActionUC,
 		private readonly InnerPeaceFanceletActionUC $innerPeaceFanceletActionUC,
+		private readonly YogaFanceletActionUC $yogaFanceletActionUC,
 		private readonly FanceletContentLikeUC $contentLikeUC,
 		private readonly FanceletCommentUC $fanceletCommentUC,
 		private readonly FanceletService $fanceletService,
@@ -56,9 +60,12 @@ final class FanceletController extends Controller
 		return HttpJson::OK($content->wrapped('content'));
 	}
 
-	public function getYogaContent(int $productId, string $password): JsonResponse
-	{
-		$content = $this->bibleUC->run([
+	public function getYogaContent(
+		FanceletRegisteredUserRequest $request,
+		int $productId,
+		string $password
+	): JsonResponse {
+		$content = $this->yogaUC->run([
 			'product_id' => $productId,
 			'password' => $password,
 		]);
@@ -134,6 +141,25 @@ final class FanceletController extends Controller
 		}
 
 		return HttpJson::OK('fancelet_IP_action_mail_sent');
+	}
+
+	public function yogaAction(Request $request): JsonResponse
+	{
+		$productId = $request->get('product_id');
+		$productPass = $request->get('product_password');
+		$message = $request->get('message');
+
+		try {
+			$this->yogaFanceletActionUC->run([
+				'product_id' => $productId,
+				'product_password' => $productPass,
+				'message' => $message,
+			]);
+		} catch (Exception $exception) {
+			return HttpJson::KO('unable_to_send_fancelet_YO_action_mail');
+		}
+
+		return HttpJson::OK('fancelet_YO_action_mail_sent');
 	}
 
 	public function sendComment(Request $request): JsonResponse

@@ -18,9 +18,13 @@ final readonly class InnerPeaceFanceletActionUC implements UseCaseContract
 		$productPassword = $data['product_password'];
 		$comment = $data['message'];
 
-		$body = 'FROM: ' . $this->authService->userEmail() . "\r\n";
-		$body .= "MESSAGE: \r\n" . $comment . "\r\n";
+		$html = view('emails.contact-fancelet-creator')
+			->with([
+				'fanceletTitle' => 'Yoga',
+				'from' => $this->authService->userEmail(),
+				'message' => $comment,
+			])->render();
 
-		$this->resendService->send(env('FANCELET_IP_CREATOR_MAIL'), 'INNER PEACE FANCELET MESSAGE', $body,);
+		$this->resendService->send(env('FANCELET_IP_CREATOR_MAIL'), 'INNER PEACE FANCELET MESSAGE', $html,);
 	}
 }

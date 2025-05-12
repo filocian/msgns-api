@@ -14,7 +14,7 @@ final class FanceletCommentUC implements UseCaseContract
 	public function __construct(private FanceletService $fanceletService) {}
 
 	/**
-	 * @param array{product_id: int, product_group: string, message: string} $data
+	 * @param array{product_id: int, product_group: string, message: string, tags: array|null} $data
 	 */
 	public function run(mixed $data = null, ?array $opts = null): bool
 	{
@@ -22,6 +22,7 @@ final class FanceletCommentUC implements UseCaseContract
 		$productGroup = $data['product_group'];
 		$message = $data['message'];
 		$targetTable = 'fancelet_comments_registry';
+		$tags = $data['tags'];
 
 		DB::transaction(function () use ($productId, $productGroup, $message, $targetTable) {
 			$entry = DB::table($targetTable)->where('product_id', $productId)->first();
@@ -38,6 +39,6 @@ final class FanceletCommentUC implements UseCaseContract
 				->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s.u')]);
 		});
 
-		return $this->fanceletService->sendComment($productId, $productGroup, $message);
+		return $this->fanceletService->sendComment($productId, $productGroup, $message, $tags);
 	}
 }

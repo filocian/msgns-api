@@ -8,11 +8,14 @@ use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Product\Fancelet\FanceletAnonymousPairingRequest;
 use App\Http\Requests\Product\Fancelet\FanceletCanLikeRequest;
+use App\Http\Requests\Product\Fancelet\FanceletRegisteredUserRequest;
 use App\Infrastructure\Services\Product\Fancelet\FanceletService;
+use App\UseCases\Product\Fancelet\Actions\InnerPeaceFanceletActionUC;
 use App\UseCases\Product\Fancelet\Actions\LoveFanceletActionUC;
 use App\UseCases\Product\Fancelet\Comments\FanceletCommentUC;
 use App\UseCases\Product\Fancelet\Likes\FanceletContentLikeUC;
 use App\UseCases\Product\Fancelet\LogicByType\BibleUC;
+use App\UseCases\Product\Fancelet\LogicByType\InnerPeaceUC;
 use App\UseCases\Product\Fancelet\LogicByType\LoveUC;
 use App\UseCases\Product\Fancelet\Pairing\AnonymousFanceletPairingUC;
 use Exception;
@@ -24,7 +27,9 @@ final class FanceletController extends Controller
 	public function __construct(
 		private readonly LoveUC $loveUC,
 		private readonly BibleUC $bibleUC,
+		private readonly InnerPeaceUC $innerPeaceUC,
 		private readonly LoveFanceletActionUC $loveActionUC,
+		private readonly InnerPeaceFanceletActionUC $innerPeaceFanceletActionUC,
 		private readonly FanceletContentLikeUC $contentLikeUC,
 		private readonly FanceletCommentUC $fanceletCommentUC,
 		private readonly FanceletService $fanceletService,
@@ -44,6 +49,29 @@ final class FanceletController extends Controller
 	public function getBibleContent(int $productId, string $password): JsonResponse
 	{
 		$content = $this->bibleUC->run([
+			'product_id' => $productId,
+			'password' => $password,
+		]);
+
+		return HttpJson::OK($content->wrapped('content'));
+	}
+
+	public function getYogaContent(int $productId, string $password): JsonResponse
+	{
+		$content = $this->bibleUC->run([
+			'product_id' => $productId,
+			'password' => $password,
+		]);
+
+		return HttpJson::OK($content->wrapped('content'));
+	}
+
+	public function getInnerPeaceContent(
+		FanceletRegisteredUserRequest $request,
+		int $productId,
+		string $password
+	): JsonResponse {
+		$content = $this->innerPeaceUC->run([
 			'product_id' => $productId,
 			'password' => $password,
 		]);
@@ -89,17 +117,38 @@ final class FanceletController extends Controller
 		return HttpJson::OK('fancelet_love_action_message_sent');
 	}
 
+	public function innerPeaceAction(Request $request): JsonResponse
+	{
+		$productId = $request->get('product_id');
+		$productPass = $request->get('product_password');
+		$message = $request->get('message');
+
+		try {
+			$this->innerPeaceFanceletActionUC->run([
+				'product_id' => $productId,
+				'product_password' => $productPass,
+				'message' => $message,
+			]);
+		} catch (Exception $exception) {
+			return HttpJson::KO('unable_to_send_fancelet_IP_action_mail');
+		}
+
+		return HttpJson::OK('fancelet_IP_action_mail_sent');
+	}
+
 	public function sendComment(Request $request): JsonResponse
 	{
 		$productId = $request->get('product_id');
 		$productGroup = $request->get('product_group');
 		$message = $request->get('message');
+		$tags = $request->get('tags');
 
 		try {
 			$this->fanceletCommentUC->run([
 				'product_id' => $productId,
 				'product_group' => $productGroup,
 				'message' => $message,
+				'tags' => $tags,
 			]);
 		} catch (Exception $exception) {
 			return HttpJson::KO('unable_to_send_fancelet_comment');
@@ -130,9 +179,11 @@ final class FanceletController extends Controller
 		return HttpJson::OK(['can_like' => $canLike]);
 	}
 
-	public function getGroupComments(string $group_id): JsonResponse
+	public function getGroupComments(Request $request, string $group_id): JsonResponse
 	{
-		$comments = $this->fanceletService->getGroupComments($group_id);
+		$includeTags = $request->get('include_tags');
+		$filterTags = $request->get('filter_tags');
+		$comments = $this->fanceletService->getGroupComments($group_id, $includeTags, $filterTags);
 
 		return HttpJson::OK(['comments' => $comments]);
 	}
@@ -152,5 +203,15 @@ final class FanceletController extends Controller
 		}
 
 		return HttpJson::OK(['pairing_result' => $pairing]);
+	}
+
+	public function setVideoViewed(FanceletRegisteredUserRequest $request, int $video_id): JsonResponse
+	{
+		$productId = $request->input('product_id');
+		$productPwd = $request->input('product_password');
+		$availableVideos = $this->fanceletService->markVideoViewed($productId, $video_id, $productPwd);
+
+
+		return HttpJson::OK($availableVideos->wrapped('content'));
 	}
 }

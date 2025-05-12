@@ -362,4 +362,14 @@ final class AuthService
 			$user->assignRole($role);
 		}
 	}
+
+	public function userEmail(): string
+	{
+		$userId = $this->id();
+		if (!$userId) {
+			return '';
+		}
+
+		return User::findById((string) $userId)->email;
+	}
 }

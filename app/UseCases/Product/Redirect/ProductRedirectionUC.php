@@ -172,7 +172,9 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 
 	private function isBraceletProduct(ProductDto $productDto): bool
 	{
-		return str_starts_with($productDto->type->code, 'B-');
+		$oldCodeBracelet = str_starts_with($productDto->type->code, 'B-');
+		$newCodeBracelet = str_starts_with($productDto->type->code, 'F-');
+		return $oldCodeBracelet || $newCodeBracelet;
 	}
 
 	private function resolveBraceletUrl(ProductDto $productDto): string
@@ -186,6 +188,12 @@ final readonly class ProductRedirectionUC implements UseCaseContract
 			'B-BI' => env(
 				'FRONT_URL'
 			) . FanceletFrontEndUrls::$BIB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
+			'F-YO' => env(
+				'FRONT_URL'
+			) . FanceletFrontEndUrls::$YOB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
+			'F-IP' => env(
+				'FRONT_URL'
+			) . FanceletFrontEndUrls::$IPB1 . '?id=' . $productDto->id . '&pwd=' . $productDto->password,
 		};
 		//		return env('APP_URL') . '/bracelet/test/' . $productDto->id;
 	}

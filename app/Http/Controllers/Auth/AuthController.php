@@ -38,6 +38,7 @@ final class AuthController extends Controller
 			'email' => $request->get('email'),
 			'name' => $request->get('name'),
 			'phone' => $request->get('phone'),
+			'country' => $request->get('country'),
 			'password' => $request->get('password'),
 			'user_agent' => $request->get('user_agent'),
 			'default_locale' => $this->userService->resolveUserDefaultLocale($request->get('language') ?? ''),

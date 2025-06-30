@@ -53,6 +53,10 @@ Route::prefix('products')->group(function () {
 		Route::get('/{id}/group-candidates', [ProductController::class, 'getGroupCandidates']);
 		Route::put('/{referenceId}/group/{candidateId}', [ProductController::class, 'setProductGroup']);
 
+		//Product configuration cloning
+		Route::get('/{id}/clone-candidates', [ProductController::class, 'findCloneCompatibleProducts']);
+		Route::post('/{id}/clone-from/{candidate_id}', [ProductController::class, 'cloneFromProduct']);
+
 		//Whatsapp
 		Route::get('/{id}/whatsapp/phones', [ProductController::class, 'getProductWhatsappPhones']);
 		Route::get('/{id}/whatsapp/messages', [ProductController::class, 'getProductWhatsappMessages']);

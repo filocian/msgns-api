@@ -14,15 +14,12 @@ use App\Models\Whatsapp\WhatsappMessage;
 use App\Models\Whatsapp\WhatsappPhone;
 use App\UseCases\Product\Whatsapp\ListMessagesUC;
 use JetBrains\PhpStorm\ExpectedValues;
-use function PHPUnit\Framework\isInstanceOf;
 
 final readonly class CloneProductService
 {
 	public function __construct(
 		private ListMessagesUC $listMessagesUC,
-	)
-	{
-	}
+	) {}
 
 	private function hasValidStatuses(Product|ProductDto $productCandidate): bool
 	{
@@ -54,13 +51,10 @@ final readonly class CloneProductService
 		}
 
 		$allowedModels = ['google', 'instagram', 'facebook', 'whatsapp', 'youtube', 'info', 'tiktok'];
-		$isAllowedModel = in_array($currentProduct->model, $allowedModels) && in_array(
-				$candidateModel,
-				$allowedModels
-			);
+		$isAllowedModel = in_array($currentProduct->model, $allowedModels) && in_array($candidateModel, $allowedModels);
 
-		$isValidModel = $currentProductModel == $candidateModel;
-		$isValidType = $candidateTypeId == $currentProductTypeId;
+		$isValidModel = $currentProductModel === $candidateModel;
+		$isValidType = $candidateTypeId === $currentProductTypeId;
 
 		return $isAllowedModel && ($isValidModel && $isValidType);
 	}
@@ -107,7 +101,7 @@ final readonly class CloneProductService
 	{
 		$messages = $this->getProductWhatsappData($productCandidate);
 
-		if(!$messages){
+		if (!$messages) {
 			return false;
 		}
 
@@ -187,11 +181,11 @@ final readonly class CloneProductService
 	 * @return ProductDto|null
 	 */
 	public function copyPartialProductData(
-		ProductDto                                                                   $currentProduct,
-		ProductDto                                                                   $productCandidate,
-		#[ExpectedValues(['product_data', 'business_data', 'whatsapp_data'])] string $mode
-	): ProductDto|null
-	{
+		ProductDto $currentProduct,
+		ProductDto $productCandidate,
+		#[ExpectedValues(['product_data', 'business_data', 'whatsapp_data'])]
+		string $mode
+	): ProductDto|null {
 		if ($mode === 'business_data') {
 			$this->copyBusinessData($currentProduct, $productCandidate);
 

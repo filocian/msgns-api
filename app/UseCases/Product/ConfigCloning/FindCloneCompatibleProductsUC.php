@@ -6,7 +6,6 @@ namespace App\UseCases\Product\ConfigCloning;
 
 use App\Infrastructure\Contracts\UseCaseContract;
 use App\Infrastructure\DTO\CollectionDto;
-use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\Auth\AuthService;
 use App\Infrastructure\Services\Product\CloneProductService;
 use App\Models\Product;
@@ -32,8 +31,7 @@ final readonly class FindCloneCompatibleProductsUC implements UseCaseContract
 		$product = Product::findById($productId);
 		$userProducts = Product::findProductsByUserId($userId);
 		$compatibleProducts = $userProducts->filter(function (Product $candidate) use ($product) {
-
-			return $this->cloneService->isCompatible($product, $candidate) == true;
+			return $this->cloneService->isCompatible($product, $candidate) === true;
 		});
 
 		if ($compatibleProducts->isEmpty()) {

@@ -25,20 +25,27 @@ final readonly class FindCloneCompatibleProductsUC implements UseCaseContract
 	 * @param array|null $opts
 	 * @return CollectionDto|null
 	 */
-	public function run(mixed $data = null, array $opts = null): CollectionDto|null
+	public function run(mixed $data = null, array $opts = null): array|null
 	{
 		$productId = $data['product_id'];
 		$userId = $this->authService->id();
-		$productDto = ProductDto::fromModel(Product::findById($productId));
+		$product = Product::findById($productId);
 		$userProducts = Product::findProductsByUserId($userId);
-		$compatibleProducts = $userProducts->filter(function (Product $product) use ($productDto) {
-			return $this->cloneService->isCompatible($productDto, $product);
+		$compatibleProducts = $userProducts->filter(function (Product $candidate) use ($product) {
+
+			return $this->cloneService->isCompatible($product, $candidate) == true;
 		});
 
-		if ($compatibleProducts->isNotEmpty()) {
-			return CollectionDto::fromModelCollection($compatibleProducts, ProductDto::class);
+		if ($compatibleProducts->isEmpty()) {
+			return null;
 		}
 
-		return CollectionDto::fromModelCollection($userProducts, ProductDto::class);
+		$result = [];
+
+		$compatibleProducts->each(function (Product $candidate) use (&$result) {
+			$result[] = $candidate;
+		});
+
+		return $result;
 	}
 }

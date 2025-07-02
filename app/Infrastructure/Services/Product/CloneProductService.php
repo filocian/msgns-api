@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductBusiness;
 use App\Models\ProductConfigurationStatus;
 use App\Models\Whatsapp\WhatsappMessage;
+use App\Models\Whatsapp\WhatsappPhone;
 use App\UseCases\Product\Whatsapp\ListMessagesUC;
 use JetBrains\PhpStorm\ExpectedValues;
 use function PHPUnit\Framework\isInstanceOf;
@@ -19,7 +20,9 @@ final readonly class CloneProductService
 {
 	public function __construct(
 		private ListMessagesUC $listMessagesUC,
-	) {}
+	)
+	{
+	}
 
 	private function hasValidStatuses(Product|ProductDto $productCandidate): bool
 	{
@@ -34,30 +37,32 @@ final readonly class CloneProductService
 
 	private function hasValidTypology(Product|ProductDto $currentProduct, Product|ProductDto $productCandidate): bool
 	{
-		if($productCandidate instanceof ProductDto){
+		if ($productCandidate instanceof ProductDto) {
 			$candidateTypeId = $productCandidate->type->id;
-		}
-		else{
+			$candidateModel = $productCandidate->model;
+		} else {
 			$candidateTypeId = $productCandidate->product_type_id;
+			$candidateModel = $productCandidate->model;
 		}
 
-		if($currentProduct instanceof ProductDto){
+		if ($currentProduct instanceof ProductDto) {
 			$currentProductTypeId = $currentProduct->type->id;
-		}
-		else {
+			$currentProductModel = $currentProduct->model;
+		} else {
 			$currentProductTypeId = $currentProduct->product_type_id;
+			$currentProductModel = $currentProduct->model;
 		}
 
 		$allowedModels = ['google', 'instagram', 'facebook', 'whatsapp', 'youtube', 'info', 'tiktok'];
 		$isAllowedModel = in_array($currentProduct->model, $allowedModels) && in_array(
-			$productCandidate->model,
-			$allowedModels
-		);
+				$candidateModel,
+				$allowedModels
+			);
 
-		$isValidModel = $currentProduct->model === $productCandidate->model;
-		$isValidType = $candidateTypeId === $currentProductTypeId;
+		$isValidModel = $currentProductModel == $candidateModel;
+		$isValidType = $candidateTypeId == $currentProductTypeId;
 
-		return $isAllowedModel && ($isValidModel || $isValidType);
+		return $isAllowedModel && ($isValidModel && $isValidType);
 	}
 
 	private function getProductData(ProductDto $productCandidate): array
@@ -88,15 +93,8 @@ final readonly class CloneProductService
 			'configuration_status' => ProductConfigurationStatus::$STATUS_TARGET_SET,
 		];
 
-		if (!in_array(
-			$currentProduct->configuration_status,
-			[ProductConfigurationStatus::$STATUS_BUSINESS_SET, ProductConfigurationStatus::$STATUS_COMPLETED]
-		)) {
-			$hasBusiness = $this->copyBusinessData($currentProduct, $productCandidate);
-
-			if ($hasBusiness) {
-				$data['configuration_status'] = ProductConfigurationStatus::$STATUS_BUSINESS_SET;
-			}
+		if ($this->copyBusinessData($currentProduct, $productCandidate)) {
+			$data['configuration_status'] = ProductConfigurationStatus::$STATUS_BUSINESS_SET;
 		}
 
 		$clonedProduct->update($data);
@@ -107,17 +105,27 @@ final readonly class CloneProductService
 
 	private function copyWhatsappData(ProductDto $currentProduct, ProductDto $productCandidate): bool
 	{
-		$messages = $this->getProductWhatsappData($productCandidate)->toArray();
+		$messages = $this->getProductWhatsappData($productCandidate);
 
-		foreach ($messages as $message) {
-			WhatsappMessage::query()->updateOrCreate([
-				'product_id' => $currentProduct->id,
-				'phone_id' => $message['phone']['id'],
-				'message' => $message['message'],
-				'default' => $message['default'],
-				'locale_id' => $message['locale']['id'],
-			]);
+		if(!$messages){
+			return false;
 		}
+
+		$messages->data->each(function ($message) use ($currentProduct) {
+			$phone = WhatsappPhone::query()->firstOrCreate([
+				'product_id' => $currentProduct->id,
+				'phone' => $message->phone->phone,
+				'prefix' => $message->phone->prefix,
+			]);
+
+			$message = WhatsappMessage::query()->firstOrCreate([
+				'product_id' => $currentProduct->id,
+				'phone_id' => $phone->id,
+				'message' => $message->message,
+				'default' => $message->default,
+				'locale_id' => $message->locale->id,
+			]);
+		});
 
 		return true;
 	}
@@ -130,7 +138,7 @@ final readonly class CloneProductService
 			return false;
 		}
 
-		ProductBusiness::query()->updateOrCreate([
+		ProductBusiness::query()->firstOrCreate([
 			'product_id' => $currentProduct->id,
 			'user_id' => $currentProduct->user->id,
 			'not_a_business' => $businessData->not_a_business,
@@ -179,10 +187,11 @@ final readonly class CloneProductService
 	 * @return ProductDto|null
 	 */
 	public function copyPartialProductData(
-		ProductDto $currentProduct,
-		ProductDto $productCandidate,
+		ProductDto                                                                   $currentProduct,
+		ProductDto                                                                   $productCandidate,
 		#[ExpectedValues(['product_data', 'business_data', 'whatsapp_data'])] string $mode
-	): ProductDto|null {
+	): ProductDto|null
+	{
 		if ($mode === 'business_data') {
 			$this->copyBusinessData($currentProduct, $productCandidate);
 

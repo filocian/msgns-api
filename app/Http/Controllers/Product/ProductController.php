@@ -29,6 +29,8 @@ use App\UseCases\Product\Activation\DeactivateUC;
 use App\UseCases\Product\Assignment\AssignToCurrentUserUC;
 use App\UseCases\Product\Assignment\AssignToUserUC;
 use App\UseCases\Product\Businesses\AddBusinessUC;
+use App\UseCases\Product\ConfigCloning\CloneFromCommonProductUC;
+use App\UseCases\Product\ConfigCloning\FindCloneCompatibleProductsUC;
 use App\UseCases\Product\Configuration\ConfigureUC;
 use App\UseCases\Product\Configuration\ListConfigStatusUC;
 use App\UseCases\Product\Configuration\RenameUC;
@@ -84,6 +86,8 @@ final class ProductController extends Controller
 		private readonly RemoveMessageUC $removeMessageUC,
 		private readonly SetDefaultMessageUC $setDefaultMessageUC,
 		private readonly UsageOverviewUC $usageOverviewUC,
+		private readonly FindCloneCompatibleProductsUC $findCloneCompatibleProductsUC,
+		private readonly CloneFromCommonProductUC $cloneFromCommonProductUC,
 	) {}
 
 	public function hello(): JsonResponse
@@ -425,5 +429,22 @@ final class ProductController extends Controller
 		]);
 
 		return HttpJson::OK(['usage_overview' => $usageOverview]);
+	}
+
+	public function findCloneCompatibleProducts(int $product_id): JsonResponse
+	{
+		$candidates = $this->findCloneCompatibleProductsUC->run(['product_id' => $product_id]);
+
+		return HttpJson::OK(['clone_candidates' => $candidates]);
+	}
+
+	public function cloneFromProduct(int $product_id, int $candidate_id): JsonResponse
+	{
+		$cloned = $this->cloneFromCommonProductUC->run([
+			'product_id' => $product_id,
+			'candidate_id' => $candidate_id,
+		]);
+
+		return HttpJson::OK(['cloned' => $cloned]);
 	}
 }

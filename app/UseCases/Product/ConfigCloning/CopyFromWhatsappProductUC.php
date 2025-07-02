@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\UseCases\Product\Whatsapp;
+namespace App\UseCases\Product\ConfigCloning;
 
 use App\Exceptions\Product\ProductNotFoundException;
 use App\Infrastructure\Contracts\UseCaseContract;
@@ -11,7 +11,7 @@ use App\Models\Product;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-final readonly class CopyFromProductUC implements UseCaseContract
+final readonly class CopyFromWhatsappProductUC implements UseCaseContract
 {
 	/**
 	 * UseCase: Activate a product based on product id and its password

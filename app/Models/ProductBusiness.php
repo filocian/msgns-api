@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Infrastructure\DTO\ProductBusinessDto;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,5 +27,16 @@ final class ProductBusiness extends Model
 	public function user()
 	{
 		return $this->belongsTo(User::class, 'user_id');
+	}
+
+	public static function findByProductId(int $id): ProductBusinessDto|null
+	{
+		$data = self::query()->find(['product_id' => $id])->first();
+
+		if (!$data) {
+			return null;
+		}
+
+		return ProductBusinessDto::fromModel($data);
 	}
 }

@@ -10,11 +10,13 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 final class Product extends Model
 {
 	use HasFactory;
+	use SoftDeletes;
 
 	protected $table = 'products';
 	protected $fillable = [
@@ -35,6 +37,7 @@ final class Product extends Model
 	protected $casts = [
 		'active' => 'bool',
 		'assigned_at' => 'datetime',
+		'deleted_at' => 'datetime',
 	];
 
 	public function productType()
@@ -156,7 +159,11 @@ final class Product extends Model
 			'order_direction' => $currentFilters['order_direction'] ?? null,
 		];
 
-		$query = self::query();
+		if ($currentFilters['withTrashed']) {
+			$query = self::withTrashed();
+		} else {
+			$query = self::query();
+		}
 
 		if ($filters['id']) {
 			$query->where('id', $filters['id']);
@@ -238,8 +245,12 @@ final class Product extends Model
 	 * @param int $productId
 	 * @return Product
 	 */
-	public static function findById(int $productId): self
+	public static function findById(int $productId, bool $withTrashed = false): self
 	{
+		if ($withTrashed) {
+			return self::withTrashed()->find($productId);
+		}
+
 		return self::findOrFail($productId);
 	}
 

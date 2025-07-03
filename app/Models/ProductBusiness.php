@@ -31,7 +31,7 @@ final class ProductBusiness extends Model
 
 	public static function findByProductId(int $id): ProductBusinessDto|null
 	{
-		$data = self::query()->find(['product_id' => $id])->first();
+		$data = self::query()->where(['product_id' => $id])->first();
 
 		if (!$data) {
 			return null;

@@ -71,12 +71,17 @@ Route::prefix('products')->group(function () {
 			[ProductController::class, 'setDefaultProductWhatsappMessage']
 		);
 
+		//Soft Delete Products
+		Route::post('/{id}/delete', [ProductController::class, 'softDeleteProduct']);
+
 		//ADMIN EndPoints
 		Route::post('/{id}/assign', [AdminProductController::class, 'assignToUser']);
 		Route::post('/{id}/reset', [AdminProductController::class, 'resetProduct']);
 		Route::put('/{child_id}/remove-product-link', [AdminProductController::class, 'removeProductLink']);
 		Route::get('/config-status-list', [ProductController::class, 'getProductConfigStatusList']);
 		Route::put('/{id}/set-config-status', [ProductController::class, 'setProductConfigStatus']);
+		Route::get('/with-trashed/{id}', [ProductController::class, 'findWithTrashedById']);
+		Route::post('/{id}/restore', [ProductController::class, 'restoreProduct']);
 	});
 
 	Route::get('/{id}/{password?}', [ProductController::class, 'findById']);

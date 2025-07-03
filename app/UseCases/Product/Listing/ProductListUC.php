@@ -18,7 +18,7 @@ final class ProductListUC implements UseCaseContract
 	 * UseCase: Retrieves all products
 	 *
 	 * @param array|null $data
-	 * @param array{perPage:int}|null $opts
+	 * @param array|null $opts
 	 * @return PaginatorDto
 	 */
 	public function run(mixed $data = null, ?array $opts = []): PaginatorDto
@@ -29,13 +29,14 @@ final class ProductListUC implements UseCaseContract
 	/**
 	 * Resolve UseCase Options
 	 *
-	 * @param array{perPage:int}|null $options
+	 * @param array|null $options
 	 * @return array
 	 */
 	private function resolveOptions(?array $options): array
 	{
 		return array_merge([
 			'perPage' => (int) env('DEFAULT_PAGINATION_LENGTH', 15),
+			'withTrashed' => true,
 		], $options);
 	}
 }

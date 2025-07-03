@@ -28,6 +28,7 @@ final class ProductDto extends BaseDTO
 	public Carbon|null $assigned_at;
 	public Carbon $created_at;
 	public Carbon $updated_at;
+	public Carbon|null $deleted_at;
 
 	public function __construct(Model $model)
 	{
@@ -49,5 +50,6 @@ final class ProductDto extends BaseDTO
 		$this->assigned_at = $model->assigned_at ?? null;
 		$this->created_at = $model->created_at;
 		$this->updated_at = $model->updated_at ?? Carbon::create(null);
+		$this->deleted_at = $model->deleted_at ?? null;
 	}
 }

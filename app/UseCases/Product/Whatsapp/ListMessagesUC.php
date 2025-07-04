@@ -22,7 +22,7 @@ final readonly class ListMessagesUC implements UseCaseContract
 	{
 		$productId = $data['id'];
 		$product = Product::findById($productId);
-		$messages = $product->whatsappMessages;
+		$messages = $product->whatsappMessages ?? collect([]);
 
 		if ($messages->isEmpty()) {
 			return null;

@@ -15,6 +15,7 @@ use App\Http\Requests\Product\ProductListExportRequest;
 use App\Http\Requests\Product\RegisterProductRequest;
 use App\Http\Requests\Product\RenameProductRequest;
 use App\Http\Requests\Product\SetProductConfigStatusRequest;
+use App\Http\Requests\Product\SoftDeleteProductRequest;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UsageStatsRequest;
 use App\Http\Requests\Product\Whatsapp\GetWhatsappDataRequest;
@@ -24,11 +25,14 @@ use App\Http\Requests\Product\Whatsapp\SaveInitialWhatsappDataRequest;
 use App\Http\Requests\Product\Whatsapp\SaveWhatsappMessageRequest;
 use App\Http\Requests\Product\Whatsapp\SaveWhatsappPhoneRequest;
 use App\Http\Requests\Product\Whatsapp\SetDefaultWhatsappMessageRequest;
+use App\Http\Requests\User\OnlyAdminRequest;
 use App\UseCases\Product\Activation\ActivateUC;
 use App\UseCases\Product\Activation\DeactivateUC;
 use App\UseCases\Product\Assignment\AssignToCurrentUserUC;
 use App\UseCases\Product\Assignment\AssignToUserUC;
 use App\UseCases\Product\Businesses\AddBusinessUC;
+use App\UseCases\Product\ConfigCloning\CloneFromCommonProductUC;
+use App\UseCases\Product\ConfigCloning\FindCloneCompatibleProductsUC;
 use App\UseCases\Product\Configuration\ConfigureUC;
 use App\UseCases\Product\Configuration\ListConfigStatusUC;
 use App\UseCases\Product\Configuration\RenameUC;
@@ -41,6 +45,8 @@ use App\UseCases\Product\Listing\ProductListExportUC;
 use App\UseCases\Product\Listing\ProductListUC;
 use App\UseCases\Product\Redirect\ProductRedirectionUC;
 use App\UseCases\Product\Registration\RegisterProductUC;
+use App\UseCases\Product\SoftDelete\RestoreProductUC;
+use App\UseCases\Product\SoftDelete\SoftDeleteProductUC;
 use App\UseCases\Product\Stats\UsageOverviewUC;
 use App\UseCases\Product\Whatsapp\AddMessageUC;
 use App\UseCases\Product\Whatsapp\AddPhoneUC;
@@ -84,6 +90,10 @@ final class ProductController extends Controller
 		private readonly RemoveMessageUC $removeMessageUC,
 		private readonly SetDefaultMessageUC $setDefaultMessageUC,
 		private readonly UsageOverviewUC $usageOverviewUC,
+		private readonly FindCloneCompatibleProductsUC $findCloneCompatibleProductsUC,
+		private readonly CloneFromCommonProductUC $cloneFromCommonProductUC,
+		private readonly SoftDeleteProductUC $softDeleteProductUC,
+		private readonly RestoreProductUC $restoreProductUC,
 	) {}
 
 	public function hello(): JsonResponse
@@ -168,6 +178,17 @@ final class ProductController extends Controller
 		$product = $this->FindProductByIdUC->run([
 			'id' => (int) $id,
 			'password' => $password,
+		]);
+
+		return HttpJson::OK($product->wrapped('product'));
+	}
+
+	public function findWithTrashedById(OnlyAdminRequest $request, string $id, string|null $password = null): JsonResponse
+	{
+		$product = $this->FindProductByIdUC->run([
+			'id' => (int) $id,
+			'password' => $password,
+			'with_trashed' => true,
 		]);
 
 		return HttpJson::OK($product->wrapped('product'));
@@ -425,5 +446,40 @@ final class ProductController extends Controller
 		]);
 
 		return HttpJson::OK(['usage_overview' => $usageOverview]);
+	}
+
+	public function findCloneCompatibleProducts(int $product_id): JsonResponse
+	{
+		$candidates = $this->findCloneCompatibleProductsUC->run(['product_id' => $product_id]);
+
+		return HttpJson::OK(['clone_candidates' => $candidates]);
+	}
+
+	public function cloneFromProduct(int $product_id, int $candidate_id): JsonResponse
+	{
+		$cloned = $this->cloneFromCommonProductUC->run([
+			'product_id' => $product_id,
+			'candidate_id' => $candidate_id,
+		]);
+
+		return HttpJson::OK(['cloned' => $cloned]);
+	}
+
+	public function softDeleteProduct(SoftDeleteProductRequest $request, int $id): JsonResponse
+	{
+		$deleted = $this->softDeleteProductUC->run([
+			'product_id' => $id,
+		]);
+
+		return HttpJson::OK(['deleted' => $deleted]);
+	}
+
+	public function restoreProduct(OnlyAdminRequest $request, int $id): JsonResponse
+	{
+		$restored = $this->restoreProductUC->run([
+			'product_id' => $id,
+		]);
+
+		return HttpJson::OK(['restored' => $restored]);
 	}
 }

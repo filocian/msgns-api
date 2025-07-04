@@ -18,19 +18,20 @@ final readonly class FindByIdUC implements UseCaseContract
 	/**
 	 * Retrieves a product by its ID
 	 *
-	 * @param array{id: int, password: string|null}|null $data
+	 * @param array{id: int, password: string|null, with_trashed: bool}|null $data
 	 * @throws ProductNotFoundException|Exception
 	 */
 	public function run(mixed $data = null, ?array $opts = []): ProductDto
 	{
 		$productId = $data['id'];
 		$productPassword = $data['password'];
+		$options = array_merge($opts, ['with_trashed' => $data['with_trashed'] ?? false]);
 
 		if ($productPassword) {
 			return $this->findByIdAndPassword($productId, $productPassword);
 		}
 
-		return $this->findById($productId, $opts);
+		return $this->findById($productId, $options);
 	}
 
 	/**
@@ -51,7 +52,11 @@ final readonly class FindByIdUC implements UseCaseContract
 		$exclude = $opts['exclude'] ?? [];
 
 		try {
-			$product = Product::findById($id);
+			if ($opts['with_trashed']) {
+				$product = Product::findById($id, true);
+			} else {
+				$product = Product::findById($id);
+			}
 
 			return ProductDto::fromModel($product, $exclude);
 		} catch (ModelNotFoundException $e) {

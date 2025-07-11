@@ -109,14 +109,20 @@ final class Product extends Model
 	 * Retrieve all products owned by a given user id.
 	 *
 	 * @param int $userId
-	 * @param array{perPage:int}|null $options
+	 * @param array{perPage:int, name: string}|null $options
 	 * @return LengthAwarePaginator|Collection
 	 */
 	public static function findProductsByUserId(int $userId, ?array $options = []): Collection|LengthAwarePaginator
 	{
 		$perPage = $options['perPage'] ?? 0;
+		$nameFilter = $options['name'] ?? null;
+
 		$query = self::where('user_id', $userId)
 			->where('linked_to_product_id', null);
+
+		if ($nameFilter) {
+			$query->where('name', 'like', '%' . $nameFilter . '%');
+		}
 
 		if ($perPage === 0) {
 			return $query->get();

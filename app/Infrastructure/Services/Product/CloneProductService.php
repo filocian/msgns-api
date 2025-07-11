@@ -60,7 +60,7 @@ final readonly class CloneProductService
 		}
 
 		if ($currentProductType->secondary_model || $candidateType->secondary_model) {
-			$isValidType = $candidateTypeId == $currentProductTypeId;
+			$isValidType = $candidateTypeId === $currentProductTypeId;
 		}
 
 		return $isAllowedModel && ($isValidModel && $isValidType);

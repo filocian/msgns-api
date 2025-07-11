@@ -7,9 +7,11 @@ namespace App\Infrastructure\Services\Product;
 use App\Infrastructure\DTO\CollectionDto;
 use App\Infrastructure\DTO\ProductBusinessDto;
 use App\Infrastructure\DTO\ProductDto;
+use App\Infrastructure\DTO\ProductTypeDto;
 use App\Models\Product;
 use App\Models\ProductBusiness;
 use App\Models\ProductConfigurationStatus;
+use App\Models\ProductType;
 use App\Models\Whatsapp\WhatsappMessage;
 use App\Models\Whatsapp\WhatsappPhone;
 use App\UseCases\Product\Whatsapp\ListMessagesUC;
@@ -34,27 +36,32 @@ final readonly class CloneProductService
 
 	private function hasValidTypology(Product|ProductDto $currentProduct, Product|ProductDto $productCandidate): bool
 	{
+		$allowedModels = ['google', 'instagram', 'facebook', 'whatsapp', 'youtube', 'info', 'tiktok'];
+		$currentProductModel = $currentProduct->model;
+		$candidateModel = $productCandidate->model;
+		$isAllowedModel = in_array($currentProduct->model, $allowedModels) && in_array($candidateModel, $allowedModels);
+		$isValidType = true;
+		$isValidModel = $currentProductModel === $candidateModel;
+
 		if ($productCandidate instanceof ProductDto) {
 			$candidateTypeId = $productCandidate->type->id;
-			$candidateModel = $productCandidate->model;
+			$candidateType = $productCandidate->type;
 		} else {
 			$candidateTypeId = $productCandidate->product_type_id;
-			$candidateModel = $productCandidate->model;
+			$candidateType = ProductTypeDto::fromModel(ProductType::findById($candidateTypeId));
 		}
 
 		if ($currentProduct instanceof ProductDto) {
 			$currentProductTypeId = $currentProduct->type->id;
-			$currentProductModel = $currentProduct->model;
+			$currentProductType = $currentProduct->type;
 		} else {
 			$currentProductTypeId = $currentProduct->product_type_id;
-			$currentProductModel = $currentProduct->model;
+			$currentProductType = ProductTypeDto::fromModel(ProductType::findById($currentProductTypeId));
 		}
 
-		$allowedModels = ['google', 'instagram', 'facebook', 'whatsapp', 'youtube', 'info', 'tiktok'];
-		$isAllowedModel = in_array($currentProduct->model, $allowedModels) && in_array($candidateModel, $allowedModels);
-
-		$isValidModel = $currentProductModel === $candidateModel;
-		$isValidType = $candidateTypeId === $currentProductTypeId;
+		if ($currentProductType->secondary_model || $candidateType->secondary_model) {
+			$isValidType = $candidateTypeId === $currentProductTypeId;
+		}
 
 		return $isAllowedModel && ($isValidModel && $isValidType);
 	}

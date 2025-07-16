@@ -9,6 +9,7 @@ use App\Http\Contracts\Controller;
 use App\Http\Contracts\HttpJson;
 use App\Http\Requests\Product\AssignToUserRequest;
 use App\Http\Requests\User\OnlyAdminRequest;
+use App\Http\Requests\User\ProductResetRequest;
 use App\UseCases\Product\Activation\ActivateUC;
 use App\UseCases\Product\Activation\DeactivateUC;
 use App\UseCases\Product\Assignment\AssignToUserUC;
@@ -85,12 +86,12 @@ final class AdminProductController extends Controller
 	 * Reset a product to not-started status. Only designed for types:
 	 * Google Review, Instagram, Info, Facebook, Tiktok, Youtube, Whatsapp
 	 *
-	 * @param OnlyAdminRequest $request
+	 * @param ProductResetRequest $request
 	 * @param int $productId
 	 * @return JsonResponse
 	 * @throws ProductNotFoundException
 	 */
-	public function resetProduct(OnlyAdminRequest $request, int $productId): JsonResponse
+	public function resetProduct(ProductResetRequest $request, int $productId): JsonResponse
 	{
 		$product = $this->resetUC->run([
 			'id' => $productId,

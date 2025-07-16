@@ -286,6 +286,7 @@ final readonly class ProductService
 
 		$product->update([
 			'user_id' => null,
+			'name' => $productDto->model . ' (' . $productDto->id . ')',
 			'linked_to_product_id' => null,
 			'usage' => 0,
 			'assigned_at' => null,

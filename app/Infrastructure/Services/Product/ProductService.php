@@ -11,6 +11,8 @@ use App\Infrastructure\DTO\ProductDto;
 use App\Infrastructure\Services\DynamoDb\DynamoDbService;
 use App\Models\Product;
 use App\Models\ProductConfigurationStatus;
+use App\Models\Whatsapp\WhatsappMessage;
+use App\Models\Whatsapp\WhatsappPhone;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -276,14 +278,15 @@ final readonly class ProductService
 		}
 
 		$productDto = ProductDto::fromModel($product);
+		$code = $productDto->type->code;
 
-		if (str_starts_with($productDto->type->code, 'B-')) {
+		if (str_starts_with($code, 'B-') || str_starts_with($code, 'F-')) {
 			throw new InvalidProductTypeException();
 		}
 
-
 		$product->update([
 			'user_id' => null,
+			'name' => $productDto->model . ' (' . $productDto->id . ')',
 			'linked_to_product_id' => null,
 			'usage' => 0,
 			'assigned_at' => null,
@@ -291,9 +294,24 @@ final readonly class ProductService
 			'target_url' => null,
 		]);
 
+		if ($productDto->model === 'whatsapp') {
+			$this->resetWhatsappData($productDto);
+		}
+
 		$product->refresh();
 
 		return ProductDto::fromModel($product);
+	}
+
+	private function resetWhatsappData(ProductDto $productDto): void
+	{
+		WhatsappPhone::query()->where([
+			'product_id' => $productDto->id,
+		])->delete();
+
+		WhatsappMessage::query()->where([
+			'product_id' => $productDto->id,
+		])->delete();
 	}
 
 	public function testDynamoDB()

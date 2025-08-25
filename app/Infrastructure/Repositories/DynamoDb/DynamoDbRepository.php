@@ -6,6 +6,7 @@ namespace App\Infrastructure\Repositories\DynamoDb;
 
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\Exception\DynamoDbException;
+use Aws\Result;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -78,12 +79,24 @@ final class DynamoDbRepository
 		array $expressionAttributeValues
 	): ?\Aws\Result {
 		try {
-			return $this->client->scan([
+
+			$allItems = [];
+			$params = [
 				'TableName' => $tableName,
 				'FilterExpression' => $filterExpression,
 				'ExpressionAttributeNames' => $expressionAttributeNames,
 				'ExpressionAttributeValues' => $expressionAttributeValues,
-			]);
+			];
+
+			do {
+				$result = $this->client->scan($params);;
+				if (isset($result['Items'])) {
+					$allItems = array_merge($allItems, $result['Items']);
+				}
+				$params['ExclusiveStartKey'] = $result['LastEvaluatedKey'] ?? null;
+			} while (!empty($params['ExclusiveStartKey']));
+
+			return new Result(['Items' => $allItems]);
 		} catch (DynamoDbException $e) {
 			Log::error($e->getMessage());
 		}

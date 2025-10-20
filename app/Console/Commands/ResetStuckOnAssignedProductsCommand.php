@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
-final class ResetStuckOnAssignedProductsAfterOneWeek extends Command
+final class ResetStuckOnAssignedProductsCommand extends Command
 {
 	public function __construct(private readonly ResetUC $resetUC, private readonly MPLogger $mpLogger)
 	{
@@ -23,7 +23,7 @@ final class ResetStuckOnAssignedProductsAfterOneWeek extends Command
 	 *
 	 * @var string
 	 */
-	protected $signature = 'app:reset-stuck-on-assigned-products-after-one-week';
+	protected $signature = 'app:reset-stuck-on-assigned-products-command';
 
 	/**
 	 * The console command description.
@@ -35,9 +35,9 @@ final class ResetStuckOnAssignedProductsAfterOneWeek extends Command
 	/**
 	 * Execute the console command.
 	 */
-	public function handle()
+	public function handle(): void
 	{
-		$deadline = Carbon::now()->addDays(7);
+		$deadline = Carbon::now()->addDays(2);
 		$affectedProducts = [];
 
 		$products = Product::where('configuration_status', 'assigned')

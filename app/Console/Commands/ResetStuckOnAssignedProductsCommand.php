@@ -30,26 +30,36 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 	 *
 	 * @var string
 	 */
-	protected $description = 'Resets products that are stuck on assigned status after 7 days';
+	protected $description = 'Resets products that are stuck on assigned status after configured time ';
+
+	/**
+	 *  Time for deadline in days: time to subtract from "now"
+	 *
+	 * @var int
+	 */
+	private int $time = 2;
 
 	/**
 	 * Execute the console command.
 	 */
 	public function handle(): void
 	{
-		$deadline = Carbon::now()->addDays(2);
+		$deadline = Carbon::now()->subDays($this->time);
 		$affectedProducts = [];
 
 		$products = Product::where('configuration_status', 'assigned')
 			->where('assigned_at', '<=', $deadline)
 			->get();
 
-		if (count($products ?? []) < 1) {
+		$productsCount = count($products);
+
+		if ($productsCount ?? [] < 1) {
 			$this->mpLogger->info('ASSIGNED_PURGE', 'NO STUCK ON ASSIGNED PRODUCTS', 'no products stuck found', [
 				'products_restarted' => $affectedProducts,
 			]);
 
 			Log::info('COMMAND STUCK ON ASSIGNED => no products stuck found');
+			$this->line('  ✅ No products with status assigned, and more than' .$this->time. 'days found.');
 
 			return;
 		}
@@ -63,6 +73,7 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 			'products_restarted' => $affectedProducts,
 		]);
 
-		Log::alert('COMMAND STUCK ON ASSIGNED => reset stuck on assigned products after 7 days');
+		Log::alert('COMMAND STUCK ON ASSIGNED => ' . $productsCount . 'Products have been restored to "not-started" status: ' . implode(',', $affectedProducts));
+		$this->line('  ⚠️' . $productsCount . 'Products have been restored to "not-started" status:' . implode(',', $affectedProducts));
 	}
 }

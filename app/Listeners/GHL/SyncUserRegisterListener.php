@@ -22,6 +22,6 @@ final class SyncUserRegisterListener
 	 */
 	public function handle(UserSignedUpEvent $event): void
 	{
-		CreateContactJob::dispatch($event);
+		//CreateContactJob::dispatch($event);
 	}
 }

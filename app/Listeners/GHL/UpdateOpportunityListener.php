@@ -22,6 +22,6 @@ final class UpdateOpportunityListener
 	 */
 	public function handle(ProductConfiguredEvent $event): void
 	{
-		UpdateOpportunityJob::dispatch($event);
+		//UpdateOpportunityJob::dispatch($event);
 	}
 }

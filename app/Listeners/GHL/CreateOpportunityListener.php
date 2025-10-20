@@ -22,6 +22,6 @@ final class CreateOpportunityListener
 	 */
 	public function handle(ProductAssignedEvent $event): void
 	{
-		CreateOpportunityJob::dispatch($event);
+		//CreateOpportunityJob::dispatch($event);
 	}
 }

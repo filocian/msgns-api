@@ -73,8 +73,8 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 			$this->line("  -> Processing product ID: {$product->id}");
 
 			try {
-				$this->resetUC->run(['id' => $product->id]);
-				$affectedProducts[] = $product->id;
+				$this->resetUC->run(['id' => (int) $product->id]);
+				$affectedProducts[] = (int) $product->id;
 				$this->comment("    -> ID: {$product->id} reset successful.");
 			} catch (\Exception $e) {
 				$this->error("    -> error resetting product ID: {$product->id}. Error: {$e->getMessage()}");
@@ -83,7 +83,7 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 		}
 
 		$productsRestoredCount = count($affectedProducts);
-		$productsRestoredList = implode(',', $affectedProducts);
+		$productsRestoredList = implode(', ', $affectedProducts);
 
 		$this->mpLogger->warn('ASSIGNED_PURGE', 'PURGED STUCK ON ASSIGNED PRODUCTS', 'products restarted', [
 			'products_restarted' => $affectedProducts,

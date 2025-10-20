@@ -22,6 +22,6 @@ final class UpdateUserContactListener
 	 */
 	public function handle(UserDataUpdatedEvent $event): void
 	{
-		UpdateContactJob::dispatch($event);
+		//UpdateContactJob::dispatch($event);
 	}
 }

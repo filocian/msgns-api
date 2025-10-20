@@ -59,7 +59,8 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 			]);
 
 			Log::info('COMMAND STUCK ON ASSIGNED => no products stuck found');
-			$this->line('  ✅ No products with status assigned, and more than' .$this->time. 'days found.');
+			$this->line('Deadline Date Applied: ' .$deadline. '.');
+			$this->line('  ✅ No products with status assigned, and more than ' .$this->time. ' days found.');
 
 			return;
 		}
@@ -73,7 +74,8 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 			'products_restarted' => $affectedProducts,
 		]);
 
-		Log::alert('COMMAND STUCK ON ASSIGNED => ' . $productsCount . 'Products have been restored to "not-started" status: ' . implode(',', $affectedProducts));
-		$this->line('  ⚠️' . $productsCount . 'Products have been restored to "not-started" status:' . implode(',', $affectedProducts));
+		Log::alert('COMMAND STUCK ON ASSIGNED => ' . $productsCount . ' Products have been restored to "not-started" status: ' . implode(',', $affectedProducts));
+		$this->line('Deadline Date Applied: ' .$deadline. '.');
+		$this->line('  ⚠️' . $productsCount . 'Products have been restored to "not-started" status: ' . implode(',', $affectedProducts));
 	}
 }

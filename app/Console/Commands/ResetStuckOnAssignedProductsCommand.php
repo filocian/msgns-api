@@ -47,7 +47,7 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 		$deadline = Carbon::now()->subDays($this->time);
 		$affectedProducts = [];
 
-		$products = Product::where('configuration_status', 'assigned')
+		$products = Product::where('configuration_status', '=','assigned')
 			->where('assigned_at', '<=', $deadline)
 			->get();
 

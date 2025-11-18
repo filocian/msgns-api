@@ -30,6 +30,8 @@ Route::prefix('auth')->group(function () {
 		Route::get('/user', [AuthController::class, 'currentUser']);
 		Route::get('/user/{id}/has-admin-rights', [AuthController::class, 'hasAdminRights']);
 		Route::post('/logout', [AuthController::class, 'logout']);
+		Route::post('/impersonate/start/{id}', [AuthController::class, 'startImpersonation']);
+		Route::post('/impersonate/stop', [AuthController::class, 'stopImpersonation']);
 	});
 });
 
@@ -60,7 +62,7 @@ Route::prefix('products')->group(function () {
 		//Whatsapp
 		Route::get('/{id}/whatsapp/phones', [ProductController::class, 'getProductWhatsappPhones']);
 		Route::get('/{id}/whatsapp/messages', [ProductController::class, 'getProductWhatsappMessages']);
-		Route::get('/{id}/whatsapp/copy/{source_id}', [ProductController::class, 'copyProductWhatsappMessages']);
+//		Route::get('/{id}/whatsapp/copy/{source_id}', [ProductController::class, 'copyProductWhatsappMessages']);
 		Route::post('/{id}/whatsapp/add/initial', [ProductController::class, 'addProductWhatsappInitialData']);
 		Route::post('/{id}/whatsapp/add/phone', [ProductController::class, 'addProductWhatsappPhone']);
 		Route::post('/{id}/whatsapp/remove/phone', [ProductController::class, 'removeProductWhatsappPhone']);

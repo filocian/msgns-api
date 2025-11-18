@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Infrastructure\Services\MixPanel\MPLogger;
 use App\Models\Product;
 use App\UseCases\Product\Configuration\ResetUC;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -76,7 +77,7 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 				$this->resetUC->run(['id' => (int) $product->id]);
 				$affectedProducts[] = (int) $product->id;
 				$this->comment("    -> ID: {$product->id} reset successful.");
-			} catch (\Exception $e) {
+			} catch (Exception $e) {
 				$this->error("    -> error resetting product ID: {$product->id}. Error: {$e->getMessage()}");
 				Log::error("Failed to reset product ID {$product->id}: {$e->getMessage()}");
 			}
@@ -89,7 +90,9 @@ final class ResetStuckOnAssignedProductsCommand extends Command
 			'products_restarted' => $affectedProducts,
 		]);
 
-		Log::alert('COMMAND STUCK ON ASSIGNED => ' . $productsRestoredCount . ' Products have been restored to "not-started" status: ' . $productsRestoredList);
+		Log::alert(
+			'COMMAND STUCK ON ASSIGNED => ' . $productsRestoredCount . ' Products have been restored to "not-started" status: ' . $productsRestoredList
+		);
 
 		$this->line('--- Summary ---');
 		$this->line('Deadline Date Applied: ' . $deadlineString . '.');

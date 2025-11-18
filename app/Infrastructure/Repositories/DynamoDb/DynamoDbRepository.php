@@ -56,7 +56,7 @@ final class DynamoDbRepository
 		array $expressionAttributeNames,
 		array $expressionAttributeValues,
 		string $order = 'ASC'
-	): ?\Aws\Result {
+	): ?Result {
 		try {
 			return $this->client->query([
 				'TableName' => $tableName,
@@ -77,9 +77,8 @@ final class DynamoDbRepository
 		string $filterExpression,
 		array $expressionAttributeNames,
 		array $expressionAttributeValues
-	): ?\Aws\Result {
+	): ?Result {
 		try {
-
 			$allItems = [];
 			$params = [
 				'TableName' => $tableName,
@@ -89,7 +88,8 @@ final class DynamoDbRepository
 			];
 
 			do {
-				$result = $this->client->scan($params);;
+				$result = $this->client->scan($params);
+				;
 				if (isset($result['Items'])) {
 					$allItems = array_merge($allItems, $result['Items']);
 				}

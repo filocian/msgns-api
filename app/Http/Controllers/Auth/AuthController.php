@@ -10,6 +10,7 @@ use App\Http\Requests\Auth\GoogleLoginRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\LogoutRequest;
 use App\Http\Requests\Auth\SignupRequest;
+use App\Http\Requests\User\OnlyAdminRequest;
 use App\Infrastructure\Services\User\UserService;
 use App\UseCases\Auth\CurrentUserUC;
 use App\UseCases\Auth\GoogleLoginUC;
@@ -17,6 +18,8 @@ use App\UseCases\Auth\HasAdminRightsUC;
 use App\UseCases\Auth\LoginUC;
 use App\UseCases\Auth\LogoutUC;
 use App\UseCases\Auth\SignUpUC;
+use App\UseCases\Auth\StartImpersonateUC;
+use App\UseCases\Auth\StopImpersonateUC;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -30,6 +33,8 @@ final class AuthController extends Controller
 		readonly private CurrentUserUC $currentUserUC,
 		readonly private HasAdminRightsUC $hasAdminRightsUC,
 		readonly private UserService $userService,
+		readonly private StartImpersonateUC $startImpersonateUC,
+		readonly private StopImpersonateUC $stopImpersonateUC,
 	) {}
 
 	public function signUp(SignupRequest $request): JsonResponse
@@ -106,5 +111,19 @@ final class AuthController extends Controller
 	public function hello(): JsonResponse
 	{
 		return HttpJson::OK('hello');
+	}
+
+	public function startImpersonation(OnlyAdminRequest $request, int $userId): JsonResponse
+	{
+		$userDto = $this->startImpersonateUC->run(['user_id' => $userId]);
+
+		return HttpJson::OK($userDto->wrapped('user'));
+	}
+
+	public function stopImpersonation(): JsonResponse
+	{
+		$userDto = $this->stopImpersonateUC->run();
+
+		return HttpJson::OK($userDto->wrapped('user'));
 	}
 }

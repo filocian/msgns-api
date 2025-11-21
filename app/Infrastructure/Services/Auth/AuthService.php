@@ -372,4 +372,43 @@ final class AuthService
 
 		return User::findById((string) $userId)->email;
 	}
+
+	public function startImpersonation(int $userId): UserDto|null
+	{
+		$currentUserId = $this->id();
+		$impersonatedUserModel = User::findById((string) $userId);
+
+		if (!$impersonatedUserModel) {
+			return null;
+		}
+
+		if (!$this->hasAdminRole($currentUserId)) {
+			return null;
+		}
+
+		if ($currentUserId === $userId || $this->hasAdminRole($userId)) {
+			return null;
+		}
+
+		session()->put('impersonator_id', $currentUserId);
+
+		Auth::login($impersonatedUserModel);
+
+		return UserDto::fromModel($impersonatedUserModel);
+	}
+
+	public function stopImpersonation(): UserDto|null
+	{
+		if (!session()->has('impersonator_id')) {
+			return null;
+		}
+
+		$adminId = (int) session()->pull('impersonator_id');
+		session()->forget('impersonator_id');
+		$impersonator = User::findOrFail($adminId);
+
+		Auth::login($impersonator);
+
+		return UserDto::fromModel($impersonator);
+	}
 }

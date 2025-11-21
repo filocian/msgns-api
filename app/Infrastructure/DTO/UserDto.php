@@ -26,6 +26,7 @@ final class UserDto extends BaseDTO
 	public Carbon|null $last_access;
 	public Carbon $created_at;
 	public Carbon $updated_at;
+	public bool $impersonated;
 
 	public function __construct(Model $model)
 	{
@@ -45,6 +46,7 @@ final class UserDto extends BaseDTO
 		$this->last_access = $model->last_access ?? null;
 		$this->created_at = $model->created_at;
 		$this->updated_at = $model->updated_at;
+		$this->impersonated = session()->has('impersonator_id') ?? false;
 	}
 
 	public function getContactId()

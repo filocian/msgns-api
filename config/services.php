@@ -40,4 +40,10 @@ return [
 		'fancelet_comments_table' => env('AWS_DYNAMODB_FANCELET_COMMENTS_TABLE'),
 		'product_config_history_table' => env('AWS_DYNAMODB_PRODUCT_CONFIG_HISTORY_TABLE'),
 	],
+
+	'mixpanel' => [
+		'token' => env('MIXPANEL_TOKEN', ''),
+		'source' => env('MIXPANEL_SOURCE', 'API'),
+		'system_alias' => env('MIXPANEL_SYSTEM_ALIAS', 'SYS@API'),
+	],
 ];

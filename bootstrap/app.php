@@ -13,6 +13,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
+use Src\Shared\Core\Errors\DomainException;
+use Src\Shared\Infrastructure\Http\DomainExceptionHandler;
 use Symfony\Component\HttpFoundation\Response as Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -27,6 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
 		$middleware->statefulApi();
 	})
 	->withExceptions(function (Exceptions $exceptions) {
+		$exceptions->render(function (DomainException $exception) {
+			return app(DomainExceptionHandler::class)->render($exception);
+		});
+
 		$exceptions->render(function (Exception $exception) {
 			$class = get_class($exception);
 			$status = match ($class) {

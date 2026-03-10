@@ -8,16 +8,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration {
 	/**
+	 * SQLite cannot apply the MySQL-specific collation used in production.
+	 */
+	private function usesSqlite(): bool
+	{
+		return Schema::getConnection()->getDriverName() === 'sqlite';
+	}
+
+	/**
 	 * Run the migrations.
 	 */
 	public function up(): void
 	{
 		Schema::table('users', function (Blueprint $table) {
-			$table->longText('user_agent')
-				->collation('utf8mb4_unicode_ci') // Change collation or keep it as utf8mb4_bin
+			$column = $table->longText('user_agent')
 				->nullable()
-				->default(null)
-				->change();
+				->default(null);
+
+			if (! $this->usesSqlite()) {
+				$column->collation('utf8mb4_unicode_ci');
+			}
+
+			$column->change();
 		});
 	}
 

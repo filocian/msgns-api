@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Tests;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Testing\TestResponse;
 use Spatie\Permission\Models\Permission;
@@ -18,8 +16,8 @@ abstract class TestCase extends BaseTestCase
 	 * Sends a POST request using required auth headers
 	 *
 	 * @param string $uri
-	 * @param array $data
-	 * @return TestResponse
+	 * @param array<string, mixed> $data
+	 * @return TestResponse<\Symfony\Component\HttpFoundation\Response>
 	 */
 	public function postWithHeaders(string $uri, array $data = []): TestResponse
 	{
@@ -33,8 +31,8 @@ abstract class TestCase extends BaseTestCase
 	 * Sends a PUT request using required auth headers
 	 *
 	 * @param string $uri
-	 * @param array $data
-	 * @return TestResponse
+	 * @param array<string, mixed> $data
+	 * @return TestResponse<\Symfony\Component\HttpFoundation\Response>
 	 */
 	public function putWithHeaders(string $uri, array $data = []): TestResponse
 	{
@@ -55,10 +53,9 @@ abstract class TestCase extends BaseTestCase
 	 *
 	 * google_id: null
 	 *
-	 * @param array{name: ?string, email:string, password:string, googleId: ?string} $userData
-	 * @return User|Collection|Model
+	 * @param array{name?: string|null, email?: string, password?: string, google_id?: string|null} $userData
 	 */
-	public function create_user(array $userData): Collection|Model|User
+	public function create_user(array $userData): User
 	{
 		$defaultUserData = [
 			'name' => 'Test User',

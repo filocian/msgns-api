@@ -67,7 +67,7 @@ final class AuthService
 			throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR,);
 		}
 
-		$user->assignRole(StaticRoles::USER_ROLE);
+		$this->setDefaultRole($user);
 
 		if ($user->google_id === '') {
 			app()->setLocale($user->default_locale);
@@ -129,7 +129,10 @@ final class AuthService
 			return null;
 		}
 
-		Request::session()->regenerate();
+
+		if (Request::hasSession()) {
+			Request::session()->regenerate();
+		}
 
 		$userRoles = $this->getRoles($user);
 
@@ -197,8 +200,11 @@ final class AuthService
 	{
 		Auth::guard('stateful-api')->logout();
 		Cookie::queue(Cookie::forget(config('session.cookie')));
-		Request::session()->invalidate();
-		Request::session()->regenerateToken();
+
+		if (Request::hasSession()) {
+			Request::session()->invalidate();
+			Request::session()->regenerateToken();
+		}
 
 		return true;
 	}
@@ -358,9 +364,8 @@ final class AuthService
 
 	private function setDefaultRole(User $user): void
 	{
-		if ($role = Role::findByName(StaticRoles::USER_ROLE, 'stateful-api')) {
-			$user->assignRole($role);
-		}
+		$role = Role::findOrCreate(StaticRoles::USER_ROLE, 'stateful-api');
+		$user->assignRole($role);
 	}
 
 	public function userEmail(): string

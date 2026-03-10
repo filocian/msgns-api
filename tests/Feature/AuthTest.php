@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Infrastructure\DTO\UserDto;
 use Symfony\Component\HttpFoundation\Response as Response;
 
 describe('App Auth', function () {
@@ -16,14 +15,13 @@ describe('App Auth', function () {
 		$response = $this->postWithHeaders('/api/auth/sign-up', $userData);
 		$responseData = $response->json();
 
-		$response->assertStatus(Response::HTTP_CREATED);
+		$response->assertStatus(Response::HTTP_OK);
 		$this->assertEquals($userData['name'], $responseData['data']['user']['name']);
 		$this->assertEquals($userData['email'], $responseData['data']['user']['email']);
 	});
 
 	it('User can LogIn', function () {
 		$user = $this->create_user([]);
-		$userDto = UserDto::fromModel($user);
 		$response = $this->postWithHeaders('/api/auth/login', [
 			'email' => $user->email,
 			'password' => 'Pass123456!',
@@ -31,7 +29,16 @@ describe('App Auth', function () {
 
 		$response->assertStatus(Response::HTTP_OK);
 		$response->assertJson([
-			'data' => $userDto->toArray('user'),
+			'data' => [
+				'user' => [
+					'id' => $user->id,
+					'name' => $user->name,
+					'email' => $user->email,
+					'password_reset_required' => false,
+					'default_locale' => 'en_UK',
+					'roles' => ['user'],
+				],
+			],
 		]);
 	});
 

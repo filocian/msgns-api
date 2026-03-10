@@ -38,6 +38,6 @@ return [
 		'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
 		'product_usage_table' => env('AWS_DYNAMODB_PRODUCT_USAGE_TABLE'),
 		'fancelet_comments_table' => env('AWS_DYNAMODB_FANCELET_COMMENTS_TABLE'),
-		'$product_config_history_table' => env('AWS_DYNAMODB_PRODUCT_CONFIG_HISTORY_TABLE'),
+		'product_config_history_table' => env('AWS_DYNAMODB_PRODUCT_CONFIG_HISTORY_TABLE'),
 	],
 ];

@@ -24,8 +24,6 @@ abstract class TestCase extends BaseTestCase
 	public function postWithHeaders(string $uri, array $data = []): TestResponse
 	{
 		$headers = [
-			'Origin' => env('HTTP_REFERER'),
-			'Referer' => env('HTTP_REFERER'),
 			'Accept' => 'application/json',
 		];
 		return $this->post($uri, $data, $headers);
@@ -41,8 +39,6 @@ abstract class TestCase extends BaseTestCase
 	public function putWithHeaders(string $uri, array $data = []): TestResponse
 	{
 		$headers = [
-			'Origin' => env('HTTP_REFERER'),
-			'Referer' => env('HTTP_REFERER'),
 			'Accept' => 'application/json',
 		];
 		return $this->put($uri, $data, $headers);
@@ -81,14 +77,14 @@ abstract class TestCase extends BaseTestCase
 	 * @param string $roleGuard
 	 * @return \Spatie\Permission\Contracts\Role|Role
 	 */
-	public function createRole(string $roleName, string $roleGuard = 'api'): Role|\Spatie\Permission\Contracts\Role
+	public function createRole(string $roleName, string $roleGuard = 'stateful-api'): Role|\Spatie\Permission\Contracts\Role
 	{
 		return Role::findOrCreate($roleName, $roleGuard);
 	}
 
 	public function createPermission(
 		string $permissionName,
-		string $permissionGuard = 'api'
+		string $permissionGuard = 'stateful-api'
 	): Permission|\Spatie\Permission\Contracts\Permission {
 		return Permission::findOrCreate($permissionName, $permissionGuard);
 	}

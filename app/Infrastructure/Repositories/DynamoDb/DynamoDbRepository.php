@@ -19,13 +19,18 @@ final class DynamoDbRepository
 	 */
 	public function __construct()
 	{
+		$key = config('services.dynamodb.key');
+		$secret = config('services.dynamodb.secret');
+
 		$this->client = new DynamoDbClient([
 			'region' => config('services.dynamodb.region'),
 			'version' => 'latest',
-			'credentials' => [
-				'key' => config('services.dynamodb.key'),
-				'secret' => config('services.dynamodb.secret'),
-			],
+			'credentials' => $key && $secret
+				? [
+					'key' => $key,
+					'secret' => $secret,
+				]
+				: false,
 			'retries' => 0,
 		]);
 	}

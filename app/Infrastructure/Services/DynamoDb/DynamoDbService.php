@@ -20,9 +20,9 @@ final readonly class DynamoDbService
 
 	public function __construct(private DynamoDbRepository $dynamoDbRepo)
 	{
-		$this->productUsageTable = config('services.dynamodb.product_usage_table');
-		$this->fanceletCommentsTable = config('services.dynamodb.fancelet_comments_table');
-		$this->productConfigHistoryTable = config('services.dynamodb.$product_config_history_table');
+		$this->productUsageTable = (string) config('services.dynamodb.product_usage_table', '');
+		$this->fanceletCommentsTable = (string) config('services.dynamodb.fancelet_comments_table', '');
+		$this->productConfigHistoryTable = (string) config('services.dynamodb.product_config_history_table', '');
 	}
 
 	/**

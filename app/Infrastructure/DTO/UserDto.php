@@ -39,8 +39,8 @@ final class UserDto extends BaseDTO
 		$this->country = $model->country ?? null;
 		$this->google_id = $model->google_id;
 		$this->roles = $model->getRoles($model->id);
-		$this->password_reset_required = $model->password_reset_required;
-		$this->default_locale = $model->default_locale;
+		$this->password_reset_required = (bool) ($model->password_reset_required ?? false);
+		$this->default_locale = (string) ($model->default_locale ?? 'en_UK');
 		$this->user_agent = $model->user_agent ?? null;
 		$this->email_verified_at = $model->email_verified_at;
 		$this->last_access = $model->last_access ?? null;

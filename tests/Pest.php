@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use Database\Seeders\RolePermissionsSeeder;
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -13,10 +16,14 @@ declare(strict_types=1);
 |
 */
 
-uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class,)->in('Feature', 'Unit');
+uses(TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class)->in('Feature');
+uses(TestCase::class)->in('Unit');
 
-beforeEach(function () {
-	$this->seed(Database\Seeders\RolePermissionsSeeder::class);
+beforeEach(function (): void {
+	/** @var TestCase $this */
+	if (str_contains((string) $this::class, 'Feature')) {
+		$this->seed(RolePermissionsSeeder::class);
+	}
 });
 
 //uses(
@@ -35,9 +42,7 @@ beforeEach(function () {
 |
 */
 
-expect()->extend('toBeOne', function () {
-	return $this->toBe(1);
-});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -49,8 +54,3 @@ expect()->extend('toBeOne', function () {
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-
-function something()
-{
-	// ..
-}

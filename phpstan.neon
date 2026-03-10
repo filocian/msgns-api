@@ -1,0 +1,19 @@
+includes:
+  - vendor/larastan/larastan/extension.neon
+
+parameters:
+  level: 8
+  paths:
+    - src/Shared
+    - tools/phpstan
+    - tests/Pest.php
+    - tests/TestCase.php
+    - tests/Datasets
+    - tests/Architecture
+  excludePaths:
+    - src/*/Infrastructure/Persistence/*Model.php
+
+services:
+  - class: Tools\PHPStan\Rules\NoIlluminateInCoreLayers
+    tags:
+      - phpstan.rules.rule

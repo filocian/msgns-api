@@ -19,12 +19,22 @@ final class IdentityUser
         public ?string $googleId,
         public ?string $phone,
         public ?string $country,
+        public ?string $defaultLocale,
+        public ?string $userAgent,
         public bool $passwordResetRequired,
         public readonly DateTimeImmutable $createdAt,
         public DateTimeImmutable $updatedAt,
     ) {}
 
-    public static function create(string $email, string $name, string $hashedPassword): self
+    public static function create(
+        string $email,
+        string $name,
+        string $hashedPassword,
+        ?string $phone = null,
+        ?string $country = null,
+        ?string $defaultLocale = null,
+        ?string $userAgent = null,
+    ): self
     {
         $now = new DateTimeImmutable();
         return new self(
@@ -35,8 +45,10 @@ final class IdentityUser
             active: true,
             emailVerifiedAt: null,
             googleId: null,
-            phone: null,
-            country: null,
+            phone: $phone,
+            country: $country,
+            defaultLocale: $defaultLocale,
+            userAgent: $userAgent,
             passwordResetRequired: false,
             createdAt: $now,
             updatedAt: $now,
@@ -56,6 +68,8 @@ final class IdentityUser
             googleId: $googleId,
             phone: null,
             country: null,
+            defaultLocale: null,
+            userAgent: null,
             passwordResetRequired: false,
             createdAt: $now,
             updatedAt: $now,
@@ -75,6 +89,8 @@ final class IdentityUser
         bool $passwordResetRequired,
         DateTimeImmutable $createdAt,
         DateTimeImmutable $updatedAt,
+        ?string $defaultLocale = null,
+        ?string $userAgent = null,
     ): self {
         return new self(
             id: $id,
@@ -86,6 +102,8 @@ final class IdentityUser
             googleId: $googleId,
             phone: $phone,
             country: $country,
+            defaultLocale: $defaultLocale,
+            userAgent: $userAgent,
             passwordResetRequired: $passwordResetRequired,
             createdAt: $createdAt,
             updatedAt: $updatedAt,

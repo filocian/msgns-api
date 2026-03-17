@@ -18,6 +18,7 @@ final class LoginRequest extends FormRequest
         return [
             'email'    => 'required|email',
             'password' => 'required|string',
+            'user_agent' => 'nullable|string|max:1024',
         ];
     }
 }

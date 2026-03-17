@@ -19,7 +19,7 @@ afterEach(fn() => Mockery::close());
 it('throws if user not found', function () {
     $this->repo->shouldReceive('findByEmail')->andReturn(null);
     (new LoginHandler($this->repo, $this->eventBus))
-        ->handle(new LoginCommand(email: 'x@x.com', password: 'pass'));
+        ->handle(new LoginCommand(email: 'x@x.com', password: 'pass', userAgent: null));
 })->throws(ValidationFailed::class);
 
 it('throws if account inactive', function () {
@@ -27,7 +27,7 @@ it('throws if account inactive', function () {
     $user = \Src\Identity\Domain\Entities\IdentityUser::fromPersistence(1, 'x@x.com', 'X', 'hash', false, null, null, null, null, false, $now, $now);
     $this->repo->shouldReceive('findByEmail')->andReturn($user);
     (new LoginHandler($this->repo, $this->eventBus))
-        ->handle(new LoginCommand(email: 'x@x.com', password: 'pass'));
+        ->handle(new LoginCommand(email: 'x@x.com', password: 'pass', userAgent: null));
 })->throws(ValidationFailed::class);
 
 it('throws on invalid password', function () {
@@ -36,7 +36,7 @@ it('throws on invalid password', function () {
     $user = \Src\Identity\Domain\Entities\IdentityUser::fromPersistence(1, 'x@x.com', 'X', $hash, true, null, null, null, null, false, $now, $now);
     $this->repo->shouldReceive('findByEmail')->andReturn($user);
     (new LoginHandler($this->repo, $this->eventBus))
-        ->handle(new LoginCommand(email: 'x@x.com', password: 'wrong'));
+        ->handle(new LoginCommand(email: 'x@x.com', password: 'wrong', userAgent: null));
 })->throws(ValidationFailed::class);
 
 it('logs in with correct credentials', function () {
@@ -44,9 +44,10 @@ it('logs in with correct credentials', function () {
     $hash = password_hash('correct', PASSWORD_BCRYPT);
     $user = \Src\Identity\Domain\Entities\IdentityUser::fromPersistence(1, 'x@x.com', 'X', $hash, true, null, null, null, null, false, $now, $now);
     $this->repo->shouldReceive('findByEmail')->andReturn($user);
+    $this->repo->shouldReceive('applyLoginSideEffects')->once()->with(1, 'test-agent');
     $this->eventBus->shouldReceive('publish')->once();
 
     $result = (new LoginHandler($this->repo, $this->eventBus))
-        ->handle(new LoginCommand(email: 'x@x.com', password: 'correct'));
+        ->handle(new LoginCommand(email: 'x@x.com', password: 'correct', userAgent: 'test-agent'));
     expect($result)->not->toBeNull();
 });

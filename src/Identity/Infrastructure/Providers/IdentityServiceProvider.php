@@ -27,6 +27,7 @@ use Src\Identity\Application\Commands\StartImpersonation\StartImpersonationHandl
 use Src\Identity\Application\Commands\StopImpersonation\StopImpersonationHandler;
 use Src\Identity\Application\Commands\UpdateRole\UpdateRoleHandler;
 use Src\Identity\Application\Commands\VerifyEmail\VerifyEmailHandler;
+use Src\Identity\Application\Contracts\LocaleMapper;
 use Src\Identity\Application\Queries\GetCurrentUser\GetCurrentUserHandler;
 use Src\Identity\Application\Queries\GetUser\GetUserHandler;
 use Src\Identity\Application\Queries\ListPermissions\ListPermissionsHandler;
@@ -50,6 +51,7 @@ use Src\Identity\Infrastructure\Listeners\LogImpersonation;
 use Src\Identity\Infrastructure\Listeners\SendVerificationEmail;
 use Src\Identity\Infrastructure\Listeners\TrackUserLogin;
 use Src\Identity\Infrastructure\Listeners\TrackUserRegistration;
+use Src\Identity\Infrastructure\Localization\LegacyLocaleMapper;
 use Src\Identity\Infrastructure\Persistence\EloquentIdentityUserRepository;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Core\Bus\QueryBus;
@@ -64,6 +66,7 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->app->bind(VerificationTokenPort::class, EncryptedVerificationToken::class);
         $this->app->bind(PasswordResetTokenPort::class, EncryptedPasswordResetToken::class);
         $this->app->bind(GoogleAuthPort::class, GoogleOAuthAdapter::class);
+        $this->app->bind(LocaleMapper::class, LegacyLocaleMapper::class);
     }
 
     public function boot(): void

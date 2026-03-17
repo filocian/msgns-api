@@ -40,12 +40,26 @@ final class IdentityController extends Controller
 
     public function signUp(SignUpRequest $request): JsonResponse
     {
-        $user = $this->commandBus->dispatch(new SignUpCommand(
+        $this->commandBus->dispatch(new SignUpCommand(
             email: $request->input('email'),
             name: $request->input('name'),
             hashedPassword: Hash::make($request->input('password')),
+            country: $request->input('country'),
+            phone: $request->input('phone'),
+            language: $request->input('language'),
+            userAgent: $request->input('user_agent'),
         ));
-        return ApiResponseFactory::created($user);
+
+        $user = $this->commandBus->dispatch(new LoginCommand(
+            email: $request->input('email'),
+            password: $request->input('password'),
+            userAgent: $request->input('user_agent'),
+        ));
+
+        Auth::guard('stateful-api')->loginUsingId($user->id);
+        session()->regenerate();
+
+        return ApiResponseFactory::ok(new LoginResource($user));
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -53,6 +67,7 @@ final class IdentityController extends Controller
         $user = $this->commandBus->dispatch(new LoginCommand(
             email: $request->input('email'),
             password: $request->input('password'),
+            userAgent: $request->input('user_agent'),
         ));
         Auth::guard('stateful-api')->loginUsingId($user->id);
         session()->regenerate();

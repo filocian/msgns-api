@@ -42,6 +42,8 @@ final class LoginHandler implements CommandHandler
             throw ValidationFailed::because('invalid_credentials');
         }
 
+        $this->repo->applyLoginSideEffects($user->id, $command->userAgent);
+
         $this->eventBus->publish(new UserLoggedIn($user->id, 'password'));
 
         return new UserResource(

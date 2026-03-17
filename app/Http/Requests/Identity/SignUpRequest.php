@@ -28,6 +28,10 @@ final class SignUpRequest extends FormRequest
             'name'            => 'required|string|min:2|max:255',
             'password'        => 'required|string|min:' . env('PASSWORD_MIN_LENGTH', 8) . '|custom_password',
             'repeat_password' => 'required|string|same:password',
+            'country'         => ['nullable', 'string', 'size:2', 'regex:/^[A-Z]{2}$/'],
+            'phone'           => ['nullable', 'string', 'regex:/^\+[1-9]\d{5,19}$/'],
+            'language'        => ['nullable', 'string', 'size:2', 'regex:/^[a-z]{2}$/i'],
+            'user_agent'      => 'nullable|string|max:1024',
         ];
     }
 }

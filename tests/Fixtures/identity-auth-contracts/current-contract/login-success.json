@@ -1,0 +1,15 @@
+{
+  "contract": "login-success",
+  "locked_paths": {
+    "data.user.id": "integer",
+    "data.user.email": "string",
+    "data.user.name": "string",
+    "data.user.active": "boolean",
+    "data.user.emailVerified": "boolean",
+    "data.user.phone": "string|null",
+    "data.user.country": "string|null",
+    "data.user.hasGoogleLogin": "boolean",
+    "data.user.passwordResetRequired": "boolean",
+    "data.user.createdAt": "string"
+  }
+}

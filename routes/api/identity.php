@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes (no auth required)
 Route::post('/sign-up', [IdentityController::class, 'signUp']);
+Route::post('/signup', [IdentityController::class, 'signUp']);
 Route::post('/login', [IdentityController::class, 'login'])->middleware('throttle:10,1');
 Route::post('/login/google', [IdentityController::class, 'googleLogin']);
 Route::post('/email/request-verification', [IdentityController::class, 'requestVerification']);

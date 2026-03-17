@@ -12,6 +12,10 @@ final class SignUpCommand implements Command
         public readonly string $email,
         public readonly string $name,
         public readonly string $hashedPassword,
+        public readonly ?string $country,
+        public readonly ?string $phone,
+        public readonly ?string $language,
+        public readonly ?string $userAgent,
     ) {}
 
     public function commandName(): string

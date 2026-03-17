@@ -34,6 +34,15 @@ return Application::configure(basePath: dirname(__DIR__))
 		});
 
 		$exceptions->render(function (Exception $exception) {
+			if ($exception instanceof ValidationException) {
+				return HttpJson::KO('validation_error', Response::HTTP_BAD_REQUEST, [
+					'code' => 'validation_error',
+					'context' => [
+						'errors' => $exception->errors(),
+					],
+				]);
+			}
+
 			$class = get_class($exception);
 			$status = match ($class) {
 				ProductNotOwnedException::class,
@@ -42,11 +51,12 @@ return Application::configure(basePath: dirname(__DIR__))
 				ActionNotAllowedException::class => Response::HTTP_UNAUTHORIZED,
 				ModelNotFoundException::class,
 				ProductNotFoundException::class => Response::HTTP_NOT_FOUND,
-				ValidationException::class => Response::HTTP_BAD_REQUEST,
-				HttpException::class => $exception->getStatusCode(),
-
 				default => Response::HTTP_INTERNAL_SERVER_ERROR
 			};
+
+			if ($exception instanceof HttpException) {
+				$status = $exception->getStatusCode();
+			}
 
 			return HttpJson::KO(
 				$exception->getMessage(),

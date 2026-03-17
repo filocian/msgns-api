@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Src\Identity\Infrastructure\Persistence;
 
+use App\Static\Permissions\StaticRoles;
 use App\Models\User;
+use Carbon\CarbonImmutable;
+use Spatie\Permission\Models\Role;
 use Src\Identity\Domain\Entities\IdentityUser;
 use Src\Identity\Domain\Ports\IdentityUserRepository;
 use Src\Identity\Application\Resources\AdminUserListResource;
@@ -44,7 +47,8 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
                 'country'                 => $user->country,
                 'password_reset_required' => $user->passwordResetRequired,
                 'email_verified_at'       => $user->emailVerifiedAt,
-                'default_locale'          => 'en',
+                'default_locale'          => $user->defaultLocale ?? 'en_UK',
+                'user_agent'              => $user->userAgent,
                 'last_access'             => now(),
             ]);
             return $this->toDomainEntity($model);
@@ -64,6 +68,40 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
         ]);
         $model->refresh();
         return $this->toDomainEntity($model);
+    }
+
+    public function applySignUpSideEffects(int $userId, ?string $userAgent): void
+    {
+        $user = User::findOrFail($userId);
+
+        $this->ensureDefaultRole($user);
+
+        $updates = [
+            'last_access' => CarbonImmutable::now(),
+        ];
+
+        if ($userAgent !== null && trim($userAgent) !== '') {
+            $updates['user_agent'] = $userAgent;
+        }
+
+        $user->update($updates);
+    }
+
+    public function applyLoginSideEffects(int $userId, ?string $userAgent): void
+    {
+        $user = User::findOrFail($userId);
+
+        $this->ensureDefaultRole($user);
+
+        $updates = [
+            'last_access' => CarbonImmutable::now(),
+        ];
+
+        if (($user->user_agent === null || trim((string) $user->user_agent) === '') && $userAgent !== null && trim($userAgent) !== '') {
+            $updates['user_agent'] = $userAgent;
+        }
+
+        $user->update($updates);
     }
 
     public function list(array $filters): PaginatedResult
@@ -133,6 +171,17 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
             passwordResetRequired: (bool) $model->password_reset_required,
             createdAt: $model->created_at?->toImmutable() ?? new \DateTimeImmutable(),
             updatedAt: $model->updated_at?->toImmutable() ?? new \DateTimeImmutable(),
+            defaultLocale: $model->getAttribute('default_locale'),
+            userAgent: $model->getAttribute('user_agent'),
         );
+    }
+
+    private function ensureDefaultRole(User $user): void
+    {
+        $role = Role::findOrCreate(StaticRoles::USER_ROLE, 'stateful-api');
+
+        if (!$user->hasRole($role)) {
+            $user->assignRole($role);
+        }
     }
 }

@@ -56,6 +56,7 @@ final class LoginHandler implements CommandHandler
             country: $user->country,
             hasGoogleLogin: $user->isGoogleUser(),
             passwordResetRequired: $user->passwordResetRequired,
+            defaultLocale: $user->defaultLocale,
             createdAt: $user->createdAt->format('c'),
         );
     }

@@ -9,10 +9,12 @@ use Illuminate\Support\ServiceProvider;
 use Mixpanel;
 use Src\Shared\Core\Ports\AnalyticsPort;
 use Src\Shared\Core\Ports\LogPort;
+use Src\Shared\Core\Ports\MailPort;
 use Src\Shared\Core\Ports\NoSqlPort;
 use Src\Shared\Core\Ports\QueuePort;
 use Src\Shared\Infrastructure\Analytics\MixPanelAnalytics;
 use Src\Shared\Infrastructure\Log\LaravelLog;
+use Src\Shared\Infrastructure\Mail\ResendMailAdapter;
 use Src\Shared\Infrastructure\NoSql\DynamoDbAdapter;
 use Src\Shared\Infrastructure\Queue\LaravelQueue;
 
@@ -51,5 +53,6 @@ final class SharedServiceProvider extends ServiceProvider
 		$this->app->bind(LogPort::class, LaravelLog::class);
 		$this->app->bind(AnalyticsPort::class, MixPanelAnalytics::class);
 		$this->app->bind(NoSqlPort::class, DynamoDbAdapter::class);
+		$this->app->bind(MailPort::class, ResendMailAdapter::class);
 	}
 }

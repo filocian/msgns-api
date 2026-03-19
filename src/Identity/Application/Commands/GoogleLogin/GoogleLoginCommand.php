@@ -10,6 +10,7 @@ final class GoogleLoginCommand implements Command
 {
     public function __construct(
         public readonly string $idToken,
+        public readonly ?string $userAgent = null,
     ) {}
 
     public function commandName(): string

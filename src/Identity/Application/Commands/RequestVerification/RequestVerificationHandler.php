@@ -6,8 +6,10 @@ namespace Src\Identity\Application\Commands\RequestVerification;
 
 use Src\Shared\Core\Bus\Command;
 use Src\Shared\Core\Bus\CommandHandler;
+use Src\Shared\Core\Bus\EventBus;
 use Src\Shared\Core\Errors\NotFound;
 use Src\Shared\Core\Errors\ValidationFailed;
+use Src\Identity\Domain\Events\VerificationRequested;
 use Src\Identity\Domain\Ports\IdentityUserRepository;
 use Src\Identity\Domain\Ports\VerificationTokenPort;
 
@@ -16,6 +18,7 @@ final class RequestVerificationHandler implements CommandHandler
     public function __construct(
         private readonly IdentityUserRepository $repo,
         private readonly VerificationTokenPort $tokenPort,
+        private readonly EventBus $eventBus,
     ) {}
 
     public function handle(Command $command): mixed
@@ -35,6 +38,8 @@ final class RequestVerificationHandler implements CommandHandler
 
         $token = $this->tokenPort->generate($user->email);
 
-        return $token;
+        $this->eventBus->publish(new VerificationRequested($user->email, $token));
+
+        return null;
     }
 }

@@ -38,12 +38,14 @@ final class GoogleLoginHandler implements CommandHandler
         if ($user === null) {
             $user = IdentityUser::fromGoogle($profile->email, $profile->name, $profile->googleId);
             $user = $this->repo->save($user);
+            $this->repo->applySignUpSideEffects($user->id, $command->userAgent);
             $this->eventBus->publish(new UserRegistered($user->id, $user->email));
         } else {
             if ($user->googleId === null) {
                 $user->googleId = $profile->googleId;
                 $user = $this->repo->save($user);
             }
+            $this->repo->applyLoginSideEffects($user->id, $command->userAgent);
         }
 
         if (!$user->active) {
@@ -62,6 +64,7 @@ final class GoogleLoginHandler implements CommandHandler
             country: $user->country,
             hasGoogleLogin: $user->isGoogleUser(),
             passwordResetRequired: $user->passwordResetRequired,
+            defaultLocale: $user->defaultLocale,
             createdAt: $user->createdAt->format('c'),
         );
     }

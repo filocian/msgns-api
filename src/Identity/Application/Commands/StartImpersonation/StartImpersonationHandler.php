@@ -54,6 +54,7 @@ final class StartImpersonationHandler implements CommandHandler
                 country: $target->country,
                 hasGoogleLogin: $target->isGoogleUser(),
                 passwordResetRequired: $target->passwordResetRequired,
+                defaultLocale: $target->defaultLocale,
                 createdAt: $target->createdAt->format('c'),
             ),
             action: 'started',

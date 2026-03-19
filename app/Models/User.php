@@ -13,6 +13,9 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * @property string|null $user_agent
+ */
 final class User extends Authenticatable implements MustVerifyEmail
 {
 	use HasRoles, HasApiTokens, HasFactory, Notifiable;

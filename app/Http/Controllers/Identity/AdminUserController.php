@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Identity;
 
 use App\Http\Contracts\Controller;
+use App\Http\Requests\Identity\AdminSetPasswordRequest;
 use App\Http\Requests\Identity\AdminUpdateUserRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Src\Identity\Application\Commands\AdminActivateUser\AdminActivateUserCommand;
 use Src\Identity\Application\Commands\AdminDeactivateUser\AdminDeactivateUserCommand;
+use Src\Identity\Application\Commands\AdminSetEmailVerified\AdminSetEmailVerifiedCommand;
+use Src\Identity\Application\Commands\AdminSetPassword\AdminSetPasswordCommand;
 use Src\Identity\Application\Commands\AdminUpdateUser\AdminUpdateUserCommand;
 use Src\Identity\Application\Queries\GetUser\GetUserQuery;
 use Src\Identity\Application\Queries\ListUsers\ListUsersQuery;
@@ -51,6 +56,26 @@ final class AdminUserController extends Controller
             userId: $id,
             name: $request->input('name'),
             email: $request->input('email'),
+            phone: $request->input('phone'),
+            country: $request->input('country'),
+            defaultLocale: $request->input('default_locale'),
+        ));
+        return ApiResponseFactory::ok($user);
+    }
+
+    public function setPassword(AdminSetPasswordRequest $request, int $id): Response
+    {
+        $this->commandBus->dispatch(new AdminSetPasswordCommand(
+            userId: $id,
+            hashedPassword: Hash::make($request->input('password')),
+        ));
+        return ApiResponseFactory::noContent();
+    }
+
+    public function setEmailVerified(int $id): JsonResponse
+    {
+        $user = $this->commandBus->dispatch(new AdminSetEmailVerifiedCommand(
+            userId: $id,
         ));
         return ApiResponseFactory::ok($user);
     }

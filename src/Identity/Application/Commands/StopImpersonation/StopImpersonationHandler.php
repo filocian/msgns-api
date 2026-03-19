@@ -46,6 +46,7 @@ final class StopImpersonationHandler implements CommandHandler
                 country: $admin->country,
                 hasGoogleLogin: $admin->isGoogleUser(),
                 passwordResetRequired: $admin->passwordResetRequired,
+                defaultLocale: $admin->defaultLocale,
                 createdAt: $admin->createdAt->format('c'),
             ),
             action: 'stopped',

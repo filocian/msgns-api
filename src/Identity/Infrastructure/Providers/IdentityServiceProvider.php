@@ -11,6 +11,8 @@ use Illuminate\Support\ServiceProvider;
 use Src\Identity\Infrastructure\Http\RoleMiddleware;
 use Src\Identity\Application\Commands\AdminActivateUser\AdminActivateUserHandler;
 use Src\Identity\Application\Commands\AdminDeactivateUser\AdminDeactivateUserHandler;
+use Src\Identity\Application\Commands\AdminSetEmailVerified\AdminSetEmailVerifiedHandler;
+use Src\Identity\Application\Commands\AdminSetPassword\AdminSetPasswordHandler;
 use Src\Identity\Application\Commands\AdminUpdateUser\AdminUpdateUserHandler;
 use Src\Identity\Application\Commands\AssignRole\AssignRoleHandler;
 use Src\Identity\Application\Commands\CreateRole\CreateRoleHandler;
@@ -18,12 +20,15 @@ use Src\Identity\Application\Commands\DeleteRole\DeleteRoleHandler;
 use Src\Identity\Application\Commands\GoogleLogin\GoogleLoginHandler;
 use Src\Identity\Application\Commands\Login\LoginHandler;
 use Src\Identity\Application\Commands\Logout\LogoutHandler;
+use Src\Identity\Application\Commands\ReconcileRbacCatalog\ReconcileRbacCatalogHandler;
 use Src\Identity\Application\Commands\RemoveRole\RemoveRoleHandler;
 use Src\Identity\Application\Commands\RequestPasswordReset\RequestPasswordResetHandler;
 use Src\Identity\Application\Commands\RequestVerification\RequestVerificationHandler;
 use Src\Identity\Application\Commands\ResetPassword\ResetPasswordHandler;
+use Src\Identity\Application\Commands\ChangeMyPassword\ChangeMyPasswordHandler;
 use Src\Identity\Application\Commands\SignUp\SignUpHandler;
 use Src\Identity\Application\Commands\StartImpersonation\StartImpersonationHandler;
+use Src\Identity\Application\Commands\UpdateMyProfile\UpdateMyProfileHandler;
 use Src\Identity\Application\Commands\StopImpersonation\StopImpersonationHandler;
 use Src\Identity\Application\Commands\UpdateRole\UpdateRoleHandler;
 use Src\Identity\Application\Commands\VerifyEmail\VerifyEmailHandler;
@@ -34,21 +39,29 @@ use Src\Identity\Application\Queries\ListPermissions\ListPermissionsHandler;
 use Src\Identity\Application\Queries\ListRoles\ListRolesHandler;
 use Src\Identity\Application\Queries\ListUsers\ListUsersHandler;
 use Src\Identity\Domain\Events\ImpersonationStarted;
+use Src\Identity\Domain\Events\PasswordReset;
+use Src\Identity\Domain\Events\PasswordResetRequested;
 use Src\Identity\Domain\Events\UserLoggedIn;
 use Src\Identity\Domain\Events\UserRegistered;
+use Src\Identity\Domain\Events\VerificationRequested;
 use Src\Identity\Domain\Ports\GoogleAuthPort;
 use Src\Identity\Domain\Ports\IdentityUserRepository;
 use Src\Identity\Domain\Ports\ImpersonationPort;
+use Src\Identity\Domain\Ports\PasswordHasherPort;
 use Src\Identity\Domain\Ports\PasswordResetTokenPort;
 use Src\Identity\Domain\Ports\RolePort;
 use Src\Identity\Domain\Ports\VerificationTokenPort;
 use Src\Identity\Infrastructure\Auth\EncryptedPasswordResetToken;
 use Src\Identity\Infrastructure\Auth\EncryptedVerificationToken;
 use Src\Identity\Infrastructure\Auth\GoogleOAuthAdapter;
+use Src\Identity\Infrastructure\Auth\LaravelPasswordHasherAdapter;
 use Src\Identity\Infrastructure\Auth\SessionImpersonationAdapter;
 use Src\Identity\Infrastructure\Authorization\SpatieRoleAdapter;
 use Src\Identity\Infrastructure\Listeners\LogImpersonation;
-use Src\Identity\Infrastructure\Listeners\SendVerificationEmail;
+use Src\Identity\Infrastructure\Listeners\SendPasswordResetEmail;
+use Src\Identity\Infrastructure\Listeners\SendVerificationEmailOnRegistration;
+use Src\Identity\Infrastructure\Listeners\SendVerificationEmailOnRequest;
+use Src\Identity\Infrastructure\Listeners\TrackPasswordReset;
 use Src\Identity\Infrastructure\Listeners\TrackUserLogin;
 use Src\Identity\Infrastructure\Listeners\TrackUserRegistration;
 use Src\Identity\Infrastructure\Localization\LegacyLocaleMapper;
@@ -66,6 +79,7 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->app->bind(VerificationTokenPort::class, EncryptedVerificationToken::class);
         $this->app->bind(PasswordResetTokenPort::class, EncryptedPasswordResetToken::class);
         $this->app->bind(GoogleAuthPort::class, GoogleOAuthAdapter::class);
+        $this->app->bind(PasswordHasherPort::class, LaravelPasswordHasherAdapter::class);
         $this->app->bind(LocaleMapper::class, LegacyLocaleMapper::class);
     }
 
@@ -86,11 +100,16 @@ final class IdentityServiceProvider extends ServiceProvider
         $commandBus->register('identity.admin_update_user', AdminUpdateUserHandler::class);
         $commandBus->register('identity.admin_deactivate_user', AdminDeactivateUserHandler::class);
         $commandBus->register('identity.admin_activate_user', AdminActivateUserHandler::class);
+        $commandBus->register('identity.update_my_profile', UpdateMyProfileHandler::class);
+        $commandBus->register('identity.change_my_password', ChangeMyPasswordHandler::class);
+        $commandBus->register('identity.admin_set_password', AdminSetPasswordHandler::class);
+        $commandBus->register('identity.admin_set_email_verified', AdminSetEmailVerifiedHandler::class);
         $commandBus->register('identity.create_role', CreateRoleHandler::class);
         $commandBus->register('identity.update_role', UpdateRoleHandler::class);
         $commandBus->register('identity.delete_role', DeleteRoleHandler::class);
         $commandBus->register('identity.assign_role', AssignRoleHandler::class);
         $commandBus->register('identity.remove_role', RemoveRoleHandler::class);
+        $commandBus->register('identity.reconcile_rbac_catalog', ReconcileRbacCatalogHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);
@@ -109,9 +128,12 @@ final class IdentityServiceProvider extends ServiceProvider
             ->group(base_path('routes/api/identity.php'));
 
         // Wire event listeners
-        Event::listen(UserRegistered::class, SendVerificationEmail::class);
+        Event::listen(UserRegistered::class, SendVerificationEmailOnRegistration::class);
+        Event::listen(VerificationRequested::class, SendVerificationEmailOnRequest::class);
         Event::listen(UserRegistered::class, TrackUserRegistration::class);
         Event::listen(UserLoggedIn::class, TrackUserLogin::class);
         Event::listen(ImpersonationStarted::class, LogImpersonation::class);
+        Event::listen(PasswordResetRequested::class, SendPasswordResetEmail::class);
+        Event::listen(PasswordReset::class, TrackPasswordReset::class);
     }
 }

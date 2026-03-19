@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Src\Identity\Infrastructure\Persistence;
 
-use App\Static\Permissions\StaticRoles;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Spatie\Permission\Models\Role;
+use Src\Identity\Application\Resources\AdminUserListResource;
 use Src\Identity\Domain\Entities\IdentityUser;
 use Src\Identity\Domain\Ports\IdentityUserRepository;
-use Src\Identity\Application\Resources\AdminUserListResource;
+use Src\Identity\Domain\ValueObjects\RbacCatalog;
 use Src\Shared\Core\Bus\PaginatedResult;
 
 final class EloquentIdentityUserRepository implements IdentityUserRepository
@@ -56,16 +56,18 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
 
         // Update existing
         $model = User::findOrFail($user->id);
-        $model->update([
+        $model->forceFill([
             'name'                    => $user->name,
+            'email'                   => strtolower(trim($user->email)),
             'google_id'               => $user->googleId ?? $model->google_id,
             'active'                  => $user->active,
             'phone'                   => $user->phone,
             'country'                 => $user->country,
+            'default_locale'          => $user->defaultLocale,
             'password_reset_required' => $user->passwordResetRequired,
             'email_verified_at'       => $user->emailVerifiedAt,
             'password'                => $user->hashedPassword ?? $model->getAuthPassword(),
-        ]);
+        ])->save();
         $model->refresh();
         return $this->toDomainEntity($model);
     }
@@ -178,7 +180,7 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
 
     private function ensureDefaultRole(User $user): void
     {
-        $role = Role::findOrCreate(StaticRoles::USER_ROLE, 'stateful-api');
+        $role = Role::findOrCreate(RbacCatalog::defaultRole(), 'stateful-api');
 
         if (!$user->hasRole($role)) {
             $user->assignRole($role);

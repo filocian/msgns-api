@@ -22,6 +22,8 @@ Route::post('/password/reset', [IdentityController::class, 'resetPassword']);
 // Authenticated routes
 Route::middleware('auth:stateful-api')->group(function () {
     Route::get('/me', [IdentityController::class, 'me']);
+    Route::patch('/me', [IdentityController::class, 'updateMyProfile']);
+    Route::patch('/me/password', [IdentityController::class, 'changeMyPassword'])->middleware('throttle:5,1');
     Route::post('/logout', [IdentityController::class, 'logout']);
 
     // CRITICAL: /impersonate/stop MUST come before /impersonate/{id}
@@ -37,6 +39,8 @@ Route::middleware(['auth:stateful-api', 'role:developer|backoffice'])->prefix('/
     Route::patch('/users/{id}', [AdminUserController::class, 'update']);
     Route::patch('/users/{id}/deactivate', [AdminUserController::class, 'deactivate']);
     Route::patch('/users/{id}/activate', [AdminUserController::class, 'activate']);
+    Route::put('/users/{id}/password', [AdminUserController::class, 'setPassword']);
+    Route::patch('/users/{id}/verify-email', [AdminUserController::class, 'setEmailVerified']);
     Route::post('/users/{id}/roles', [AdminRoleController::class, 'assignToUser']);
     Route::delete('/users/{id}/roles/{role}', [AdminRoleController::class, 'removeFromUser']);
     Route::get('/roles', [AdminRoleController::class, 'index']);

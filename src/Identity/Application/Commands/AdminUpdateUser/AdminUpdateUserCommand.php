@@ -12,6 +12,9 @@ final class AdminUpdateUserCommand implements Command
         public readonly int $userId,
         public readonly ?string $name,
         public readonly ?string $email,
+        public readonly ?string $phone,
+        public readonly ?string $country,
+        public readonly ?string $defaultLocale,
     ) {}
 
     public function commandName(): string

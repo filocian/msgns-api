@@ -41,6 +41,7 @@ final class GetCurrentUserHandler implements QueryHandler
             hasGoogleLogin: $user->isGoogleUser(),
             passwordResetRequired: $user->passwordResetRequired,
             roles: $userRoles,
+            defaultLocale: $user->defaultLocale,
             createdAt: $user->createdAt->format('c'),
             updatedAt: $user->updatedAt->format('c'),
         );

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Src\Identity\Infrastructure\Authorization;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Src\Identity\Domain\DTOs\PermissionData;
@@ -81,6 +82,20 @@ final class SpatieRoleAdapter implements RolePort
             ->toArray();
     }
 
+    public function findById(int $id): RoleData
+    {
+        $role = Role::find($id);
+        if (!$role) {
+            throw NotFound::because('role_not_found');
+        }
+        return new RoleData(
+            id: (int) $role->id,
+            name: $role->name,
+            permissions: $role->permissions->pluck('name')->toArray(),
+            usersCount: 0,
+        );
+    }
+
     public function createRole(string $name, string $guard = self::GUARD): RoleData
     {
         $role = Role::findOrCreate($name, $guard);
@@ -110,5 +125,37 @@ final class SpatieRoleAdapter implements RolePort
             throw NotFound::because('role_not_found');
         }
         $role->delete();
+    }
+
+    /**
+     * Sync the given role's permissions to exactly match the provided list.
+     *
+     * This operation REPLACES the full permission set for the role — it is NOT
+     * additive. Any permissions previously assigned to this role that are absent
+     * from `$permissions` will be REMOVED.
+     *
+     * This means manually-added permissions (not present in the RBAC catalog)
+     * WILL be stripped on reconcile. This is by-design: the catalog is the
+     * single source of truth for catalog-defined roles.
+     *
+     * The operation is idempotent: running it N times with the same input
+     * produces the same final state.
+     *
+     * @param string[] $permissions
+     */
+    public function syncRolePermissions(string $role, array $permissions): void
+    {
+        $roleModel = Role::findOrCreate($role, self::GUARD);
+        $permissionModels = collect($permissions)->map(
+            fn(string $permName) => Permission::findOrCreate($permName, self::GUARD)
+        );
+        $roleModel->syncPermissions($permissionModels);
+    }
+
+    public function inTransaction(callable $fn): void
+    {
+        DB::transaction(static function () use ($fn): void {
+            $fn();
+        });
     }
 }

@@ -6,6 +6,8 @@ namespace Src\Identity\Application\Commands\RequestPasswordReset;
 
 use Src\Shared\Core\Bus\Command;
 use Src\Shared\Core\Bus\CommandHandler;
+use Src\Shared\Core\Bus\EventBus;
+use Src\Identity\Domain\Events\PasswordResetRequested;
 use Src\Identity\Domain\Ports\IdentityUserRepository;
 use Src\Identity\Domain\Ports\PasswordResetTokenPort;
 
@@ -14,6 +16,7 @@ final class RequestPasswordResetHandler implements CommandHandler
     public function __construct(
         private readonly IdentityUserRepository $repo,
         private readonly PasswordResetTokenPort $tokenPort,
+        private readonly EventBus $eventBus,
     ) {}
 
     public function handle(Command $command): mixed
@@ -29,6 +32,8 @@ final class RequestPasswordResetHandler implements CommandHandler
 
         $token = $this->tokenPort->generate($user->email);
 
-        return $token;
+        $this->eventBus->publish(new PasswordResetRequested($user->email, $token));
+
+        return null;
     }
 }

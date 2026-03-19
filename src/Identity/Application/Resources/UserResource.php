@@ -13,6 +13,7 @@ final readonly class UserResource
         public ?string $country,
         public bool $hasGoogleLogin,
         public bool $passwordResetRequired,
+        public ?string $defaultLocale,
         public string $createdAt,
     ) {}
 }

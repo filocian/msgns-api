@@ -11,6 +11,8 @@ use App\Http\Requests\Identity\RequestPasswordResetRequest;
 use App\Http\Requests\Identity\RequestVerificationRequest;
 use App\Http\Requests\Identity\ResetPasswordRequest;
 use App\Http\Requests\Identity\SignUpRequest;
+use App\Http\Requests\Identity\UpdateMyProfileRequest;
+use App\Http\Requests\Identity\ChangeMyPasswordRequest;
 use App\Http\Requests\Identity\VerifyEmailRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,6 +26,8 @@ use Src\Identity\Application\Commands\RequestPasswordReset\RequestPasswordResetC
 use Src\Identity\Application\Commands\RequestVerification\RequestVerificationCommand;
 use Src\Identity\Application\Commands\ResetPassword\ResetPasswordCommand;
 use Src\Identity\Application\Commands\SignUp\SignUpCommand;
+use Src\Identity\Application\Commands\UpdateMyProfile\UpdateMyProfileCommand;
+use Src\Identity\Application\Commands\ChangeMyPassword\ChangeMyPasswordCommand;
 use Src\Identity\Application\Commands\VerifyEmail\VerifyEmailCommand;
 use Src\Identity\Application\Queries\GetCurrentUser\GetCurrentUserQuery;
 use Src\Identity\Application\Resources\LoginResource;
@@ -78,6 +82,7 @@ final class IdentityController extends Controller
     {
         $user = $this->commandBus->dispatch(new GoogleLoginCommand(
             idToken: $request->input('id_token'),
+            userAgent: $request->input('user_agent'),
         ));
         Auth::guard('stateful-api')->loginUsingId($user->id);
         session()->regenerate();
@@ -122,6 +127,30 @@ final class IdentityController extends Controller
         $userId = Auth::id();
         $user = $this->queryBus->dispatch(new GetCurrentUserQuery(userId: $userId));
         return ApiResponseFactory::ok($user);
+    }
+
+    public function updateMyProfile(UpdateMyProfileRequest $request): JsonResponse
+    {
+        $userId = (int) Auth::id();
+        $user = $this->commandBus->dispatch(new UpdateMyProfileCommand(
+            userId: $userId,
+            name: $request->input('name'),
+            phone: $request->input('phone'),
+            country: $request->input('country'),
+            defaultLocale: $request->input('default_locale'),
+        ));
+        return ApiResponseFactory::ok($user);
+    }
+
+    public function changeMyPassword(ChangeMyPasswordRequest $request): Response
+    {
+        $userId = (int) Auth::id();
+        $this->commandBus->dispatch(new ChangeMyPasswordCommand(
+            userId: $userId,
+            currentPassword: $request->input('current_password'),
+            newHashedPassword: Hash::make($request->input('new_password')),
+        ));
+        return ApiResponseFactory::noContent();
     }
 
     public function logout(Request $request): Response

@@ -15,6 +15,7 @@ final readonly class AdminUserResource
         public bool $hasGoogleLogin,
         public bool $passwordResetRequired,
         public array $roles,
+        public ?string $defaultLocale,
         public string $createdAt,
         public string $updatedAt,
     ) {}

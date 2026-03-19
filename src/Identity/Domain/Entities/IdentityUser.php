@@ -11,7 +11,7 @@ final class IdentityUser
 {
     private function __construct(
         public readonly int $id,
-        public readonly string $email,
+        public string $email,
         public string $name,
         public ?string $hashedPassword,
         public bool $active,
@@ -137,15 +137,90 @@ final class IdentityUser
         $this->updatedAt = new DateTimeImmutable();
     }
 
-    public function updateProfile(?string $name, ?string $email): void
-    {
+    public function updateProfile(
+        ?string $name = null,
+        ?string $phone = null,
+        ?string $country = null,
+        ?string $defaultLocale = null,
+    ): void {
+        if ($name !== null) {
+            $this->name = $name;
+        }
+        if ($phone !== null) {
+            $this->phone = $phone;
+        }
+        if ($country !== null) {
+            $this->country = $country;
+        }
+        if ($defaultLocale !== null) {
+            $this->defaultLocale = $defaultLocale;
+        }
+        $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function adminUpdateProfile(
+        ?string $name = null,
+        ?string $email = null,
+        ?string $phone = null,
+        ?string $country = null,
+        ?string $defaultLocale = null,
+    ): void {
         if ($name !== null) {
             $this->name = $name;
         }
         if ($email !== null) {
-            // Note: email is readonly, so this is intentionally limited
+            $this->changeEmail($email);
+        }
+        if ($phone !== null) {
+            $this->phone = $phone;
+        }
+        if ($country !== null) {
+            $this->country = $country;
+        }
+        if ($defaultLocale !== null) {
+            $this->defaultLocale = $defaultLocale;
         }
         $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function changeEmail(string $email): void
+    {
+        $this->email = strtolower(trim($email));
+        $this->updatedAt = new DateTimeImmutable();
+    }
+
+    /**
+     * @param callable(string, string): bool $verifyCurrentPassword
+     */
+    public function changePassword(
+        string $currentPlaintext,
+        string $newHashedPassword,
+        callable $verifyCurrentPassword,
+    ): void {
+        if ($this->hashedPassword === null) {
+            throw ValidationFailed::because('no_password_set');
+        }
+        if (!$verifyCurrentPassword($currentPlaintext, $this->hashedPassword)) {
+            throw ValidationFailed::because('invalid_current_password');
+        }
+        $this->hashedPassword = $newHashedPassword;
+        $this->passwordResetRequired = false;
+        $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function adminSetPassword(string $hashedPassword): void
+    {
+        $this->hashedPassword = $hashedPassword;
+        $this->passwordResetRequired = false;
+        $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function forceVerifyEmail(): void
+    {
+        if ($this->emailVerifiedAt === null) {
+            $this->emailVerifiedAt = new DateTimeImmutable();
+            $this->updatedAt = new DateTimeImmutable();
+        }
     }
 
     public function resetPassword(string $hashedPassword): void

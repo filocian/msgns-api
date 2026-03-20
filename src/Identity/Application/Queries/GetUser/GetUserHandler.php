@@ -44,6 +44,7 @@ final class GetUserHandler implements QueryHandler
             defaultLocale: $user->defaultLocale,
             createdAt: $user->createdAt->format('c'),
             updatedAt: $user->updatedAt->format('c'),
+            pendingEmail: $user->pendingEmail,
         );
     }
 }

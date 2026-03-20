@@ -25,7 +25,10 @@ use Src\Identity\Application\Commands\RemoveRole\RemoveRoleHandler;
 use Src\Identity\Application\Commands\RequestPasswordReset\RequestPasswordResetHandler;
 use Src\Identity\Application\Commands\RequestVerification\RequestVerificationHandler;
 use Src\Identity\Application\Commands\ResetPassword\ResetPasswordHandler;
+use Src\Identity\Application\Commands\CancelPendingEmailChange\CancelPendingEmailChangeHandler;
 use Src\Identity\Application\Commands\ChangeMyPassword\ChangeMyPasswordHandler;
+use Src\Identity\Application\Commands\ConfirmEmailChange\ConfirmEmailChangeHandler;
+use Src\Identity\Application\Commands\RequestEmailChange\RequestEmailChangeHandler;
 use Src\Identity\Application\Commands\SignUp\SignUpHandler;
 use Src\Identity\Application\Commands\StartImpersonation\StartImpersonationHandler;
 use Src\Identity\Application\Commands\UpdateMyProfile\UpdateMyProfileHandler;
@@ -37,7 +40,9 @@ use Src\Identity\Application\Queries\GetCurrentUser\GetCurrentUserHandler;
 use Src\Identity\Application\Queries\GetUser\GetUserHandler;
 use Src\Identity\Application\Queries\ListPermissions\ListPermissionsHandler;
 use Src\Identity\Application\Queries\ListRoles\ListRolesHandler;
+use Src\Identity\Application\Queries\ExportUsers\ExportUsersHandler;
 use Src\Identity\Application\Queries\ListUsers\ListUsersHandler;
+use Src\Identity\Domain\Events\EmailChangeRequested;
 use Src\Identity\Domain\Events\ImpersonationStarted;
 use Src\Identity\Domain\Events\PasswordReset;
 use Src\Identity\Domain\Events\PasswordResetRequested;
@@ -50,7 +55,9 @@ use Src\Identity\Domain\Ports\ImpersonationPort;
 use Src\Identity\Domain\Ports\PasswordHasherPort;
 use Src\Identity\Domain\Ports\PasswordResetTokenPort;
 use Src\Identity\Domain\Ports\RolePort;
+use Src\Identity\Domain\Ports\EmailChangeTokenPort;
 use Src\Identity\Domain\Ports\VerificationTokenPort;
+use Src\Identity\Infrastructure\Auth\EncryptedEmailChangeToken;
 use Src\Identity\Infrastructure\Auth\EncryptedPasswordResetToken;
 use Src\Identity\Infrastructure\Auth\EncryptedVerificationToken;
 use Src\Identity\Infrastructure\Auth\GoogleOAuthAdapter;
@@ -58,6 +65,7 @@ use Src\Identity\Infrastructure\Auth\LaravelPasswordHasherAdapter;
 use Src\Identity\Infrastructure\Auth\SessionImpersonationAdapter;
 use Src\Identity\Infrastructure\Authorization\SpatieRoleAdapter;
 use Src\Identity\Infrastructure\Listeners\LogImpersonation;
+use Src\Identity\Infrastructure\Listeners\SendEmailChangeVerification;
 use Src\Identity\Infrastructure\Listeners\SendPasswordResetEmail;
 use Src\Identity\Infrastructure\Listeners\SendVerificationEmailOnRegistration;
 use Src\Identity\Infrastructure\Listeners\SendVerificationEmailOnRequest;
@@ -78,6 +86,7 @@ final class IdentityServiceProvider extends ServiceProvider
         $this->app->bind(RolePort::class, SpatieRoleAdapter::class);
         $this->app->bind(VerificationTokenPort::class, EncryptedVerificationToken::class);
         $this->app->bind(PasswordResetTokenPort::class, EncryptedPasswordResetToken::class);
+        $this->app->bind(EmailChangeTokenPort::class, EncryptedEmailChangeToken::class);
         $this->app->bind(GoogleAuthPort::class, GoogleOAuthAdapter::class);
         $this->app->bind(PasswordHasherPort::class, LaravelPasswordHasherAdapter::class);
         $this->app->bind(LocaleMapper::class, LegacyLocaleMapper::class);
@@ -110,12 +119,16 @@ final class IdentityServiceProvider extends ServiceProvider
         $commandBus->register('identity.assign_role', AssignRoleHandler::class);
         $commandBus->register('identity.remove_role', RemoveRoleHandler::class);
         $commandBus->register('identity.reconcile_rbac_catalog', ReconcileRbacCatalogHandler::class);
+        $commandBus->register('identity.request_email_change', RequestEmailChangeHandler::class);
+        $commandBus->register('identity.confirm_email_change', ConfirmEmailChangeHandler::class);
+        $commandBus->register('identity.cancel_pending_email_change', CancelPendingEmailChangeHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);
         $queryBus->register('identity.get_current_user', GetCurrentUserHandler::class);
         $queryBus->register('identity.get_user', GetUserHandler::class);
         $queryBus->register('identity.list_users', ListUsersHandler::class);
+        $queryBus->register('identity.export_users', ExportUsersHandler::class);
         $queryBus->register('identity.list_roles', ListRolesHandler::class);
         $queryBus->register('identity.list_permissions', ListPermissionsHandler::class);
 
@@ -135,5 +148,6 @@ final class IdentityServiceProvider extends ServiceProvider
         Event::listen(ImpersonationStarted::class, LogImpersonation::class);
         Event::listen(PasswordResetRequested::class, SendPasswordResetEmail::class);
         Event::listen(PasswordReset::class, TrackPasswordReset::class);
+        Event::listen(EmailChangeRequested::class, SendEmailChangeVerification::class);
     }
 }

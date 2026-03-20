@@ -15,5 +15,6 @@ final readonly class UserResource
         public bool $passwordResetRequired,
         public ?string $defaultLocale,
         public string $createdAt,
+        public ?string $pendingEmail = null,
     ) {}
 }

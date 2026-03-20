@@ -49,6 +49,7 @@ final class VerifyEmailHandler implements CommandHandler
             passwordResetRequired: $user->passwordResetRequired,
             defaultLocale: $user->defaultLocale,
             createdAt: $user->createdAt->format('c'),
+            pendingEmail: $user->pendingEmail,
         );
     }
 }

@@ -18,5 +18,6 @@ final readonly class AdminUserResource
         public ?string $defaultLocale,
         public string $createdAt,
         public string $updatedAt,
+        public ?string $pendingEmail = null,
     ) {}
 }

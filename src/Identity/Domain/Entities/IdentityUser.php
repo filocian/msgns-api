@@ -22,6 +22,7 @@ final class IdentityUser
         public ?string $defaultLocale,
         public ?string $userAgent,
         public bool $passwordResetRequired,
+        public ?string $pendingEmail,
         public readonly DateTimeImmutable $createdAt,
         public DateTimeImmutable $updatedAt,
     ) {}
@@ -50,6 +51,7 @@ final class IdentityUser
             defaultLocale: $defaultLocale,
             userAgent: $userAgent,
             passwordResetRequired: false,
+            pendingEmail: null,
             createdAt: $now,
             updatedAt: $now,
         );
@@ -71,6 +73,7 @@ final class IdentityUser
             defaultLocale: null,
             userAgent: null,
             passwordResetRequired: false,
+            pendingEmail: null,
             createdAt: $now,
             updatedAt: $now,
         );
@@ -91,6 +94,7 @@ final class IdentityUser
         DateTimeImmutable $updatedAt,
         ?string $defaultLocale = null,
         ?string $userAgent = null,
+        ?string $pendingEmail = null,
     ): self {
         return new self(
             id: $id,
@@ -105,6 +109,7 @@ final class IdentityUser
             defaultLocale: $defaultLocale,
             userAgent: $userAgent,
             passwordResetRequired: $passwordResetRequired,
+            pendingEmail: $pendingEmail,
             createdAt: $createdAt,
             updatedAt: $updatedAt,
         );
@@ -186,6 +191,38 @@ final class IdentityUser
     public function changeEmail(string $email): void
     {
         $this->email = strtolower(trim($email));
+        $this->emailVerifiedAt = null;
+        $this->pendingEmail = null;
+        $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function requestEmailChange(string $newEmail): void
+    {
+        $normalized = strtolower(trim($newEmail));
+        if ($normalized === strtolower($this->email)) {
+            throw ValidationFailed::because('email_unchanged');
+        }
+        $this->pendingEmail = $normalized;
+        $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function confirmEmailChange(): void
+    {
+        if ($this->pendingEmail === null) {
+            throw ValidationFailed::because('no_pending_email_change');
+        }
+        $this->email = $this->pendingEmail;
+        $this->pendingEmail = null;
+        $this->emailVerifiedAt = null;
+        $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function cancelPendingEmailChange(): void
+    {
+        if ($this->pendingEmail === null) {
+            throw ValidationFailed::because('no_pending_email_change');
+        }
+        $this->pendingEmail = null;
         $this->updatedAt = new DateTimeImmutable();
     }
 

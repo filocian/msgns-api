@@ -52,3 +52,14 @@ it('returns 400 validation error with mismatched confirmation', function () {
     $response->assertStatus(400)
              ->assertJsonPath('error.code', 'validation_error');
 });
+
+it('has rate limiting middleware (throttle:5,1) on PATCH /me/password', function () {
+    $route = collect(\Illuminate\Support\Facades\Route::getRoutes()->getRoutes())
+        ->first(fn (\Illuminate\Routing\Route $r) =>
+            $r->uri() === 'api/v2/identity/me/password' && in_array('PATCH', $r->methods())
+        );
+
+    expect($route)->not->toBeNull();
+    $middleware = $route->middleware();
+    expect($middleware)->toContain('throttle:5,1');
+});

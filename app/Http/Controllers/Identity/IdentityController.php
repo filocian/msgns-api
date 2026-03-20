@@ -13,6 +13,8 @@ use App\Http\Requests\Identity\ResetPasswordRequest;
 use App\Http\Requests\Identity\SignUpRequest;
 use App\Http\Requests\Identity\UpdateMyProfileRequest;
 use App\Http\Requests\Identity\ChangeMyPasswordRequest;
+use App\Http\Requests\Identity\ConfirmEmailChangeRequest;
+use App\Http\Requests\Identity\RequestEmailChangeRequest;
 use App\Http\Requests\Identity\VerifyEmailRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,6 +30,9 @@ use Src\Identity\Application\Commands\ResetPassword\ResetPasswordCommand;
 use Src\Identity\Application\Commands\SignUp\SignUpCommand;
 use Src\Identity\Application\Commands\UpdateMyProfile\UpdateMyProfileCommand;
 use Src\Identity\Application\Commands\ChangeMyPassword\ChangeMyPasswordCommand;
+use Src\Identity\Application\Commands\CancelPendingEmailChange\CancelPendingEmailChangeCommand;
+use Src\Identity\Application\Commands\ConfirmEmailChange\ConfirmEmailChangeCommand;
+use Src\Identity\Application\Commands\RequestEmailChange\RequestEmailChangeCommand;
 use Src\Identity\Application\Commands\VerifyEmail\VerifyEmailCommand;
 use Src\Identity\Application\Queries\GetCurrentUser\GetCurrentUserQuery;
 use Src\Identity\Application\Resources\LoginResource;
@@ -149,6 +154,34 @@ final class IdentityController extends Controller
             userId: $userId,
             currentPassword: $request->input('current_password'),
             newHashedPassword: Hash::make($request->input('new_password')),
+        ));
+        return ApiResponseFactory::noContent();
+    }
+
+    public function requestEmailChange(RequestEmailChangeRequest $request): JsonResponse
+    {
+        $userId = (int) Auth::id();
+        $this->commandBus->dispatch(new RequestEmailChangeCommand(
+            userId: $userId,
+            newEmail: $request->input('new_email'),
+            password: $request->input('password'),
+        ));
+        return ApiResponseFactory::ok(['message' => 'email_change_requested']);
+    }
+
+    public function confirmEmailChange(ConfirmEmailChangeRequest $request): JsonResponse
+    {
+        $user = $this->commandBus->dispatch(new ConfirmEmailChangeCommand(
+            token: $request->input('token'),
+        ));
+        return ApiResponseFactory::ok($user);
+    }
+
+    public function cancelPendingEmailChange(Request $request): Response
+    {
+        $userId = (int) Auth::id();
+        $this->commandBus->dispatch(new CancelPendingEmailChangeCommand(
+            userId: $userId,
         ));
         return ApiResponseFactory::noContent();
     }

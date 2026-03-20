@@ -46,6 +46,7 @@ final class AdminSetEmailVerifiedHandler implements CommandHandler
             defaultLocale: $saved->defaultLocale,
             createdAt: $saved->createdAt->format('c'),
             updatedAt: $saved->updatedAt->format('c'),
+            pendingEmail: $saved->pendingEmail,
         );
     }
 }

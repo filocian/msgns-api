@@ -27,6 +27,12 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
         return $model ? $this->toDomainEntity($model) : null;
     }
 
+    public function findByPendingEmail(string $email): ?IdentityUser
+    {
+        $model = User::where('pending_email', strtolower(trim($email)))->first();
+        return $model ? $this->toDomainEntity($model) : null;
+    }
+
     public function findByGoogleId(string $googleId): ?IdentityUser
     {
         $model = User::where('google_id', $googleId)->first();
@@ -49,6 +55,7 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
                 'email_verified_at'       => $user->emailVerifiedAt,
                 'default_locale'          => $user->defaultLocale ?? 'en_UK',
                 'user_agent'              => $user->userAgent,
+                'pending_email'           => $user->pendingEmail,
                 'last_access'             => now(),
             ]);
             return $this->toDomainEntity($model);
@@ -67,6 +74,7 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
             'password_reset_required' => $user->passwordResetRequired,
             'email_verified_at'       => $user->emailVerifiedAt,
             'password'                => $user->hashedPassword ?? $model->getAuthPassword(),
+            'pending_email'           => $user->pendingEmail,
         ])->save();
         $model->refresh();
         return $this->toDomainEntity($model);
@@ -158,6 +166,54 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
         );
     }
 
+    /**
+     * @param array{
+     *     search?: string|null,
+     *     active?: bool|null,
+     *     role?: string|null,
+     *     created_from?: string|null,
+     *     created_to?: string|null,
+     * } $filters
+     * @return iterable<int, User>
+     */
+    public function export(array $filters): iterable
+    {
+        $search      = $filters['search'] ?? null;
+        $active      = $filters['active'] ?? null;
+        $role        = $filters['role'] ?? null;
+        $createdFrom = $filters['created_from'] ?? null;
+        $createdTo   = $filters['created_to'] ?? null;
+
+        $query = User::query()->with('roles');
+
+        if ($search !== null) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($active !== null) {
+            $query->where('active', $active);
+        }
+
+        if ($role !== null) {
+            $query->whereHas('roles', fn ($q) => $q->where('name', $role));
+        }
+
+        if ($createdFrom !== null) {
+            $query->where('created_at', '>=', $createdFrom . ' 00:00:00');
+        }
+
+        if ($createdTo !== null) {
+            $query->where('created_at', '<=', $createdTo . ' 23:59:59');
+        }
+
+        $query->orderBy('created_at', 'desc');
+
+        return $query->cursor();
+    }
+
     private function toDomainEntity(User $model): IdentityUser
     {
         return IdentityUser::fromPersistence(
@@ -175,6 +231,7 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
             updatedAt: $model->updated_at?->toImmutable() ?? new \DateTimeImmutable(),
             defaultLocale: $model->getAttribute('default_locale'),
             userAgent: $model->getAttribute('user_agent'),
+            pendingEmail: $model->getAttribute('pending_email'),
         );
     }
 

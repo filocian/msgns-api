@@ -31,7 +31,8 @@ it('returns 409 on email conflict', function () {
     $response = $this->patchJson("/api/v2/identity/admin/users/{$target->id}", [
         'email' => 'taken@example.com',
     ]);
-    $response->assertStatus(422);
+    $response->assertStatus(409)
+             ->assertJsonPath('error.code', 'email_already_taken');
 });
 
 it('allows updating to the same email (no conflict)', function () {

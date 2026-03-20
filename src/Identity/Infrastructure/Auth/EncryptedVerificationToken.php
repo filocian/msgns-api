@@ -14,7 +14,7 @@ final class EncryptedVerificationToken implements VerificationTokenPort
 
     public function generate(string $email): string
     {
-        $inner = Crypt::encrypt($email . ';' . now()->toIso8601String());
+        $inner = Crypt::encrypt('verification;' . $email . ';' . now()->toIso8601String());
         $outer = json_encode([
             'value'           => $inner,
             'expiration_date' => now()->addDays(self::TTL_DAYS)->toIso8601String(),
@@ -44,7 +44,11 @@ final class EncryptedVerificationToken implements VerificationTokenPort
             throw ValidationFailed::because('invalid_or_expired_token');
         }
 
-        $parts = explode(';', $inner, 2);
-        return $parts[0]; // email
+        $parts = explode(';', $inner, 3);
+        if (count($parts) < 2 || $parts[0] !== 'verification') {
+            throw ValidationFailed::because('invalid_or_expired_token');
+        }
+
+        return $parts[1]; // email
     }
 }

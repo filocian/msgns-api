@@ -16,6 +16,7 @@ Route::post('/login', [IdentityController::class, 'login'])->middleware('throttl
 Route::post('/login/google', [IdentityController::class, 'googleLogin']);
 Route::post('/email/request-verification', [IdentityController::class, 'requestVerification']);
 Route::post('/email/verify', [IdentityController::class, 'verifyEmail']);
+Route::post('/email/confirm-change', [IdentityController::class, 'confirmEmailChange']);
 Route::post('/password/request-reset', [IdentityController::class, 'requestPasswordReset']);
 Route::post('/password/reset', [IdentityController::class, 'resetPassword']);
 
@@ -24,6 +25,8 @@ Route::middleware('auth:stateful-api')->group(function () {
     Route::get('/me', [IdentityController::class, 'me']);
     Route::patch('/me', [IdentityController::class, 'updateMyProfile']);
     Route::patch('/me/password', [IdentityController::class, 'changeMyPassword'])->middleware('throttle:5,1');
+    Route::post('/me/email', [IdentityController::class, 'requestEmailChange'])->middleware('throttle:3,60');
+    Route::delete('/me/email/pending', [IdentityController::class, 'cancelPendingEmailChange']);
     Route::post('/logout', [IdentityController::class, 'logout']);
 
     // CRITICAL: /impersonate/stop MUST come before /impersonate/{id}
@@ -34,6 +37,9 @@ Route::middleware('auth:stateful-api')->group(function () {
 
 // Admin routes
 Route::middleware(['auth:stateful-api', 'role:developer|backoffice'])->prefix('/admin')->group(function () {
+    // IMPORTANT: /users/export MUST come before /users/{id} to avoid route parameter capture
+    Route::get('/users/export', [AdminUserController::class, 'export'])
+         ->middleware('throttle:10,1');
     Route::get('/users', [AdminUserController::class, 'index']);
     Route::get('/users/{id}', [AdminUserController::class, 'show']);
     Route::patch('/users/{id}', [AdminUserController::class, 'update']);

@@ -152,6 +152,12 @@ final class SpatieRoleAdapter implements RolePort
         $roleModel->syncPermissions($permissionModels);
     }
 
+    public function syncRoles(int $userId, array $roles): void
+    {
+        $user = User::findOrFail($userId);
+        $user->syncRoles($roles);
+    }
+
     public function inTransaction(callable $fn): void
     {
         DB::transaction(static function () use ($fn): void {

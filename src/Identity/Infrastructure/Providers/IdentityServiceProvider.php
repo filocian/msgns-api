@@ -15,6 +15,14 @@ use Src\Identity\Application\Commands\AdminSetEmailVerified\AdminSetEmailVerifie
 use Src\Identity\Application\Commands\AdminSetPassword\AdminSetPasswordHandler;
 use Src\Identity\Application\Commands\AdminUpdateUser\AdminUpdateUserHandler;
 use Src\Identity\Application\Commands\AssignRole\AssignRoleHandler;
+use Src\Identity\Application\Commands\BulkActivation\BulkActivationHandler;
+use Src\Identity\Application\Commands\BulkAssignRoles\BulkAssignRolesHandler;
+use Src\Identity\Application\Commands\BulkChangeEmail\BulkChangeEmailHandler;
+use Src\Identity\Application\Commands\BulkPasswordReset\BulkPasswordResetHandler;
+use Src\Identity\Application\Commands\BulkVerifyEmail\BulkVerifyEmailHandler;
+use Src\Identity\Application\Commands\CancelPendingEmailChange\CancelPendingEmailChangeHandler;
+use Src\Identity\Application\Commands\ChangeMyPassword\ChangeMyPasswordHandler;
+use Src\Identity\Application\Commands\ConfirmEmailChange\ConfirmEmailChangeHandler;
 use Src\Identity\Application\Commands\CreateRole\CreateRoleHandler;
 use Src\Identity\Application\Commands\DeleteRole\DeleteRoleHandler;
 use Src\Identity\Application\Commands\GoogleLogin\GoogleLoginHandler;
@@ -22,17 +30,14 @@ use Src\Identity\Application\Commands\Login\LoginHandler;
 use Src\Identity\Application\Commands\Logout\LogoutHandler;
 use Src\Identity\Application\Commands\ReconcileRbacCatalog\ReconcileRbacCatalogHandler;
 use Src\Identity\Application\Commands\RemoveRole\RemoveRoleHandler;
+use Src\Identity\Application\Commands\RequestEmailChange\RequestEmailChangeHandler;
 use Src\Identity\Application\Commands\RequestPasswordReset\RequestPasswordResetHandler;
 use Src\Identity\Application\Commands\RequestVerification\RequestVerificationHandler;
 use Src\Identity\Application\Commands\ResetPassword\ResetPasswordHandler;
-use Src\Identity\Application\Commands\CancelPendingEmailChange\CancelPendingEmailChangeHandler;
-use Src\Identity\Application\Commands\ChangeMyPassword\ChangeMyPasswordHandler;
-use Src\Identity\Application\Commands\ConfirmEmailChange\ConfirmEmailChangeHandler;
-use Src\Identity\Application\Commands\RequestEmailChange\RequestEmailChangeHandler;
 use Src\Identity\Application\Commands\SignUp\SignUpHandler;
 use Src\Identity\Application\Commands\StartImpersonation\StartImpersonationHandler;
-use Src\Identity\Application\Commands\UpdateMyProfile\UpdateMyProfileHandler;
 use Src\Identity\Application\Commands\StopImpersonation\StopImpersonationHandler;
+use Src\Identity\Application\Commands\UpdateMyProfile\UpdateMyProfileHandler;
 use Src\Identity\Application\Commands\UpdateRole\UpdateRoleHandler;
 use Src\Identity\Application\Commands\VerifyEmail\VerifyEmailHandler;
 use Src\Identity\Application\Contracts\LocaleMapper;
@@ -122,6 +127,13 @@ final class IdentityServiceProvider extends ServiceProvider
         $commandBus->register('identity.request_email_change', RequestEmailChangeHandler::class);
         $commandBus->register('identity.confirm_email_change', ConfirmEmailChangeHandler::class);
         $commandBus->register('identity.cancel_pending_email_change', CancelPendingEmailChangeHandler::class);
+
+        // Bulk command handlers
+        $commandBus->register('identity.bulk_verify_email', BulkVerifyEmailHandler::class);
+        $commandBus->register('identity.bulk_change_email', BulkChangeEmailHandler::class);
+        $commandBus->register('identity.bulk_activation', BulkActivationHandler::class);
+        $commandBus->register('identity.bulk_assign_roles', BulkAssignRolesHandler::class);
+        $commandBus->register('identity.bulk_password_reset', BulkPasswordResetHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);

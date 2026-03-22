@@ -6,6 +6,7 @@ namespace Src\Identity\Infrastructure\Persistence;
 
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Src\Identity\Application\Resources\AdminUserListResource;
 use Src\Identity\Domain\Entities\IdentityUser;
@@ -212,6 +213,18 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
         $query->orderBy('created_at', 'desc');
 
         return $query->cursor();
+    }
+
+    /**
+     * Execute the given callable inside a database transaction.
+     *
+     * @template T
+     * @param callable(): T $fn
+     * @return T
+     */
+    public function inTransaction(callable $fn): mixed
+    {
+        return DB::transaction($fn);
     }
 
     private function toDomainEntity(User $model): IdentityUser

@@ -7,6 +7,11 @@ namespace App\Http\Controllers\Identity;
 use App\Http\Contracts\Controller;
 use App\Http\Requests\Identity\AdminSetPasswordRequest;
 use App\Http\Requests\Identity\AdminUpdateUserRequest;
+use App\Http\Requests\Identity\BulkActivationRequest;
+use App\Http\Requests\Identity\BulkAssignRolesRequest;
+use App\Http\Requests\Identity\BulkChangeEmailRequest;
+use App\Http\Requests\Identity\BulkPasswordResetRequest;
+use App\Http\Requests\Identity\BulkVerifyEmailRequest;
 use App\Http\Requests\Identity\ExportUsersRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +23,11 @@ use Src\Identity\Application\Commands\AdminDeactivateUser\AdminDeactivateUserCom
 use Src\Identity\Application\Commands\AdminSetEmailVerified\AdminSetEmailVerifiedCommand;
 use Src\Identity\Application\Commands\AdminSetPassword\AdminSetPasswordCommand;
 use Src\Identity\Application\Commands\AdminUpdateUser\AdminUpdateUserCommand;
+use Src\Identity\Application\Commands\BulkActivation\BulkActivationCommand;
+use Src\Identity\Application\Commands\BulkAssignRoles\BulkAssignRolesCommand;
+use Src\Identity\Application\Commands\BulkChangeEmail\BulkChangeEmailCommand;
+use Src\Identity\Application\Commands\BulkPasswordReset\BulkPasswordResetCommand;
+use Src\Identity\Application\Commands\BulkVerifyEmail\BulkVerifyEmailCommand;
 use Src\Identity\Application\Queries\ExportUsers\ExportUsersQuery;
 use Src\Identity\Application\Queries\GetUser\GetUserQuery;
 use Src\Identity\Application\Queries\ListUsers\ListUsersQuery;
@@ -163,7 +173,7 @@ final class AdminUserController extends Controller
     {
         $user = $this->commandBus->dispatch(new AdminDeactivateUserCommand(
             userId: $id,
-            deactivatedBy: Auth::id(),
+            deactivatedBy: (int) Auth::id(),
         ));
         return ApiResponseFactory::ok($user);
     }
@@ -172,8 +182,51 @@ final class AdminUserController extends Controller
     {
         $user = $this->commandBus->dispatch(new AdminActivateUserCommand(
             userId: $id,
-            activatedBy: Auth::id(),
+            activatedBy: (int) Auth::id(),
         ));
         return ApiResponseFactory::ok($user);
+    }
+
+    public function bulkVerifyEmail(BulkVerifyEmailRequest $request): JsonResponse
+    {
+        $result = $this->commandBus->dispatch(new BulkVerifyEmailCommand(
+            userIds: $request->validatedUserIds(),
+        ));
+        return ApiResponseFactory::ok($result->toArray());
+    }
+
+    public function bulkChangeEmail(BulkChangeEmailRequest $request): JsonResponse
+    {
+        $result = $this->commandBus->dispatch(new BulkChangeEmailCommand(
+            changes: $request->validatedUpdates(),
+        ));
+        return ApiResponseFactory::ok($result->toArray());
+    }
+
+    public function bulkActivation(BulkActivationRequest $request): JsonResponse
+    {
+        $result = $this->commandBus->dispatch(new BulkActivationCommand(
+            userIds: $request->validatedUserIds(),
+            active: $request->validatedActive(),
+            performedBy: (int) (Auth::id() ?? 0),
+        ));
+        return ApiResponseFactory::ok($result->toArray());
+    }
+
+    public function bulkAssignRoles(BulkAssignRolesRequest $request): JsonResponse
+    {
+        $result = $this->commandBus->dispatch(new BulkAssignRolesCommand(
+            userIds: $request->validatedUserIds(),
+            roles: $request->validatedRoles(),
+        ));
+        return ApiResponseFactory::ok($result->toArray());
+    }
+
+    public function bulkPasswordReset(BulkPasswordResetRequest $request): JsonResponse
+    {
+        $result = $this->commandBus->dispatch(new BulkPasswordResetCommand(
+            userIds: $request->validatedUserIds(),
+        ));
+        return ApiResponseFactory::ok($result->toArray());
     }
 }

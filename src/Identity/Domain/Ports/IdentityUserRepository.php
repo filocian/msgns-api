@@ -30,4 +30,16 @@ interface IdentityUserRepository
      * @return iterable<int, \App\Models\User>
      */
     public function export(array $filters): iterable;
+
+    /**
+     * Execute the given callable inside a database transaction.
+     *
+     * If the callable throws an exception, all writes performed within it
+     * are rolled back and the exception is re-thrown to the caller.
+     *
+     * @template T
+     * @param callable(): T $fn
+     * @return T
+     */
+    public function inTransaction(callable $fn): mixed;
 }

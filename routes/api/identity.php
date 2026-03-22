@@ -37,9 +37,19 @@ Route::middleware('auth:stateful-api')->group(function () {
 
 // Admin routes
 Route::middleware(['auth:stateful-api', 'role:developer|backoffice'])->prefix('/admin')->group(function () {
-    // IMPORTANT: /users/export MUST come before /users/{id} to avoid route parameter capture
+    // IMPORTANT: /users/export MUST come before /users/bulk/* and /users/{id} to avoid route parameter capture
     Route::get('/users/export', [AdminUserController::class, 'export'])
          ->middleware('throttle:10,1');
+
+    // Bulk routes - MUST come before /users/{id}
+    Route::prefix('/users/bulk')->group(function () {
+        Route::post('/verify-email', [AdminUserController::class, 'bulkVerifyEmail']);
+        Route::post('/email', [AdminUserController::class, 'bulkChangeEmail']);
+        Route::post('/activation', [AdminUserController::class, 'bulkActivation']);
+        Route::post('/roles', [AdminUserController::class, 'bulkAssignRoles']);
+        Route::post('/password-reset', [AdminUserController::class, 'bulkPasswordReset']);
+    });
+
     Route::get('/users', [AdminUserController::class, 'index']);
     Route::get('/users/{id}', [AdminUserController::class, 'show']);
     Route::patch('/users/{id}', [AdminUserController::class, 'update']);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\ProductType;
 use App\Static\Product\StaticProductTypes;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -25,22 +26,31 @@ final class ProductSeeder extends Seeder
 	private function products(): array
 	{
 		$now = Carbon::now();
-		$productsQty = 1;
 		$staticProducts = StaticProductTypes::all();
 		$productList = [];
 
-		for ($y = 0; $y < count($staticProducts); $y++) {
-			for ($x = 0; $x < $productsQty; $x++) {
-				$product = array_merge($staticProducts[$y], [
-					'product_type_id' => $y + 1,
-					'created_at' => $now,
-					'updated_at' => $now,
-				]);
+		/** @var array<string, int> $typeIdByCode */
+		$typeIdByCode = ProductType::all()->pluck('id', 'code')->toArray();
 
-				unset($product['code']);
-				$product['config'] = json_encode($product['config']);
-				$productList[] = $product;
+		$id = 1;
+		foreach ($staticProducts as $static) {
+			$typeId = $typeIdByCode[$static['name']] ?? null;
+			if ($typeId === null) {
+				continue;
 			}
+			$productList[] = [
+				'id' => $id++,
+				'product_type_id' => $typeId,
+				'model' => $static['primary_model'],
+				'password' => '123456',
+				'name' => $static['name'],
+				'description' => $static['description'],
+				'usage' => 0,
+				'active' => false,
+				'configuration_status' => 'not-started',
+				'created_at' => $now,
+				'updated_at' => $now,
+			];
 		}
 
 		return $productList;

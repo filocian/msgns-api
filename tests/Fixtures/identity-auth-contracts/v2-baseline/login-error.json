@@ -1,0 +1,7 @@
+{
+  "contract": "login-error",
+  "locked_paths": {
+    "error.code": "string",
+    "error.context": "array"
+  }
+}

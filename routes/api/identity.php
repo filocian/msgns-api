@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Http\Controllers\Identity\AdminPermissionController;
+use App\Http\Controllers\Identity\AdminRoleController;
+use App\Http\Controllers\Identity\AdminUserController;
+use App\Http\Controllers\Identity\IdentityController;
+use App\Http\Controllers\Identity\ImpersonationController;
+use Illuminate\Support\Facades\Route;
+
+// Public routes (no auth required)
+Route::post('/sign-up', [IdentityController::class, 'signUp']);
+Route::post('/signup', [IdentityController::class, 'signUp']);
+Route::post('/login', [IdentityController::class, 'login'])->middleware('throttle:10,1');
+Route::post('/login/google', [IdentityController::class, 'googleLogin']);
+Route::post('/email/request-verification', [IdentityController::class, 'requestVerification']);
+Route::post('/email/verify', [IdentityController::class, 'verifyEmail']);
+Route::post('/email/confirm-change', [IdentityController::class, 'confirmEmailChange']);
+Route::post('/password/request-reset', [IdentityController::class, 'requestPasswordReset']);
+Route::post('/password/reset', [IdentityController::class, 'resetPassword']);
+
+// Authenticated routes
+Route::middleware('auth:stateful-api')->group(function () {
+    Route::get('/me', [IdentityController::class, 'me']);
+    Route::patch('/me', [IdentityController::class, 'updateMyProfile']);
+    Route::patch('/me/password', [IdentityController::class, 'changeMyPassword'])->middleware('throttle:5,1');
+    Route::post('/me/email', [IdentityController::class, 'requestEmailChange'])->middleware('throttle:3,60');
+    Route::delete('/me/email/pending', [IdentityController::class, 'cancelPendingEmailChange']);
+    Route::post('/logout', [IdentityController::class, 'logout']);
+
+    // CRITICAL: /impersonate/stop MUST come before /impersonate/{id}
+    Route::post('/impersonate/stop', [ImpersonationController::class, 'stop']);
+    Route::post('/impersonate/{id}', [ImpersonationController::class, 'start'])
+         ->middleware('role:developer|backoffice');
+});
+
+// Admin routes
+Route::middleware(['auth:stateful-api', 'role:developer|backoffice'])->prefix('/admin')->group(function () {
+    // IMPORTANT: /users/export MUST come before /users/bulk/* and /users/{id} to avoid route parameter capture
+    Route::get('/users/export', [AdminUserController::class, 'export'])
+         ->middleware('throttle:10,1');
+
+    // Bulk routes - MUST come before /users/{id}
+    Route::prefix('/users/bulk')->group(function () {
+        Route::post('/verify-email', [AdminUserController::class, 'bulkVerifyEmail']);
+        Route::post('/email', [AdminUserController::class, 'bulkChangeEmail']);
+        Route::post('/activation', [AdminUserController::class, 'bulkActivation']);
+        Route::post('/roles', [AdminUserController::class, 'bulkAssignRoles']);
+        Route::post('/password-reset', [AdminUserController::class, 'bulkPasswordReset']);
+    });
+
+    Route::get('/users', [AdminUserController::class, 'index']);
+    Route::get('/users/{id}', [AdminUserController::class, 'show']);
+    Route::patch('/users/{id}', [AdminUserController::class, 'update']);
+    Route::patch('/users/{id}/deactivate', [AdminUserController::class, 'deactivate']);
+    Route::patch('/users/{id}/activate', [AdminUserController::class, 'activate']);
+    Route::put('/users/{id}/password', [AdminUserController::class, 'setPassword']);
+    Route::patch('/users/{id}/verify-email', [AdminUserController::class, 'setEmailVerified']);
+    Route::post('/users/{id}/roles', [AdminRoleController::class, 'assignToUser']);
+    Route::delete('/users/{id}/roles/{role}', [AdminRoleController::class, 'removeFromUser']);
+    Route::get('/roles', [AdminRoleController::class, 'index']);
+    Route::post('/roles', [AdminRoleController::class, 'store']);
+    Route::patch('/roles/{id}', [AdminRoleController::class, 'update']);
+    Route::delete('/roles/{id}', [AdminRoleController::class, 'destroy']);
+    Route::get('/permissions', [AdminPermissionController::class, 'index']);
+});

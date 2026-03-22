@@ -12,4 +12,9 @@ final class NotFound extends DomainException
 	{
 		return new self(sprintf('%s_not_found', $type), Response::HTTP_NOT_FOUND, ['id' => $id]);
 	}
+
+	public static function because(string $reason): self
+	{
+		return new self($reason, Response::HTTP_NOT_FOUND);
+	}
 }

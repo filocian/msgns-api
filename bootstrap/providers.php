@@ -8,4 +8,5 @@ return [
 	Src\Shared\Infrastructure\Providers\CacheServiceProvider::class,
 	Src\Shared\Infrastructure\Providers\SharedServiceProvider::class,
 	Src\Identity\Infrastructure\Providers\IdentityServiceProvider::class,
+	Src\Products\Infrastructure\Providers\ProductsServiceProvider::class,
 ];

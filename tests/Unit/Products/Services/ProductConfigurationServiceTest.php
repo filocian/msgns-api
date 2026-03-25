@@ -10,11 +10,9 @@ use Src\Shared\Core\Errors\ValidationFailed;
 
 describe('ProductConfigurationService', function () {
 
-    beforeEach(function () {
-        $this->service = new ProductConfigurationService();
-    });
-
     it('sets target URL and records event', function () {
+        $service = new ProductConfigurationService();
+
         $product = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -35,7 +33,7 @@ describe('ProductConfigurationService', function () {
             deletedAt: null,
         );
 
-        $this->service->setTargetUrl($product, 'https://example.com');
+        $service->setTargetUrl($product, 'https://example.com');
 
         expect($product->targetUrl)->toBe('https://example.com');
         expect($product->hasEvents())->toBeTrue();
@@ -43,11 +41,15 @@ describe('ProductConfigurationService', function () {
         $events = $product->releaseEvents();
         expect($events)->toHaveCount(1);
         expect($events[0])->toBeInstanceOf(ProductTargetUrlSet::class);
+        // @phpstan-ignore-next-line
         expect($events[0]->productId)->toBe(1);
+        // @phpstan-ignore-next-line
         expect($events[0]->targetUrl)->toBe('https://example.com');
     });
 
     it('throws on invalid URL', function () {
+        $service = new ProductConfigurationService();
+
         $product = Product::fromPersistence(
             id: 2,
             productTypeId: 1,
@@ -68,10 +70,12 @@ describe('ProductConfigurationService', function () {
             deletedAt: null,
         );
 
-        $this->service->setTargetUrl($product, 'not-a-url');
+        $service->setTargetUrl($product, 'not-a-url');
     })->throws(ValidationFailed::class, 'target_url_invalid');
 
     it('updates existing target URL', function () {
+        $service = new ProductConfigurationService();
+
         $product = Product::fromPersistence(
             id: 3,
             productTypeId: 1,
@@ -92,7 +96,7 @@ describe('ProductConfigurationService', function () {
             deletedAt: null,
         );
 
-        $this->service->setTargetUrl($product, 'https://new.example.com');
+        $service->setTargetUrl($product, 'https://new.example.com');
 
         expect($product->targetUrl)->toBe('https://new.example.com');
     });

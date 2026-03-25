@@ -10,12 +10,9 @@ use Src\Shared\Core\Errors\ValidationFailed;
 
 describe('ProductGroupingService', function () {
 
-    beforeEach(function () {
-        $this->productRepo = Mockery::mock(ProductRepositoryPort::class);
-        $this->service = new ProductGroupingService($this->productRepo);
-    });
-
     it('links two products and records event', function () {
+        $service = new ProductGroupingService();
+
         $primary = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -56,7 +53,7 @@ describe('ProductGroupingService', function () {
             deletedAt: null,
         );
 
-        $this->service->link($primary, $secondary);
+        $service->link($primary, $secondary);
 
         expect($primary->linkedToProductId)->toBe(2);
         expect($primary->hasEvents())->toBeTrue();
@@ -64,11 +61,15 @@ describe('ProductGroupingService', function () {
         $events = $primary->releaseEvents();
         expect($events)->toHaveCount(1);
         expect($events[0])->toBeInstanceOf(ProductsPaired::class);
+        // @phpstan-ignore-next-line
         expect($events[0]->mainProductId)->toBe(1);
+        // @phpstan-ignore-next-line
         expect($events[0]->childProductId)->toBe(2);
     });
 
     it('throws when product types differ', function () {
+        $service = new ProductGroupingService();
+
         $primary = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -109,10 +110,12 @@ describe('ProductGroupingService', function () {
             deletedAt: null,
         );
 
-        $this->service->link($primary, $secondary);
+        $service->link($primary, $secondary);
     })->throws(ValidationFailed::class, 'products_must_have_same_type');
 
     it('throws when users differ', function () {
+        $service = new ProductGroupingService();
+
         $primary = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -153,10 +156,12 @@ describe('ProductGroupingService', function () {
             deletedAt: null,
         );
 
-        $this->service->link($primary, $secondary);
+        $service->link($primary, $secondary);
     })->throws(ValidationFailed::class, 'products_must_have_same_user');
 
     it('throws when primary is already linked', function () {
+        $service = new ProductGroupingService();
+
         $primary = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -197,10 +202,12 @@ describe('ProductGroupingService', function () {
             deletedAt: null,
         );
 
-        $this->service->link($primary, $secondary);
+        $service->link($primary, $secondary);
     })->throws(ValidationFailed::class, 'primary_product_already_linked');
 
     it('throws when secondary is already linked', function () {
+        $service = new ProductGroupingService();
+
         $primary = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -241,10 +248,12 @@ describe('ProductGroupingService', function () {
             deletedAt: null,
         );
 
-        $this->service->link($primary, $secondary);
+        $service->link($primary, $secondary);
     })->throws(ValidationFailed::class, 'secondary_product_already_linked');
 
     it('unlinks a product', function () {
+        $service = new ProductGroupingService();
+
         $product = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -265,7 +274,7 @@ describe('ProductGroupingService', function () {
             deletedAt: null,
         );
 
-        $this->service->unlink($product);
+        $service->unlink($product);
 
         expect($product->linkedToProductId)->toBeNull();
     });

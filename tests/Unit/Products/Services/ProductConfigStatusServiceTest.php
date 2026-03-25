@@ -8,11 +8,9 @@ use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 
 describe('ProductConfigStatusService', function () {
 
-    beforeEach(function () {
-        $this->service = new ProductConfigStatusService();
-    });
-
     it('performs valid forward transition', function () {
+        $service = new ProductConfigStatusService();
+
         $product = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -33,12 +31,14 @@ describe('ProductConfigStatusService', function () {
             deletedAt: null,
         );
 
-        $this->service->transition($product, 'assigned');
+        $service->transition($product, 'assigned');
 
         expect($product->configurationStatus->value)->toBe('assigned');
     });
 
     it('performs multiple forward transitions', function () {
+        $service = new ProductConfigStatusService();
+
         $product = Product::fromPersistence(
             id: 2,
             productTypeId: 1,
@@ -59,20 +59,22 @@ describe('ProductConfigStatusService', function () {
             deletedAt: null,
         );
 
-        $this->service->transition($product, 'assigned');
+        $service->transition($product, 'assigned');
         expect($product->configurationStatus->value)->toBe('assigned');
 
-        $this->service->transition($product, 'target-set');
+        $service->transition($product, 'target-set');
         expect($product->configurationStatus->value)->toBe('target-set');
 
-        $this->service->transition($product, 'business-set');
+        $service->transition($product, 'business-set');
         expect($product->configurationStatus->value)->toBe('business-set');
 
-        $this->service->transition($product, 'completed');
+        $service->transition($product, 'completed');
         expect($product->configurationStatus->value)->toBe('completed');
     });
 
     it('throws on invalid backward transition', function () {
+        $service = new ProductConfigStatusService();
+
         $product = Product::fromPersistence(
             id: 3,
             productTypeId: 1,
@@ -93,10 +95,12 @@ describe('ProductConfigStatusService', function () {
             deletedAt: null,
         );
 
-        $this->service->transition($product, 'not-started');
+        $service->transition($product, 'not-started');
     })->throws(\InvalidArgumentException::class, 'Invalid configuration status transition');
 
     it('throws on same status transition', function () {
+        $service = new ProductConfigStatusService();
+
         $product = Product::fromPersistence(
             id: 4,
             productTypeId: 1,
@@ -117,6 +121,6 @@ describe('ProductConfigStatusService', function () {
             deletedAt: null,
         );
 
-        $this->service->transition($product, 'target-set');
+        $service->transition($product, 'target-set');
     })->throws(\InvalidArgumentException::class, 'Invalid configuration status transition');
 });

@@ -2,22 +2,20 @@
 
 declare(strict_types=1);
 
+use Mockery\MockInterface;
 use Src\Products\Domain\Entities\Product;
-use Src\Products\Domain\Events\ProductReset;
 use Src\Products\Domain\Ports\ProductUsagePort;
 use Src\Products\Domain\Services\ProductResetService;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
-use Mockery;
 
 describe('ProductResetService', function () {
 
-    beforeEach(function () {
-        $this->usagePort = Mockery::mock(ProductUsagePort::class);
-        $this->service = new ProductResetService($this->usagePort);
-    });
-
     it('resets product and records event', function () {
-        $this->usagePort->shouldReceive('deleteUsage')->once()->with(1);
+        /** @var MockInterface&ProductUsagePort $usagePort */
+        $usagePort = Mockery::mock(ProductUsagePort::class);
+        $usagePort->shouldReceive('deleteUsage')->once()->with(1); // @phpstan-ignore-line
+
+        $service = new ProductResetService($usagePort);
 
         $product = Product::fromPersistence(
             id: 1,
@@ -39,7 +37,7 @@ describe('ProductResetService', function () {
             deletedAt: null,
         );
 
-        $this->service->reset($product);
+        $service->reset($product);
 
         expect($product->userId)->toBeNull()
             ->and($product->targetUrl)->toBeNull()
@@ -51,7 +49,11 @@ describe('ProductResetService', function () {
     });
 
     it('calls usage port to delete usage data', function () {
-        $this->usagePort->shouldReceive('deleteUsage')->once()->with(42);
+        /** @var MockInterface&ProductUsagePort $usagePort */
+        $usagePort = Mockery::mock(ProductUsagePort::class);
+        $usagePort->shouldReceive('deleteUsage')->once()->with(42); // @phpstan-ignore-line
+
+        $service = new ProductResetService($usagePort);
 
         $product = Product::fromPersistence(
             id: 42,
@@ -73,6 +75,6 @@ describe('ProductResetService', function () {
             deletedAt: null,
         );
 
-        $this->service->reset($product);
+        $service->reset($product);
     });
 });

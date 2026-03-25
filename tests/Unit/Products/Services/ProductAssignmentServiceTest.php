@@ -9,11 +9,9 @@ use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 
 describe('ProductAssignmentService', function () {
 
-    beforeEach(function () {
-        $this->service = new ProductAssignmentService();
-    });
-
     it('assigns product to user and records event', function () {
+        $service = new ProductAssignmentService();
+
         $product = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -34,7 +32,7 @@ describe('ProductAssignmentService', function () {
             deletedAt: null,
         );
 
-        $this->service->assign($product, 42);
+        $service->assign($product, 42);
 
         expect($product->userId)->toBe(42)
             ->and($product->assignedAt)->toBeInstanceOf(DateTimeImmutable::class)
@@ -43,11 +41,15 @@ describe('ProductAssignmentService', function () {
         $events = $product->releaseEvents();
         expect($events)->toHaveCount(1);
         expect($events[0])->toBeInstanceOf(ProductAssigned::class);
+        // @phpstan-ignore-next-line
         expect($events[0]->productId)->toBe(1);
+        // @phpstan-ignore-next-line
         expect($events[0]->userId)->toBe(42);
     });
 
     it('reassigns product to different user', function () {
+        $service = new ProductAssignmentService();
+
         $product = Product::fromPersistence(
             id: 2,
             productTypeId: 1,
@@ -68,10 +70,11 @@ describe('ProductAssignmentService', function () {
             deletedAt: null,
         );
 
-        $this->service->assign($product, 20);
+        $service->assign($product, 20);
 
         expect($product->userId)->toBe(20)
-            ->and($product->assignedAt)->toBeInstanceOf(DateTimeImmutable::class)
-            ->and($product->assignedAt->format('Y-m-d'))->not->toBe('2024-01-01');
+            ->and($product->assignedAt)->toBeInstanceOf(DateTimeImmutable::class);
+        // @phpstan-ignore-next-line
+        expect($product->assignedAt->format('Y-m-d'))->not->toBe('2024-01-01');
     });
 });

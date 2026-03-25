@@ -4,15 +4,39 @@ declare(strict_types=1);
 
 namespace Src\Products\Domain\ValueObjects;
 
+use Src\Shared\Core\Errors\ValidationFailed;
+
 final class ProductDescription
 {
+    public const int MAX_LENGTH = 500;
+
     private function __construct(
         public readonly ?string $value,
     ) {}
 
     public static function from(?string $value): self
     {
-        return new self($value !== null ? trim($value) : null);
+        // Null is allowed (nullable field)
+        if ($value === null) {
+            return new self(null);
+        }
+
+        $trimmed = trim($value);
+
+        // Empty string is not allowed
+        if ($trimmed === '') {
+            throw ValidationFailed::because('product_description_empty');
+        }
+
+        // Max length validation
+        if (mb_strlen($trimmed) > self::MAX_LENGTH) {
+            throw ValidationFailed::because('product_description_too_long', [
+                'max' => self::MAX_LENGTH,
+                'actual' => mb_strlen($trimmed),
+            ]);
+        }
+
+        return new self($trimmed);
     }
 
     public function equals(self $other): bool

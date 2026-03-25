@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Identity;
 
 use App\Http\Contracts\Controller;
+use App\Http\OpenApi\Schemas as OpenApiSchemas;
 use App\Http\Requests\Identity\AdminSetPasswordRequest;
 use App\Http\Requests\Identity\AdminUpdateUserRequest;
 use App\Http\Requests\Identity\BulkActivationRequest;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Attributes as OA;
 use Src\Identity\Application\Commands\AdminActivateUser\AdminActivateUserCommand;
 use Src\Identity\Application\Commands\AdminDeactivateUser\AdminDeactivateUserCommand;
 use Src\Identity\Application\Commands\AdminSetEmailVerified\AdminSetEmailVerifiedCommand;
@@ -37,6 +39,7 @@ use Src\Shared\Core\Bus\QueryBus;
 use Src\Shared\Infrastructure\Http\ApiResponseFactory;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+#[OA\Tag(name: 'Identity - Admin', description: 'Administrator endpoints for user management')]
 final class AdminUserController extends Controller
 {
     public function __construct(
@@ -44,6 +47,38 @@ final class AdminUserController extends Controller
         private readonly QueryBus $queryBus,
     ) {}
 
+    #[OA\Get(
+        path: '/identity/admin/users',
+        summary: 'List all users',
+        description: 'Returns a paginated list of users with optional filtering and sorting.',
+        operationId: 'listUsers',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'page', in: 'query', schema: new OA\Schema(type: 'integer', default: 1)),
+            new OA\Parameter(name: 'per_page', in: 'query', schema: new OA\Schema(type: 'integer', default: 15)),
+            new OA\Parameter(name: 'sort_by', in: 'query', schema: new OA\Schema(type: 'string', default: 'created_at')),
+            new OA\Parameter(name: 'sort_dir', in: 'query', schema: new OA\Schema(type: 'string', default: 'desc', enum: ['asc', 'desc'])),
+            new OA\Parameter(name: 'search', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'active', in: 'query', schema: new OA\Schema(type: 'boolean')),
+            new OA\Parameter(name: 'role', in: 'query', schema: new OA\Schema(type: 'string')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Users list', content: new OA\JsonContent(
+                allOf: [
+                    new OA\Schema(ref: '#/components/schemas/JsonEnvelope'),
+                    new OA\Schema(properties: [
+                        new OA\Property(property: 'data', properties: [
+                            new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/UserResource')),
+                            new OA\Property(property: 'meta', ref: '#/components/schemas/PaginatedMeta'),
+                        ]),
+                    ])
+                ]
+            )),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden - requires admin permissions'),
+        ]
+    )]
     public function index(Request $request): JsonResponse
     {
         $result = $this->queryBus->dispatch(new ListUsersQuery(
@@ -58,6 +93,33 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::paginated($result);
     }
 
+    #[OA\Get(
+        path: '/identity/admin/users/export',
+        summary: 'Export users as CSV',
+        description: 'Generates a CSV file with user data matching the provided filters.',
+        operationId: 'exportUsers',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'search', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'active', in: 'query', schema: new OA\Schema(type: 'boolean')),
+            new OA\Parameter(name: 'role', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'created_from', in: 'query', schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'created_to', in: 'query', schema: new OA\Schema(type: 'string', format: 'date')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'CSV file download',
+                content: new OA\MediaType(
+                    mediaType: 'text/csv',
+                    schema: new OA\Schema(type: 'string', format: 'binary')
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+        ]
+    )]
     public function export(ExportUsersRequest $request): StreamedResponse
     {
         set_time_limit(0);
@@ -133,12 +195,57 @@ final class AdminUserController extends Controller
         return $response;
     }
 
+    #[OA\Get(
+        path: '/identity/admin/users/{id}',
+        summary: 'Get a user by ID',
+        operationId: 'getUser',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'User details', content: new OA\JsonContent(ref: '#/components/schemas/UserResource')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ]
+    )]
     public function show(int $id): JsonResponse
     {
         $user = $this->queryBus->dispatch(new GetUserQuery(userId: $id));
         return ApiResponseFactory::ok($user);
     }
 
+    #[OA\Patch(
+        path: '/identity/admin/users/{id}',
+        summary: 'Update a user',
+        operationId: 'updateUser',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email'),
+                    new OA\Property(property: 'phone', type: 'string', nullable: true),
+                    new OA\Property(property: 'country', type: 'string', nullable: true),
+                    new OA\Property(property: 'default_locale', type: 'string', nullable: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'User updated', content: new OA\JsonContent(ref: '#/components/schemas/UserResource')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'User not found'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function update(AdminUpdateUserRequest $request, int $id): JsonResponse
     {
         $user = $this->commandBus->dispatch(new AdminUpdateUserCommand(
@@ -152,6 +259,32 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::ok($user);
     }
 
+    #[OA\Put(
+        path: '/identity/admin/users/{id}/password',
+        summary: 'Set user password (admin)',
+        operationId: 'adminSetPassword',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['password'],
+                properties: [
+                    new OA\Property(property: 'password', type: 'string', format: 'password'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 204, description: 'Password set successfully'),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'User not found'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function setPassword(AdminSetPasswordRequest $request, int $id): Response
     {
         $this->commandBus->dispatch(new AdminSetPasswordCommand(
@@ -161,6 +294,22 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::noContent();
     }
 
+    #[OA\Patch(
+        path: '/identity/admin/users/{id}/verify-email',
+        summary: 'Mark user email as verified',
+        operationId: 'setEmailVerified',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Email verified', content: new OA\JsonContent(ref: '#/components/schemas/UserResource')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ]
+    )]
     public function setEmailVerified(int $id): JsonResponse
     {
         $user = $this->commandBus->dispatch(new AdminSetEmailVerifiedCommand(
@@ -169,6 +318,22 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::ok($user);
     }
 
+    #[OA\Patch(
+        path: '/identity/admin/users/{id}/deactivate',
+        summary: 'Deactivate a user',
+        operationId: 'deactivateUser',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'User deactivated', content: new OA\JsonContent(ref: '#/components/schemas/UserResource')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ]
+    )]
     public function deactivate(int $id): JsonResponse
     {
         $user = $this->commandBus->dispatch(new AdminDeactivateUserCommand(
@@ -178,6 +343,22 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::ok($user);
     }
 
+    #[OA\Patch(
+        path: '/identity/admin/users/{id}/activate',
+        summary: 'Activate a user',
+        operationId: 'activateUser',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'User activated', content: new OA\JsonContent(ref: '#/components/schemas/UserResource')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 404, description: 'User not found'),
+        ]
+    )]
     public function activate(int $id): JsonResponse
     {
         $user = $this->commandBus->dispatch(new AdminActivateUserCommand(
@@ -187,6 +368,32 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::ok($user);
     }
 
+    #[OA\Post(
+        path: '/identity/admin/users/bulk/verify-email',
+        summary: 'Bulk verify user emails',
+        operationId: 'bulkVerifyEmail',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_ids'],
+                properties: [
+                    new OA\Property(
+                        property: 'user_ids',
+                        type: 'array',
+                        items: new OA\Items(type: 'integer')
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Bulk operation completed', content: new OA\JsonContent(ref: '#/components/schemas/BulkOperationResult')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function bulkVerifyEmail(BulkVerifyEmailRequest $request): JsonResponse
     {
         $result = $this->commandBus->dispatch(new BulkVerifyEmailCommand(
@@ -195,6 +402,38 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::ok($result->toArray());
     }
 
+    #[OA\Post(
+        path: '/identity/admin/users/bulk/email',
+        summary: 'Bulk change user emails',
+        operationId: 'bulkChangeEmail',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['updates'],
+                properties: [
+                    new OA\Property(
+                        property: 'updates',
+                        type: 'array',
+                        items: new OA\Items(
+                            type: 'object',
+                            properties: [
+                                new OA\Property(property: 'user_id', type: 'integer'),
+                                new OA\Property(property: 'new_email', type: 'string', format: 'email'),
+                            ]
+                        )
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Bulk operation completed', content: new OA\JsonContent(ref: '#/components/schemas/BulkOperationResult')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function bulkChangeEmail(BulkChangeEmailRequest $request): JsonResponse
     {
         $result = $this->commandBus->dispatch(new BulkChangeEmailCommand(
@@ -203,6 +442,33 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::ok($result->toArray());
     }
 
+    #[OA\Post(
+        path: '/identity/admin/users/bulk/activation',
+        summary: 'Bulk activate or deactivate users',
+        operationId: 'bulkActivation',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_ids', 'active'],
+                properties: [
+                    new OA\Property(
+                        property: 'user_ids',
+                        type: 'array',
+                        items: new OA\Items(type: 'integer')
+                    ),
+                    new OA\Property(property: 'active', type: 'boolean'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Bulk operation completed', content: new OA\JsonContent(ref: '#/components/schemas/BulkOperationResult')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function bulkActivation(BulkActivationRequest $request): JsonResponse
     {
         $result = $this->commandBus->dispatch(new BulkActivationCommand(
@@ -213,6 +479,37 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::ok($result->toArray());
     }
 
+    #[OA\Post(
+        path: '/identity/admin/users/bulk/roles',
+        summary: 'Bulk assign roles to users',
+        operationId: 'bulkAssignRoles',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_ids', 'roles'],
+                properties: [
+                    new OA\Property(
+                        property: 'user_ids',
+                        type: 'array',
+                        items: new OA\Items(type: 'integer')
+                    ),
+                    new OA\Property(
+                        property: 'roles',
+                        type: 'array',
+                        items: new OA\Items(type: 'string')
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Bulk operation completed', content: new OA\JsonContent(ref: '#/components/schemas/BulkOperationResult')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function bulkAssignRoles(BulkAssignRolesRequest $request): JsonResponse
     {
         $result = $this->commandBus->dispatch(new BulkAssignRolesCommand(
@@ -222,6 +519,32 @@ final class AdminUserController extends Controller
         return ApiResponseFactory::ok($result->toArray());
     }
 
+    #[OA\Post(
+        path: '/identity/admin/users/bulk/password-reset',
+        summary: 'Bulk reset user passwords',
+        operationId: 'bulkPasswordReset',
+        tags: ['Identity - Admin'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['user_ids'],
+                properties: [
+                    new OA\Property(
+                        property: 'user_ids',
+                        type: 'array',
+                        items: new OA\Items(type: 'integer')
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Bulk operation completed', content: new OA\JsonContent(ref: '#/components/schemas/BulkOperationResult')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Validation error'),
+        ]
+    )]
     public function bulkPasswordReset(BulkPasswordResetRequest $request): JsonResponse
     {
         $result = $this->commandBus->dispatch(new BulkPasswordResetCommand(

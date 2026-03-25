@@ -8,11 +8,9 @@ use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 
 describe('ProductCloneService', function () {
 
-    beforeEach(function () {
-        $this->service = new ProductCloneService();
-    });
-
     it('copies target URL from source to target', function () {
+        $service = new ProductCloneService();
+
         $source = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -53,12 +51,14 @@ describe('ProductCloneService', function () {
             deletedAt: null,
         );
 
-        $this->service->clone($source, $target);
+        $service->clone($source, $target);
 
         expect($target->targetUrl)->toBe('https://source.example.com');
     });
 
     it('copies configuration status when target can advance', function () {
+        $service = new ProductCloneService();
+
         $source = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -99,13 +99,15 @@ describe('ProductCloneService', function () {
             deletedAt: null,
         );
 
-        $this->service->clone($source, $target);
+        $service->clone($source, $target);
 
         // Target can advance to business-set, so status should be copied
         expect($target->configurationStatus->value)->toBe(ConfigurationStatus::BUSINESS_SET);
     });
 
     it('does NOT record domain events', function () {
+        $service = new ProductCloneService();
+
         $source = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -146,13 +148,15 @@ describe('ProductCloneService', function () {
             deletedAt: null,
         );
 
-        $this->service->clone($source, $target);
+        $service->clone($source, $target);
 
         expect($target->hasEvents())->toBeFalse();
         expect($target->releaseEvents())->toBeEmpty();
     });
 
     it('does not copy status when target cannot advance to source status', function () {
+        $service = new ProductCloneService();
+
         // Source is at business-set (3)
         $source = Product::fromPersistence(
             id: 1,
@@ -195,7 +199,7 @@ describe('ProductCloneService', function () {
             deletedAt: null,
         );
 
-        $this->service->clone($source, $target);
+        $service->clone($source, $target);
 
         // Target is already at business-set, cannot advance to same level
         // so status should remain at business-set

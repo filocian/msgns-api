@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-use Mockery;
+use Mockery\MockInterface;
 use Src\Products\Domain\Entities\Product;
-use Src\Products\Domain\Entities\ProductBusiness;
 use Src\Products\Domain\Events\ProductBusinessUpdated;
 use Src\Products\Domain\Ports\ProductBusinessPort;
 use Src\Products\Domain\Services\ProductBusinessService;
@@ -12,12 +11,11 @@ use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 
 describe('ProductBusinessService', function () {
 
-    beforeEach(function () {
-        $this->businessPort = Mockery::mock(ProductBusinessPort::class);
-        $this->service = new ProductBusinessService($this->businessPort);
-    });
-
     it('creates business info and records ProductBusinessUpdated event', function () {
+        /** @var MockInterface&ProductBusinessPort $businessPort */
+        $businessPort = Mockery::mock(ProductBusinessPort::class);
+        $service = new ProductBusinessService($businessPort);
+
         $product = Product::fromPersistence(
             id: 1,
             productTypeId: 1,
@@ -38,15 +36,8 @@ describe('ProductBusinessService', function () {
             deletedAt: null,
         );
 
-        $this->businessPort->shouldReceive('findByProductId')
-            ->with(1)
-            ->andReturn(null);
-
-        $this->businessPort->shouldReceive('save')
-            ->once()
-            ->andReturnUsing(function ($business) {
-                return $business;
-            });
+        $businessPort->shouldReceive('findByProductId')->with(1)->andReturn(null); // @phpstan-ignore-line
+        $businessPort->shouldReceive('save')->once()->andReturnUsing(fn ($business) => $business); // @phpstan-ignore-line
 
         $businessData = [
             'userId' => 10,
@@ -57,17 +48,21 @@ describe('ProductBusinessService', function () {
             'size' => 'small',
         ];
 
-        $this->service->updateBusiness($product, $businessData);
+        $service->updateBusiness($product, $businessData);
 
         expect($product->hasEvents())->toBeTrue();
 
         $events = $product->releaseEvents();
         expect($events)->toHaveCount(1);
         expect($events[0])->toBeInstanceOf(ProductBusinessUpdated::class);
-        expect($events[0]->productId)->toBe(1);
+        expect($events[0]->productId)->toBe(1); // @phpstan-ignore-line
     });
 
     it('triggers config status transition to business-set when possible', function () {
+        /** @var MockInterface&ProductBusinessPort $businessPort */
+        $businessPort = Mockery::mock(ProductBusinessPort::class);
+        $service = new ProductBusinessService($businessPort);
+
         $product = Product::fromPersistence(
             id: 2,
             productTypeId: 1,
@@ -88,15 +83,8 @@ describe('ProductBusinessService', function () {
             deletedAt: null,
         );
 
-        $this->businessPort->shouldReceive('findByProductId')
-            ->with(2)
-            ->andReturn(null);
-
-        $this->businessPort->shouldReceive('save')
-            ->once()
-            ->andReturnUsing(function ($business) {
-                return $business;
-            });
+        $businessPort->shouldReceive('findByProductId')->with(2)->andReturn(null); // @phpstan-ignore-line
+        $businessPort->shouldReceive('save')->once()->andReturnUsing(fn ($business) => $business); // @phpstan-ignore-line
 
         $businessData = [
             'userId' => 10,
@@ -107,13 +95,17 @@ describe('ProductBusinessService', function () {
             'size' => 'small',
         ];
 
-        $this->service->updateBusiness($product, $businessData);
+        $service->updateBusiness($product, $businessData);
 
         // Status should transition from notStarted to businessSet
         expect($product->configurationStatus->value)->toBe(ConfigurationStatus::BUSINESS_SET);
     });
 
     it('does not transition status when already past business-set', function () {
+        /** @var MockInterface&ProductBusinessPort $businessPort */
+        $businessPort = Mockery::mock(ProductBusinessPort::class);
+        $service = new ProductBusinessService($businessPort);
+
         // Product is already completed (4), cannot go backwards to business-set (3)
         $product = Product::fromPersistence(
             id: 3,
@@ -135,15 +127,8 @@ describe('ProductBusinessService', function () {
             deletedAt: null,
         );
 
-        $this->businessPort->shouldReceive('findByProductId')
-            ->with(3)
-            ->andReturn(null);
-
-        $this->businessPort->shouldReceive('save')
-            ->once()
-            ->andReturnUsing(function ($business) {
-                return $business;
-            });
+        $businessPort->shouldReceive('findByProductId')->with(3)->andReturn(null); // @phpstan-ignore-line
+        $businessPort->shouldReceive('save')->once()->andReturnUsing(fn ($business) => $business); // @phpstan-ignore-line
 
         $businessData = [
             'userId' => 10,
@@ -154,7 +139,7 @@ describe('ProductBusinessService', function () {
             'size' => 'small',
         ];
 
-        $this->service->updateBusiness($product, $businessData);
+        $service->updateBusiness($product, $businessData);
 
         // Status should remain at completed (cannot go backwards to business-set)
         expect($product->configurationStatus->value)->toBe(ConfigurationStatus::COMPLETED);

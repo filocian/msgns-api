@@ -6,6 +6,7 @@ parameters:
   paths:
     - src/Shared
     - src/Identity
+    - src/Products
     - tools/phpstan
     - tests/Pest.php
     - tests/TestCase.php
@@ -13,6 +14,7 @@ parameters:
     - tests/Architecture
   excludePaths:
     - src/*/Infrastructure/Persistence/*Model.php
+    - src/Products/Infrastructure/Persistence/Eloquent*.php
 
 services:
   - class: Tools\PHPStan\Rules\NoIlluminateInCoreLayers

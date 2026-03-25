@@ -10,10 +10,16 @@ use Src\Products\Application\Commands\CreateProductType\CreateProductTypeHandler
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
 use Src\Products\Application\Queries\ListProductTypes\ListProductTypesHandler;
+use Src\Products\Domain\Ports\ProductBusinessPort;
+use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Ports\ProductTypeRepository;
 use Src\Products\Domain\Ports\ProductTypeUsagePort;
+use Src\Products\Domain\Ports\ProductUsagePort;
+use Src\Products\Infrastructure\Persistence\EloquentProductBusinessRepository;
+use Src\Products\Infrastructure\Persistence\EloquentProductRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeUsageAdapter;
+use Src\Products\Infrastructure\Persistence\NullProductUsageAdapter;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Core\Bus\QueryBus;
 
@@ -21,8 +27,14 @@ final class ProductsServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // ProductType bindings (existing)
         $this->app->bind(ProductTypeRepository::class, EloquentProductTypeRepository::class);
         $this->app->bind(ProductTypeUsagePort::class, EloquentProductTypeUsageAdapter::class);
+
+        // Product bindings (new for issue #9)
+        $this->app->bind(ProductRepositoryPort::class, EloquentProductRepository::class);
+        $this->app->bind(ProductBusinessPort::class, EloquentProductBusinessRepository::class);
+        $this->app->bind(ProductUsagePort::class, NullProductUsageAdapter::class);
     }
 
     public function boot(): void

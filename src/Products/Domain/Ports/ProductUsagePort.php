@@ -6,15 +6,12 @@ namespace Src\Products\Domain\Ports;
 
 interface ProductUsagePort
 {
-    /**
-     * @param array<string, mixed> $data
-     */
-    public function writeUsage(int $productId, array $data): void;
+    public function writeUsageEvent(int $productId, int $userId, string $productName, \DateTimeImmutable $timestamp): void;
 
     /**
-     * @return array<string, mixed>
+     * @return array<int, array{productId: int, userId: int, productName: string, scannedAt: string}>
      */
-    public function queryUsage(int $productId): array;
+    public function queryProductUsage(int $productId, \DateTimeImmutable $startDate, \DateTimeImmutable $endDate): array;
 
-    public function deleteUsage(int $productId): void;
+    public function deleteProductUsage(int $productId): void;
 }

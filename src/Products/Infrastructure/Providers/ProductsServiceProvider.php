@@ -7,6 +7,7 @@ namespace Src\Products\Infrastructure\Providers;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Src\Products\Application\Commands\CreateProductType\CreateProductTypeHandler;
+use Src\Products\Application\Commands\ReportUsage\ReportUsageHandler;
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
 use Src\Products\Application\Queries\ListProductTypes\ListProductTypesHandler;
@@ -15,13 +16,14 @@ use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Ports\ProductTypeRepository;
 use Src\Products\Domain\Ports\ProductTypeUsagePort;
 use Src\Products\Domain\Ports\ProductUsagePort;
+use Src\Products\Infrastructure\Persistence\DynamoDbProductUsageAdapter;
 use Src\Products\Infrastructure\Persistence\EloquentProductBusinessRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeUsageAdapter;
-use Src\Products\Infrastructure\Persistence\NullProductUsageAdapter;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Core\Bus\QueryBus;
+use Src\Shared\Core\Ports\NoSqlPort;
 
 final class ProductsServiceProvider extends ServiceProvider
 {
@@ -34,7 +36,14 @@ final class ProductsServiceProvider extends ServiceProvider
         // Product bindings (new for issue #9)
         $this->app->bind(ProductRepositoryPort::class, EloquentProductRepository::class);
         $this->app->bind(ProductBusinessPort::class, EloquentProductBusinessRepository::class);
-        $this->app->bind(ProductUsagePort::class, NullProductUsageAdapter::class);
+
+        // Product usage port — backed by DynamoDB (issue #13)
+        $this->app->bind(ProductUsagePort::class, function () {
+            return new DynamoDbProductUsageAdapter(
+                noSql: $this->app->make(NoSqlPort::class),
+                table: (string) \config('services.dynamodb.product_usage_table'),
+            );
+        });
     }
 
     public function boot(): void
@@ -43,6 +52,7 @@ final class ProductsServiceProvider extends ServiceProvider
         $commandBus = $this->app->make(CommandBus::class);
         $commandBus->register('products.create_product_type', CreateProductTypeHandler::class);
         $commandBus->register('products.update_product_type', UpdateProductTypeHandler::class);
+        $commandBus->register('products.report_usage', ReportUsageHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);

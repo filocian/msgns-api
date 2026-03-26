@@ -13,7 +13,7 @@ describe('ProductResetService', function () {
     it('resets product and records event', function () {
         /** @var MockInterface&ProductUsagePort $usagePort */
         $usagePort = Mockery::mock(ProductUsagePort::class);
-        $usagePort->shouldReceive('deleteUsage')->once()->with(1); // @phpstan-ignore-line
+        $usagePort->shouldReceive('deleteProductUsage')->once()->with(1); // @phpstan-ignore-line
 
         $service = new ProductResetService($usagePort);
 
@@ -51,7 +51,7 @@ describe('ProductResetService', function () {
     it('calls usage port to delete usage data', function () {
         /** @var MockInterface&ProductUsagePort $usagePort */
         $usagePort = Mockery::mock(ProductUsagePort::class);
-        $usagePort->shouldReceive('deleteUsage')->once()->with(42); // @phpstan-ignore-line
+        $usagePort->shouldReceive('deleteProductUsage')->once()->with(42); // @phpstan-ignore-line
 
         $service = new ProductResetService($usagePort);
 

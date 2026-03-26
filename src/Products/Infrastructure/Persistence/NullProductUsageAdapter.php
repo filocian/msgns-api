@@ -15,24 +15,21 @@ use Src\Products\Domain\Ports\ProductUsagePort;
  */
 final class NullProductUsageAdapter implements ProductUsagePort
 {
-    /**
-     * @param array<string, mixed> $data
-     */
-    public function writeUsage(int $productId, array $data): void
+    public function writeUsageEvent(int $productId, int $userId, string $productName, \DateTimeImmutable $timestamp): void
     {
         // No-op: Will be implemented in issue #13 with DynamoDB
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<int, array{productId: int, userId: int, productName: string, scannedAt: string}>
      */
-    public function queryUsage(int $productId): array
+    public function queryProductUsage(int $productId, \DateTimeImmutable $startDate, \DateTimeImmutable $endDate): array
     {
         // No-op: Will be implemented in issue #13 with DynamoDB
         return [];
     }
 
-    public function deleteUsage(int $productId): void
+    public function deleteProductUsage(int $productId): void
     {
         // No-op: Will be implemented in issue #13 with DynamoDB
     }

@@ -32,7 +32,7 @@ final class ProductResetService
         );
 
         // Delete usage data
-        $this->usagePort->deleteUsage($product->id);
+        $this->usagePort->deleteProductUsage($product->id);
 
         // Record reset event
         $product->recordEvent(new ProductReset($product->id));

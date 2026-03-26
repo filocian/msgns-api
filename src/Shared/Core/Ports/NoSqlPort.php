@@ -37,4 +37,15 @@ interface NoSqlPort
 		?int $limit = null,
 		?array $exclusiveStartKey = null,
 	): NoSqlQueryResult;
+
+	/**
+	 * Delete all items matching a key condition query, in paginated 25-item batches with retry.
+	 * Retries only unprocessed items with exponential backoff and jitter, up to 5 attempts per chunk.
+	 * Throws \RuntimeException if any chunk still has unprocessed items after the retry ceiling.
+	 *
+	 * @param array<string, mixed> $keyCondition  Query params (KeyConditionExpression, ExpressionAttributeValues, etc.)
+	 * @param array<string> $keySchema            Attribute names forming the composite key (e.g. ['productId', 'scannedAt'])
+	 * @throws \RuntimeException When unprocessed items remain after 5 retries for any chunk.
+	 */
+	public function batchDeleteByQuery(string $table, array $keyCondition, array $keySchema): void;
 }

@@ -71,6 +71,30 @@ use OpenApi\Attributes as OA;
     new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
     new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
 ], required: ['id', 'code', 'name', 'primary_model', 'created_at', 'updated_at'])]
+#[OA\Schema(schema: 'ProductResource', type: 'object', properties: [
+    new OA\Property(property: 'id', type: 'integer'),
+    new OA\Property(property: 'productTypeId', type: 'integer'),
+    new OA\Property(property: 'userId', type: 'integer', nullable: true),
+    new OA\Property(property: 'model', type: 'string'),
+    new OA\Property(property: 'linkedToProductId', type: 'integer', nullable: true),
+    new OA\Property(property: 'password', type: 'string'),
+    new OA\Property(property: 'targetUrl', type: 'string', nullable: true),
+    new OA\Property(property: 'usage', type: 'integer'),
+    new OA\Property(property: 'name', type: 'string'),
+    new OA\Property(property: 'description', type: 'string', nullable: true),
+    new OA\Property(property: 'active', type: 'boolean'),
+    new OA\Property(property: 'configurationStatus', type: 'string'),
+    new OA\Property(property: 'assignedAt', type: 'string', format: 'date-time', nullable: true),
+    new OA\Property(property: 'size', type: 'string', nullable: true),
+    new OA\Property(property: 'createdAt', type: 'string', format: 'date-time'),
+    new OA\Property(property: 'updatedAt', type: 'string', format: 'date-time'),
+    new OA\Property(property: 'deletedAt', type: 'string', format: 'date-time', nullable: true),
+], required: ['id', 'productTypeId', 'model', 'password', 'usage', 'name', 'active', 'configurationStatus', 'createdAt', 'updatedAt'])]
+#[OA\Schema(schema: 'ProductEnvelope', type: 'object', properties: [
+    new OA\Property(property: 'data', properties: [
+        new OA\Property(property: 'product', ref: '#/components/schemas/ProductResource'),
+    ], type: 'object'),
+], required: ['data'])]
 #[OA\Schema(schema: 'BulkOperationResult', type: 'object', properties: [
     new OA\Property(property: 'results', type: 'array', items: new OA\Items(type: 'object', properties: [
         new OA\Property(property: 'id', type: 'integer'),

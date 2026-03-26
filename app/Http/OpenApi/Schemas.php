@@ -18,6 +18,8 @@ class Schemas
     public const ROLE_RESOURCE = 'RoleResource';
     public const PERMISSION_RESOURCE = 'PermissionResource';
     public const PRODUCT_TYPE_RESOURCE = 'ProductTypeResource';
+    public const PRODUCT_RESOURCE = 'ProductResource';
+    public const PRODUCT_ENVELOPE = 'ProductEnvelope';
     public const BULK_OPERATION_RESULT = 'BulkOperationResult';
     public const DOMAIN_ERROR = 'DomainError';
     public const LOGIN_RESPONSE = 'LoginResponse';

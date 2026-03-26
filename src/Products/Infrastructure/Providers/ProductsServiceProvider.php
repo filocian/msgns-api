@@ -7,8 +7,17 @@ namespace Src\Products\Infrastructure\Providers;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Src\Products\Application\Commands\CreateProductType\CreateProductTypeHandler;
+use Src\Products\Application\Commands\ActivateProduct\ActivateProductHandler;
+use Src\Products\Application\Commands\AssignToUser\AssignToUserHandler;
+use Src\Products\Application\Commands\ChangeConfigStatus\ChangeConfigStatusHandler;
+use Src\Products\Application\Commands\DeactivateProduct\DeactivateProductHandler;
 use Src\Products\Application\Commands\GenerateProducts\GenerateProductsHandler;
+use Src\Products\Application\Commands\RemoveProductLink\RemoveProductLinkHandler;
+use Src\Products\Application\Commands\RenameProduct\RenameProductHandler;
 use Src\Products\Application\Commands\ReportUsage\ReportUsageHandler;
+use Src\Products\Application\Commands\RestoreProduct\RestoreProductHandler;
+use Src\Products\Application\Commands\SetTargetUrl\SetTargetUrlHandler;
+use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductHandler;
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
 use Src\Products\Application\Queries\ListProductTypes\ListProductTypesHandler;
@@ -69,6 +78,15 @@ final class ProductsServiceProvider extends ServiceProvider
         $commandBus->register('products.update_product_type', UpdateProductTypeHandler::class);
         $commandBus->register('products.report_usage', ReportUsageHandler::class);
         $commandBus->register('products.generate_products', GenerateProductsHandler::class);
+        $commandBus->register('products.assign_to_user', AssignToUserHandler::class);
+        $commandBus->register('products.set_target_url', SetTargetUrlHandler::class);
+        $commandBus->register('products.activate_product', ActivateProductHandler::class);
+        $commandBus->register('products.deactivate_product', DeactivateProductHandler::class);
+        $commandBus->register('products.change_config_status', ChangeConfigStatusHandler::class);
+        $commandBus->register('products.rename_product', RenameProductHandler::class);
+        $commandBus->register('products.soft_remove_product', SoftRemoveProductHandler::class);
+        $commandBus->register('products.restore_product', RestoreProductHandler::class);
+        $commandBus->register('products.remove_product_link', RemoveProductLinkHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);

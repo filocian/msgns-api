@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Src\Products\Application\Commands\DeactivateProduct;
+
+use Src\Products\Application\Resources\ProductResource;
+use Src\Products\Domain\Ports\ProductRepositoryPort;
+use Src\Products\Domain\Services\ProductActivationService;
+use Src\Shared\Core\Bus\Command;
+use Src\Shared\Core\Bus\CommandHandler;
+use Src\Shared\Core\Errors\NotFound;
+
+final class DeactivateProductHandler implements CommandHandler
+{
+    public function __construct(
+        private readonly ProductRepositoryPort $productRepository,
+        private readonly ProductActivationService $activationService,
+    ) {}
+
+    public function handle(Command $command): ProductResource
+    {
+        assert($command instanceof DeactivateProductCommand);
+
+        $product = $this->productRepository->findById($command->productId);
+
+        if ($product === null) {
+            throw NotFound::entity('product', (string) $command->productId);
+        }
+
+        $this->activationService->deactivate($product);
+
+        return ProductResource::fromEntity($this->productRepository->save($product));
+    }
+}

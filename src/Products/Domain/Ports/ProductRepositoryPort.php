@@ -22,4 +22,20 @@ interface ProductRepositoryPort
      * @param array<Product> $products
      */
     public function bulkInsert(array $products): void;
+
+    /**
+     * Insert products in chunks and return assigned IDs in insertion order.
+     *
+     * @param list<Product> $products
+     * @param int $chunkSize
+     * @return list<int> Assigned database IDs in insertion order
+     */
+    public function bulkInsertAndReturnIds(array $products, int $chunkSize = 1000): array;
+
+    /**
+     * Update product names in batch using a single CASE WHEN query.
+     *
+     * @param array<int, string> $idToName Map of product ID → new name
+     */
+    public function bulkUpdateNames(array $idToName): void;
 }

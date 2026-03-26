@@ -109,6 +109,35 @@ final class Product
     }
 
     /**
+     * Return a copy of this product with a DB-assigned ID.
+     *
+     * Called post-bulkInsert to assign the auto-increment ID before name generation.
+     * All other properties are preserved exactly.
+     */
+    public function withAssignedId(int $id): self
+    {
+        return new self(
+            id: $id,
+            productTypeId: $this->productTypeId,
+            userId: $this->userId,
+            model: $this->model,
+            linkedToProductId: $this->linkedToProductId,
+            password: $this->password,
+            targetUrl: $this->targetUrl,
+            usage: $this->usage,
+            name: $this->name,
+            description: $this->description,
+            active: $this->active,
+            configurationStatus: $this->configurationStatus,
+            assignedAt: $this->assignedAt,
+            size: $this->size,
+            createdAt: $this->createdAt,
+            updatedAt: $this->updatedAt,
+            deletedAt: $this->deletedAt,
+        );
+    }
+
+    /**
      * Generate the default name: "{model} ({id})"
      */
     public function generateDefaultName(): void

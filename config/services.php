@@ -46,4 +46,9 @@ return [
 		'source' => env('MIXPANEL_SOURCE', 'API'),
 		'system_alias' => env('MIXPANEL_SYSTEM_ALIAS', 'SYS@API'),
 	],
+
+	'products' => [
+		'front_url' => env('FRONT_URL', 'https://app.msgns.local'),
+		'default_password_length' => (int) env('DEFAULT_PRODUCT_PASSWORD_LENGTH', 12),
+	],
 ];

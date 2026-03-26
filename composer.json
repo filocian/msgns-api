@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "mixpanel/mixpanel-php": "^2.11",
+        "phpoffice/phpspreadsheet": "^5.5",
         "resend/resend-laravel": "^1.0",
         "spatie/laravel-permission": "^6.7"
     },

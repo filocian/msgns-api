@@ -44,6 +44,26 @@ final class EloquentProductTypeRepository implements ProductTypeRepository
     }
 
     /**
+     * @param list<int> $ids
+     * @return list<ProductType>
+     */
+    public function findByIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $models = ProductTypeModel::query()
+            ->whereIn('id', $ids)
+            ->get();
+
+        return array_values(array_map(
+            static fn (ProductTypeModel $model): ProductType => $model->toDomainEntity(),
+            $models->all(),
+        ));
+    }
+
+    /**
      * @param array{page?: int, perPage?: int, sortBy?: string, sortDir?: string} $params
      */
     public function list(array $params): PaginatedResult

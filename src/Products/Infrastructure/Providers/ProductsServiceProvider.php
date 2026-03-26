@@ -7,20 +7,26 @@ namespace Src\Products\Infrastructure\Providers;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Src\Products\Application\Commands\CreateProductType\CreateProductTypeHandler;
+use Src\Products\Application\Commands\GenerateProducts\GenerateProductsHandler;
 use Src\Products\Application\Commands\ReportUsage\ReportUsageHandler;
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
 use Src\Products\Application\Queries\ListProductTypes\ListProductTypesHandler;
+use Src\Products\Domain\Ports\ExcelExportPort;
+use Src\Products\Domain\Ports\PasswordGeneratorPort;
 use Src\Products\Domain\Ports\ProductBusinessPort;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Ports\ProductTypeRepository;
 use Src\Products\Domain\Ports\ProductTypeUsagePort;
 use Src\Products\Domain\Ports\ProductUsagePort;
+use Src\Products\Domain\Services\ProductGenerationService;
 use Src\Products\Infrastructure\Persistence\DynamoDbProductUsageAdapter;
 use Src\Products\Infrastructure\Persistence\EloquentProductBusinessRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeUsageAdapter;
+use Src\Products\Infrastructure\Services\AlphanumericPasswordGenerator;
+use Src\Products\Infrastructure\Services\PhpSpreadsheetExcelExporter;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Core\Bus\QueryBus;
 use Src\Shared\Core\Ports\NoSqlPort;
@@ -44,6 +50,15 @@ final class ProductsServiceProvider extends ServiceProvider
                 table: (string) \config('services.dynamodb.product_usage_table'),
             );
         });
+
+        // Issue #10: Batch product generation ports
+        $this->app->bind(PasswordGeneratorPort::class, AlphanumericPasswordGenerator::class);
+        $this->app->bind(ExcelExportPort::class, PhpSpreadsheetExcelExporter::class);
+        $this->app->singleton(ProductGenerationService::class, function () {
+            return new ProductGenerationService(
+                passwordGenerator: $this->app->make(PasswordGeneratorPort::class),
+            );
+        });
     }
 
     public function boot(): void
@@ -53,6 +68,7 @@ final class ProductsServiceProvider extends ServiceProvider
         $commandBus->register('products.create_product_type', CreateProductTypeHandler::class);
         $commandBus->register('products.update_product_type', UpdateProductTypeHandler::class);
         $commandBus->register('products.report_usage', ReportUsageHandler::class);
+        $commandBus->register('products.generate_products', GenerateProductsHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);

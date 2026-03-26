@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Products\GenerateProductsController;
 use App\Http\Controllers\Products\ProductTypeController;
 use App\Http\Controllers\Products\ProductUsageController;
 use Illuminate\Support\Facades\Route;
@@ -17,4 +18,7 @@ Route::middleware('auth:stateful-api')->group(function (): void {
 
     // Product usage — issue #13
     Route::post('/{id}/usage', [ProductUsageController::class, 'store']);
+
+    // Batch product generation — issue #10
+    Route::post('/generate', [GenerateProductsController::class, 'generate']);
 });

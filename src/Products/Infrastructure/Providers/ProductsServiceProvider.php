@@ -14,6 +14,7 @@ use Src\Products\Application\Commands\DeactivateProduct\DeactivateProductHandler
 use Src\Products\Application\Commands\GenerateProducts\GenerateProductsHandler;
 use Src\Products\Application\Commands\RemoveProductLink\RemoveProductLinkHandler;
 use Src\Products\Application\Commands\RenameProduct\RenameProductHandler;
+use Src\Products\Application\Commands\ResetProduct\ResetProductHandler;
 use Src\Products\Application\Commands\ReportUsage\ReportUsageHandler;
 use Src\Products\Application\Commands\RestoreProduct\RestoreProductHandler;
 use Src\Products\Application\Commands\SetTargetUrl\SetTargetUrlHandler;
@@ -87,6 +88,7 @@ final class ProductsServiceProvider extends ServiceProvider
         $commandBus->register('products.soft_remove_product', SoftRemoveProductHandler::class);
         $commandBus->register('products.restore_product', RestoreProductHandler::class);
         $commandBus->register('products.remove_product_link', RemoveProductLinkHandler::class);
+        $commandBus->register('products.reset_product', ResetProductHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);

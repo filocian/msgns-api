@@ -31,6 +31,9 @@ Route::middleware('auth:stateful-api')->group(function (): void {
     Route::post('/{id}/restore', [ProductActionController::class, 'restore'])->whereNumber('id');
     Route::delete('/{id}/link', [ProductActionController::class, 'removeLink'])->whereNumber('id');
 
+    // Reset action — issue #15
+    Route::post('/{id}/reset', [ProductActionController::class, 'reset'])->whereNumber('id');
+
     // Batch product generation — issue #10
     Route::post('/generate', [GenerateProductsController::class, 'generate']);
 });

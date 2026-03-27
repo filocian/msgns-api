@@ -19,6 +19,7 @@ use Src\Products\Application\Commands\ChangeConfigStatus\ChangeConfigStatusComma
 use Src\Products\Application\Commands\DeactivateProduct\DeactivateProductCommand;
 use Src\Products\Application\Commands\RemoveProductLink\RemoveProductLinkCommand;
 use Src\Products\Application\Commands\RenameProduct\RenameProductCommand;
+use Src\Products\Application\Commands\ResetProduct\ResetProductCommand;
 use Src\Products\Application\Commands\RestoreProduct\RestoreProductCommand;
 use Src\Products\Application\Commands\SetTargetUrl\SetTargetUrlCommand;
 use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductCommand;
@@ -274,6 +275,31 @@ final class ProductActionController extends Controller
         unset($request);
 
         $product = $this->commandBus->dispatch(new RemoveProductLinkCommand(
+            productId: $id,
+        ));
+
+        return ApiResponseFactory::ok(['product' => $product]);
+    }
+
+    #[OA\Post(
+        path: '/products/{id}/reset',
+        summary: 'Reset a product to virgin state',
+        operationId: 'resetProduct',
+        tags: ['Products'],
+        security: [['bearerAuth' => []]],
+        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Product reset to virgin state', content: new OA\JsonContent(ref: '#/components/schemas/ProductEnvelope')),
+            new OA\Response(response: 401, description: 'Unauthenticated'),
+            new OA\Response(response: 404, description: 'Product not found'),
+            new OA\Response(response: 422, description: 'Product type cannot be reset (bracelet/fancelet types)'),
+        ],
+    )]
+    public function reset(Request $request, int $id): JsonResponse
+    {
+        unset($request);
+
+        $product = $this->commandBus->dispatch(new ResetProductCommand(
             productId: $id,
         ));
 

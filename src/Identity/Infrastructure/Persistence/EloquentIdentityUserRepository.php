@@ -6,6 +6,7 @@ namespace Src\Identity\Infrastructure\Persistence;
 
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Src\Identity\Application\Resources\AdminUserListResource;
@@ -224,7 +225,9 @@ final class EloquentIdentityUserRepository implements IdentityUserRepository
      */
     public function inTransaction(callable $fn): mixed
     {
-        return DB::transaction($fn);
+        return DB::transaction(static function (Connection $_connection) use ($fn): mixed {
+            return $fn();
+        });
     }
 
     private function toDomainEntity(User $model): IdentityUser

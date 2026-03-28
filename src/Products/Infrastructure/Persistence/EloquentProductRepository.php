@@ -13,9 +13,15 @@ use Src\Products\Domain\ValueObjects\ProductModel;
 use Src\Products\Domain\ValueObjects\ProductName;
 use Src\Products\Domain\ValueObjects\ProductPassword;
 use Src\Products\Domain\ValueObjects\TargetUrl;
+use Src\Shared\Core\Bus\DomainEvent;
+use Src\Shared\Core\Bus\EventBus;
 
 final class EloquentProductRepository implements ProductRepositoryPort
 {
+    public function __construct(
+        private readonly EventBus $eventBus,
+    ) {}
+
     public function findById(int $id): ?Product
     {
         $model = EloquentProduct::find($id);
@@ -57,6 +63,8 @@ final class EloquentProductRepository implements ProductRepositoryPort
                 $model->save();
             }
 
+            $this->publishReleasedEvents($product);
+
             return $model->toDomainEntity();
         }
 
@@ -79,7 +87,18 @@ final class EloquentProductRepository implements ProductRepositoryPort
         ])->save();
         $model->refresh();
 
+        $this->publishReleasedEvents($product);
+
         return $model->toDomainEntity();
+    }
+
+    private function publishReleasedEvents(Product $product): void
+    {
+        foreach ($product->releaseEvents() as $event) {
+            if ($event instanceof DomainEvent) {
+                $this->eventBus->publish($event);
+            }
+        }
     }
 
     public function delete(int $id): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Src\Products\Infrastructure\Providers;
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Src\Products\Application\Commands\CreateProductType\CreateProductTypeHandler;
 use Src\Products\Application\Commands\ActivateProduct\ActivateProductHandler;
@@ -22,6 +23,14 @@ use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductHandler
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
 use Src\Products\Application\Queries\ListProductTypes\ListProductTypesHandler;
+use Src\Products\Domain\Events\ProductActivated;
+use Src\Products\Domain\Events\ProductAssigned;
+use Src\Products\Domain\Events\ProductBusinessUpdated;
+use Src\Products\Domain\Events\ProductDeactivated;
+use Src\Products\Domain\Events\ProductRenamed;
+use Src\Products\Domain\Events\ProductReset;
+use Src\Products\Domain\Events\ProductTargetUrlSet;
+use Src\Products\Domain\Events\ProductsPaired;
 use Src\Products\Domain\Ports\ExcelExportPort;
 use Src\Products\Domain\Ports\PasswordGeneratorPort;
 use Src\Products\Domain\Ports\ProductBusinessPort;
@@ -35,6 +44,14 @@ use Src\Products\Infrastructure\Persistence\EloquentProductBusinessRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeUsageAdapter;
+use Src\Products\Infrastructure\Listeners\TrackProductActivated;
+use Src\Products\Infrastructure\Listeners\TrackProductAssigned;
+use Src\Products\Infrastructure\Listeners\TrackProductBusinessUpdated;
+use Src\Products\Infrastructure\Listeners\TrackProductDeactivated;
+use Src\Products\Infrastructure\Listeners\TrackProductRenamed;
+use Src\Products\Infrastructure\Listeners\TrackProductReset;
+use Src\Products\Infrastructure\Listeners\TrackProductTargetUrlSet;
+use Src\Products\Infrastructure\Listeners\TrackProductsPaired;
 use Src\Products\Infrastructure\Services\AlphanumericPasswordGenerator;
 use Src\Products\Infrastructure\Services\PhpSpreadsheetExcelExporter;
 use Src\Shared\Core\Bus\CommandBus;
@@ -99,5 +116,14 @@ final class ProductsServiceProvider extends ServiceProvider
         Route::prefix('api/v2/products')
             ->middleware('api')
             ->group(base_path('routes/api/products.php'));
+
+        Event::listen(ProductActivated::class, TrackProductActivated::class);
+        Event::listen(ProductDeactivated::class, TrackProductDeactivated::class);
+        Event::listen(ProductTargetUrlSet::class, TrackProductTargetUrlSet::class);
+        Event::listen(ProductRenamed::class, TrackProductRenamed::class);
+        Event::listen(ProductReset::class, TrackProductReset::class);
+        Event::listen(ProductBusinessUpdated::class, TrackProductBusinessUpdated::class);
+        Event::listen(ProductsPaired::class, TrackProductsPaired::class);
+        Event::listen(ProductAssigned::class, TrackProductAssigned::class);
     }
 }

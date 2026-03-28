@@ -15,6 +15,7 @@ final class ProductType
         public readonly int $id,
         public ProductTypeCode $code,
         public string $name,
+        public ?string $description,
         public ProductModels $models,
         public readonly DateTimeImmutable $createdAt,
         public DateTimeImmutable $updatedAt,
@@ -25,6 +26,7 @@ final class ProductType
         string $name,
         string $primaryModel,
         ?string $secondaryModel = null,
+        ?string $description = null,
     ): self {
         $now = new DateTimeImmutable();
 
@@ -32,6 +34,7 @@ final class ProductType
             id: 0,
             code: ProductTypeCode::from($code),
             name: $name,
+            description: $description,
             models: ProductModels::from($primaryModel, $secondaryModel),
             createdAt: $now,
             updatedAt: $now,
@@ -46,11 +49,13 @@ final class ProductType
         ?string $secondaryModel,
         DateTimeImmutable $createdAt,
         DateTimeImmutable $updatedAt,
+        ?string $description = null,
     ): self {
         return new self(
             id: $id,
             code: ProductTypeCode::from($code),
             name: $name,
+            description: $description,
             models: ProductModels::from($primaryModel, $secondaryModel),
             createdAt: $createdAt,
             updatedAt: $updatedAt,
@@ -66,7 +71,6 @@ final class ProductType
      *
      * Non-protected fields (`name`) may always be updated.
      *
-     * @param string[] $changedProtectedFields  - out: list of protected fields that would change
      * @throws ValidationFailed when isUsed=true and any protected field differs from the current value
      */
     public function applyUpdate(

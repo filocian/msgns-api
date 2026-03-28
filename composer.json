@@ -7,10 +7,12 @@
     "require": {
         "php": "^8.4",
         "aws/aws-sdk-php": "^3.321",
+        "darkaonline/l5-swagger": "^11.0",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "mixpanel/mixpanel-php": "^2.11",
+        "phpoffice/phpspreadsheet": "^5.5",
         "resend/resend-laravel": "^1.0",
         "spatie/laravel-permission": "^6.7"
     },

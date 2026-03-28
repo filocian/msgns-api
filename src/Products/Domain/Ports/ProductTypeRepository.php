@@ -17,4 +17,12 @@ interface ProductTypeRepository
      * @param array{page?: int, perPage?: int, sortBy?: string, sortDir?: string} $params
      */
     public function list(array $params): PaginatedResult;
+
+    /**
+     * Batch-resolve ProductType entities by their IDs.
+     *
+     * @param list<int> $ids
+     * @return list<ProductType>
+     */
+    public function findByIds(array $ids): array;
 }

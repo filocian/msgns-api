@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use Mockery\MockInterface;
+use Psr\Log\LoggerInterface;
 use Src\Products\Domain\Entities\Product;
+use Src\Products\Domain\Ports\ProductTypeRepository;
 use Src\Products\Domain\Ports\ProductUsagePort;
 use Src\Products\Domain\Services\ProductResetService;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
@@ -11,11 +13,18 @@ use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 describe('ProductResetService', function () {
 
     it('resets product and records event', function () {
+        /** @var MockInterface&ProductTypeRepository $typeRepository */
+        $typeRepository = Mockery::mock(ProductTypeRepository::class);
         /** @var MockInterface&ProductUsagePort $usagePort */
         $usagePort = Mockery::mock(ProductUsagePort::class);
-        $usagePort->shouldReceive('deleteProductUsage')->once()->with(1); // @phpstan-ignore-line
+        /** @var MockInterface&LoggerInterface $logger */
+        $logger = Mockery::mock(LoggerInterface::class);
 
-        $service = new ProductResetService($usagePort);
+        $typeRepository->shouldReceive('findById')->once()->with(1)->andReturn(null); // @phpstan-ignore-line
+        $usagePort->shouldReceive('deleteProductUsage')->once()->with(1); // @phpstan-ignore-line
+        $logger->shouldNotReceive('error');
+
+        $service = new ProductResetService($typeRepository, $usagePort, $logger);
 
         $product = Product::fromPersistence(
             id: 1,
@@ -49,11 +58,18 @@ describe('ProductResetService', function () {
     });
 
     it('calls usage port to delete usage data', function () {
+        /** @var MockInterface&ProductTypeRepository $typeRepository */
+        $typeRepository = Mockery::mock(ProductTypeRepository::class);
         /** @var MockInterface&ProductUsagePort $usagePort */
         $usagePort = Mockery::mock(ProductUsagePort::class);
-        $usagePort->shouldReceive('deleteProductUsage')->once()->with(42); // @phpstan-ignore-line
+        /** @var MockInterface&LoggerInterface $logger */
+        $logger = Mockery::mock(LoggerInterface::class);
 
-        $service = new ProductResetService($usagePort);
+        $typeRepository->shouldReceive('findById')->once()->with(1)->andReturn(null); // @phpstan-ignore-line
+        $usagePort->shouldReceive('deleteProductUsage')->once()->with(42); // @phpstan-ignore-line
+        $logger->shouldNotReceive('error');
+
+        $service = new ProductResetService($typeRepository, $usagePort, $logger);
 
         $product = Product::fromPersistence(
             id: 42,

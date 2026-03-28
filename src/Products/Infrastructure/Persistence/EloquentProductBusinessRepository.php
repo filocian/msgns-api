@@ -25,8 +25,8 @@ final class EloquentProductBusinessRepository implements ProductBusinessPort
                 'user_id' => $business->userId,
                 'not_a_business' => $business->notABusiness,
                 'name' => $business->name,
-                'types' => json_encode($business->types),
-                'place_types' => $business->placeTypes !== null ? json_encode($business->placeTypes) : null,
+                'types' => $business->types,
+                'place_types' => $business->placeTypes,
                 'size' => $business->size,
             ]);
 
@@ -40,8 +40,8 @@ final class EloquentProductBusinessRepository implements ProductBusinessPort
             'user_id' => $business->userId,
             'not_a_business' => $business->notABusiness,
             'name' => $business->name,
-            'types' => json_encode($business->types),
-            'place_types' => $business->placeTypes !== null ? json_encode($business->placeTypes) : null,
+            'types' => $business->types,
+            'place_types' => $business->placeTypes,
             'size' => $business->size,
         ])->save();
         $model->refresh();

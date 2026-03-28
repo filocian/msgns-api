@@ -31,6 +31,17 @@ Route::middleware('auth:stateful-api')->group(function (): void {
     Route::post('/{id}/restore', [ProductActionController::class, 'restore'])->whereNumber('id');
     Route::delete('/{id}/link', [ProductActionController::class, 'removeLink'])->whereNumber('id');
 
+    // Composed actions — issue #12
+    Route::post('/{id}/register', [ProductActionController::class, 'register'])->whereNumber('id');
+    Route::put('/{id}/configure', [ProductActionController::class, 'configure'])->whereNumber('id');
+    Route::post('/{referenceId}/group/{candidateId}', [ProductActionController::class, 'group'])
+        ->whereNumber('referenceId')
+        ->whereNumber('candidateId');
+    Route::post('/{id}/clone-from/{sourceId}', [ProductActionController::class, 'cloneFrom'])
+        ->whereNumber('id')
+        ->whereNumber('sourceId');
+    Route::post('/{id}/business', [ProductActionController::class, 'addBusinessInfo'])->whereNumber('id');
+
     // Reset action — issue #15
     Route::post('/{id}/reset', [ProductActionController::class, 'reset'])->whereNumber('id');
 

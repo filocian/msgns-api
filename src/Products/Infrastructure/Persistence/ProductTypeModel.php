@@ -16,6 +16,7 @@ use Src\Products\Domain\Entities\ProductType;
  * @property int $id
  * @property string $code
  * @property string $name
+ * @property string|null $description
  * @property string $primary_model
  * @property string|null $secondary_model
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -34,6 +35,7 @@ final class ProductTypeModel extends Model
     protected $fillable = [
         'code',
         'name',
+        'description',
         'image_ref',
         'primary_model',
         'secondary_model',
@@ -53,6 +55,7 @@ final class ProductTypeModel extends Model
             updatedAt: $this->updated_at
                 ? DateTimeImmutable::createFromInterface($this->updated_at)
                 : new DateTimeImmutable(),
+            description: $this->description,
         );
     }
 }

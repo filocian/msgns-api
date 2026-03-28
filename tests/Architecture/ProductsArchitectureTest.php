@@ -67,6 +67,27 @@ describe('Products module architecture', function () {
         }
     });
 
+    // ─── Domain layer — no Application\* (dependency inversion) ─────────────
+
+    it('does not import Application classes inside Products Domain', function () {
+        $directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Domain');
+        $iterator  = new RecursiveIteratorIterator($directory);
+
+        foreach ($iterator as $file) {
+            if (! $file->isFile() || $file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $content = file_get_contents($file->getPathname());
+            assert(is_string($content));
+
+            expect($content)->not->toContain(
+                'use Src\\Products\\Application\\',
+                "File {$file->getPathname()} must not import Application classes inside Products Domain"
+            );
+        }
+    });
+
     // ─── Application layer — no App\* ────────────────────────────────────────
 
     it('does not import App classes inside Products Application', function () {

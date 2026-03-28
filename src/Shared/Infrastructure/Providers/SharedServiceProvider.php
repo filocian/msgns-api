@@ -12,7 +12,9 @@ use Src\Shared\Core\Ports\LogPort;
 use Src\Shared\Core\Ports\MailPort;
 use Src\Shared\Core\Ports\NoSqlPort;
 use Src\Shared\Core\Ports\QueuePort;
+use Src\Shared\Core\Ports\TransactionPort;
 use Src\Shared\Infrastructure\Analytics\MixPanelAnalytics;
+use Src\Shared\Infrastructure\Database\LaravelTransaction;
 use Src\Shared\Infrastructure\Log\LaravelLog;
 use Src\Shared\Infrastructure\Mail\ResendMailAdapter;
 use Src\Shared\Infrastructure\NoSql\DynamoDbAdapter;
@@ -54,5 +56,6 @@ final class SharedServiceProvider extends ServiceProvider
 		$this->app->bind(AnalyticsPort::class, MixPanelAnalytics::class);
 		$this->app->bind(NoSqlPort::class, DynamoDbAdapter::class);
 		$this->app->bind(MailPort::class, ResendMailAdapter::class);
+		$this->app->bind(TransactionPort::class, LaravelTransaction::class);
 	}
 }

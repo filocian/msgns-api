@@ -262,11 +262,6 @@ describe('ProductType Entity', function () {
             ->and($pt->models->primary)->toBe('SamePrimary');
     });
 
-    // ─── No delete (AC-008) ──────────────────────────────────────────────────
-
-    it('does not expose a delete method on the entity (AC-008)', function () {
-        expect(method_exists(ProductType::class, 'delete'))->toBeFalse()
-            ->and(method_exists(ProductType::class, 'softDelete'))->toBeFalse()
-            ->and(method_exists(ProductType::class, 'markDeleted'))->toBeFalse();
-    });
+    // Note: AC-008 (no delete method) is validated by Architecture tests,
+    // not unit tests. The entity simply doesn't have those methods by design.
 });

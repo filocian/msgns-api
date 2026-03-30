@@ -96,6 +96,49 @@ describe('POST /api/v2/products/generate', function () {
         expect($data['product_list']['P-SINGLE'])->toHaveCount(2);
     });
 
+    it('creates 2500 products across 3 chunks with correct names (chunking coverage)', function () {
+        // ~1-3s
+        $typeId = createGenerateProductType([
+            'primary_model' => 'P-CHUNK',
+            'secondary_model' => null,
+        ]);
+
+        $response = $this->postJson('/api/v2/products/generate', [
+            'items' => [['typeId' => $typeId, 'quantity' => 2500]],
+        ], ['Accept' => 'application/json']);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data' => ['new_products_count', 'product_list']]);
+
+        $data = $response->json('data');
+
+        expect($data['new_products_count'])->toBe(2500);
+        expect($data['product_list'])->toHaveKey('P-CHUNK');
+        expect($data['product_list']['P-CHUNK'])->toHaveCount(2500);
+
+        $this->assertDatabaseCount('products', 2500);
+
+        $rows = DB::table('products')
+            ->orderBy('id')
+            ->get(['id', 'name']);
+
+        expect($rows)->toHaveCount(2500);
+
+        $rows->each(function (object $row): void {
+            expect($row->name)->toMatch('/^P-CHUNK \(\d+\)$/');
+            expect($row->name)->toBe(sprintf('P-CHUNK (%d)', $row->id));
+        });
+
+        $thirdChunkRows = $rows->slice(2000)->values();
+
+        expect($thirdChunkRows)->toHaveCount(500);
+
+        $thirdChunkRows->each(function (object $row): void {
+            expect($row->name)->toMatch('/^P-CHUNK \(\d+\)$/');
+            expect($row->name)->toBe(sprintf('P-CHUNK (%d)', $row->id));
+        });
+    });
+
     // ─── Dual-model generation (FR-003) ───────────────────────────────────────
 
     it('creates 2 products per unit for dual-model type (FR-003)', function () {

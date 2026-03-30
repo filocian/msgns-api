@@ -12,6 +12,10 @@ Route::get('/', function () {
 
 Route::get('/nfc/{data}', [RedirectionController::class, 'legacyRedirect']);
 Route::get('/product/{id}/redirect/{password}', [RedirectionController::class, 'v2Redirect']);
+Route::get('/v2/product/{id}/redirect/{password}', [
+    \Src\Products\Infrastructure\Http\Controllers\ProductRedirectionController::class,
+    'webRedirect',
+])->whereNumber('id');
 
 /**
  * Bracelet Test

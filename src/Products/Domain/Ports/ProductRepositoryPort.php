@@ -10,6 +10,8 @@ interface ProductRepositoryPort
 {
     public function findById(int $id): ?Product;
 
+    public function findByIdAndPassword(int $id, string $password): ?Product;
+
     public function findByIdWithTrashed(int $id): ?Product;
 
     public function save(Product $product): Product;

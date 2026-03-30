@@ -29,6 +29,15 @@ final class EloquentProductRepository implements ProductRepositoryPort
         return $model instanceof EloquentProduct ? $model->toDomainEntity() : null;
     }
 
+    public function findByIdAndPassword(int $id, string $password): ?Product
+    {
+        $model = EloquentProduct::where('id', $id)
+            ->where('password', $password)
+            ->first();
+
+        return $model instanceof EloquentProduct ? $model->toDomainEntity() : null;
+    }
+
     public function findByIdWithTrashed(int $id): ?Product
     {
         $model = EloquentProduct::withTrashed()->find($id);

@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Route;
 // Products module v2 routes.
 // Loaded by ProductsServiceProvider with prefix `api/v2/products` and `api` middleware.
 
+Route::get('/{id}/{password}/redirection-target', [
+    \Src\Products\Infrastructure\Http\Controllers\ProductRedirectionController::class,
+    'apiRedirect',
+])->whereNumber('id');
+
 Route::middleware('auth:stateful-api')->group(function (): void {
     Route::get('/product-types', [ProductTypeController::class, 'index']);
     Route::get('/product-types/{id}', [ProductTypeController::class, 'show']);

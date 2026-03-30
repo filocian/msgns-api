@@ -26,8 +26,10 @@ use Src\Products\Application\Commands\RestoreProduct\RestoreProductHandler;
 use Src\Products\Application\Commands\SetTargetUrl\SetTargetUrlHandler;
 use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductHandler;
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
+use Src\Products\Application\Queries\ResolveProductRedirection\ResolveProductRedirectionHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
 use Src\Products\Application\Queries\ListProductTypes\ListProductTypesHandler;
+use Src\Products\Domain\Contracts\ProductRedirectionStrategy;
 use Src\Products\Domain\Events\ProductActivated;
 use Src\Products\Domain\Events\ProductAssigned;
 use Src\Products\Domain\Events\ProductBusinessUpdated;
@@ -44,6 +46,7 @@ use Src\Products\Domain\Ports\ProductTypeRepository;
 use Src\Products\Domain\Ports\ProductTypeUsagePort;
 use Src\Products\Domain\Ports\ProductUsagePort;
 use Src\Products\Domain\Services\ProductGenerationService;
+use Src\Products\Domain\Services\Redirection\SimpleRedirectionStrategy;
 use Src\Products\Infrastructure\Persistence\DynamoDbProductUsageAdapter;
 use Src\Products\Infrastructure\Persistence\EloquentProductBusinessRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductRepository;
@@ -74,6 +77,7 @@ final class ProductsServiceProvider extends ServiceProvider
         // Product bindings (new for issue #9)
         $this->app->bind(ProductRepositoryPort::class, EloquentProductRepository::class);
         $this->app->bind(ProductBusinessPort::class, EloquentProductBusinessRepository::class);
+        $this->app->bind(ProductRedirectionStrategy::class, SimpleRedirectionStrategy::class);
 
         // Product usage port — backed by DynamoDB (issue #13)
         $this->app->bind(ProductUsagePort::class, function () {
@@ -121,6 +125,7 @@ final class ProductsServiceProvider extends ServiceProvider
         $queryBus = $this->app->make(QueryBus::class);
         $queryBus->register('products.list_product_types', ListProductTypesHandler::class);
         $queryBus->register('products.get_product_type', GetProductTypeHandler::class);
+        $queryBus->register('products.resolve_product_redirection', ResolveProductRedirectionHandler::class);
 
         // Load routes
         Route::prefix('api/v2/products')

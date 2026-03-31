@@ -12,6 +12,17 @@ use Spatie\Permission\Models\Role;
 
 abstract class TestCase extends BaseTestCase
 {
+	protected function setUp(): void
+	{
+		parent::setUp();
+
+		$this->assertSame(
+			'sqlite',
+			config('database.default'),
+			'Tests MUST run on SQLite in-memory. Check phpunit.xml force="true" on DB_CONNECTION and DB_DATABASE env tags.'
+		);
+	}
+
 	/**
 	 * Sends a POST request using required auth headers
 	 *

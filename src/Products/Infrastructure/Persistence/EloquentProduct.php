@@ -92,6 +92,11 @@ final class EloquentProduct extends Model
         return $this->hasOne(EloquentProductBusiness::class, 'product_id');
     }
 
+    public function pairedProduct(): HasOne
+    {
+        return $this->hasOne(self::class, 'linked_to_product_id');
+    }
+
     public function toDomainEntity(): Product
     {
         return Product::fromPersistence(

@@ -20,6 +20,10 @@ Route::middleware('auth:stateful-api')->group(function (): void {
     // User product listing
     Route::get('/', [\Src\Products\Infrastructure\Http\Controllers\UserProductController::class, 'index']);
 
+    Route::middleware('role:developer|backoffice')->prefix('/admin')->group(function (): void {
+        Route::get('/', [\Src\Products\Infrastructure\Http\Controllers\AdminProductListController::class, 'index']);
+    });
+
     Route::get('/product-types', [ProductTypeController::class, 'index']);
     Route::get('/product-types/{id}', [ProductTypeController::class, 'show']);
     Route::post('/product-types', [ProductTypeController::class, 'store']);

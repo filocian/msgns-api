@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Src\Products\Domain\Ports;
 
 use Src\Products\Domain\Entities\Product;
+use Src\Shared\Core\Bus\PaginatedResult;
 
 interface ProductRepositoryPort
 {
@@ -40,4 +41,22 @@ interface ProductRepositoryPort
      * @param array<int, string> $idToName Map of product ID → new name
      */
     public function bulkUpdateNames(array $idToName): void;
+
+    /**
+     * List products for a specific user with filtering, sorting, and pagination.
+     *
+     * @param array{
+     *   userId: int,
+     *   page?: int,
+     *   perPage?: int,
+     *   sortBy?: string,
+     *   sortDir?: string,
+     *   configurationStatus?: string|null,
+     *   active?: bool|null,
+     *   model?: string|null,
+     *   targetUrl?: string|null,
+     *   hasBusinessInfo?: bool|null,
+     * } $params
+     */
+    public function listForUser(array $params): PaginatedResult;
 }

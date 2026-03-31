@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Src\Products\Infrastructure\Persistence;
 
 use Illuminate\Support\Facades\DB;
+use Src\Products\Application\Resources\ProductListItemResource;
 use Src\Products\Domain\Entities\Product;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
@@ -15,6 +16,7 @@ use Src\Products\Domain\ValueObjects\ProductPassword;
 use Src\Products\Domain\ValueObjects\TargetUrl;
 use Src\Shared\Core\Bus\DomainEvent;
 use Src\Shared\Core\Bus\EventBus;
+use Src\Shared\Core\Bus\PaginatedResult;
 
 final class EloquentProductRepository implements ProductRepositoryPort
 {
@@ -253,6 +255,127 @@ final class EloquentProductRepository implements ProductRepositoryPort
         DB::statement(
             "UPDATE products SET name = CASE {$cases} END, updated_at = ? WHERE id IN ({$ids})",
             $bindings,
+        );
+    }
+
+    /**
+     * @param array{
+     *   userId: int,
+     *   page?: int,
+     *   perPage?: int,
+     *   sortBy?: string,
+     *   sortDir?: string,
+     *   configurationStatus?: string|null,
+     *   active?: bool|null,
+     *   model?: string|null,
+     *   targetUrl?: string|null,
+     *   hasBusinessInfo?: bool|null,
+     * } $params
+     */
+    public function listForUser(array $params): PaginatedResult
+    {
+        $userId = $params['userId'];
+        $page = max(1, $params['page'] ?? 1);
+        $perPage = min(100, max(1, $params['perPage'] ?? 15));
+        $sortBy = $params['sortBy'] ?? 'assigned_at';
+        $sortDir = $params['sortDir'] ?? 'desc';
+        $configurationStatus = $params['configurationStatus'] ?? null;
+        $active = $params['active'] ?? null;
+        $model = $params['model'] ?? null;
+        $targetUrl = $params['targetUrl'] ?? null;
+        $hasBusinessInfo = $params['hasBusinessInfo'] ?? null;
+
+        if (!in_array($sortDir, ['asc', 'desc'], true)) {
+            $sortDir = 'desc';
+        }
+
+        $allowedSortFields = ['name', 'usage', 'active', 'configuration_status', 'model', 'assigned_at'];
+        $targetUrl = is_string($targetUrl) ? trim($targetUrl) : null;
+
+        $query = EloquentProduct::query()
+            ->where('products.user_id', $userId)
+            ->whereNull('products.linked_to_product_id')
+            ->with([
+                'productType:id,code,name',
+                'productBusiness:id,product_id,types,size',
+            ]);
+
+        if ($configurationStatus !== null) {
+            $query->where('products.configuration_status', $configurationStatus);
+        }
+
+        if ($active !== null) {
+            $query->where('products.active', $active);
+        }
+
+        if ($model !== null) {
+            $query->where('products.model', $model);
+        }
+
+        if ($targetUrl !== null && $targetUrl !== '') {
+            $escapedTargetUrl = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $targetUrl);
+            $query->where('products.target_url', 'LIKE', '%' . $escapedTargetUrl . '%');
+        }
+
+        if ($hasBusinessInfo === true) {
+            $query->whereHas('productBusiness');
+        } elseif ($hasBusinessInfo === false) {
+            $query->whereDoesntHave('productBusiness');
+        }
+
+        if ($sortBy === 'configuration_status') {
+            $query->orderByRaw(
+                "CASE WHEN products.configuration_status = 'completed' THEN 0 ELSE 1 END {$sortDir}"
+            )->orderBy('products.assigned_at', 'desc');
+        } elseif (in_array($sortBy, $allowedSortFields, true)) {
+            $query->orderBy('products.' . $sortBy, $sortDir);
+        } else {
+            $query->orderBy('products.assigned_at', 'desc');
+        }
+
+        $paginated = $query->paginate($perPage, ['*'], 'page', $page);
+
+        /** @var list<EloquentProduct> $models */
+        $models = $paginated->items();
+
+        $items = array_map(
+            static function (EloquentProduct $product): array {
+                /** @var ProductTypeModel|null $productType */
+                $productType = $product->getRelation('productType');
+                /** @var EloquentProductBusiness|null $business */
+                $business = $product->getRelation('productBusiness');
+
+                $resource = new ProductListItemResource(
+                    id: $product->id,
+                    name: $product->name,
+                    model: $product->model,
+                    active: $product->active,
+                    configurationStatus: $product->configuration_status,
+                    usage: $product->usage,
+                    targetUrl: $product->target_url,
+                    assignedAt: $product->assigned_at?->toIso8601String(),
+                    productType: [
+                        'id' => $productType?->id ?? $product->product_type_id,
+                        'code' => $productType?->code ?? '',
+                        'name' => $productType?->name ?? '',
+                    ],
+                    business: $business !== null ? [
+                        'types' => is_array($business->types) ? $business->types : [],
+                        'size' => $business->size,
+                    ] : null,
+                );
+
+                return $resource->toArray();
+            },
+            $models,
+        );
+
+        return new PaginatedResult(
+            items: $items,
+            currentPage: $paginated->currentPage(),
+            perPage: $paginated->perPage(),
+            total: $paginated->total(),
+            lastPage: $paginated->lastPage(),
         );
     }
 }

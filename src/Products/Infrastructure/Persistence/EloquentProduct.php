@@ -7,6 +7,7 @@ namespace Src\Products\Infrastructure\Persistence;
 use DateTimeImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Src\Products\Domain\Entities\Product;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
@@ -84,6 +85,11 @@ final class EloquentProduct extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
+
+    public function productBusiness(): HasOne
+    {
+        return $this->hasOne(EloquentProductBusiness::class, 'product_id');
     }
 
     public function toDomainEntity(): Product

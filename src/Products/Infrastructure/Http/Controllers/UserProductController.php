@@ -93,6 +93,16 @@ final class UserProductController extends Controller
                         ], type: 'object'),
                     ),
                     new OA\Property(property: 'meta', ref: '#/components/schemas/PaginatedMeta'),
+                    new OA\Property(
+                        property: 'overview',
+                        required: ['total_products', 'pending_configuration', 'paused'],
+                        properties: [
+                            new OA\Property(property: 'total_products', type: 'integer', example: 47, description: 'Total root products for this user'),
+                            new OA\Property(property: 'pending_configuration', type: 'integer', example: 12, description: 'Products with incomplete configuration'),
+                            new OA\Property(property: 'paused', type: 'integer', example: 5, description: 'Inactive (paused) products'),
+                        ],
+                        type: 'object',
+                    ),
                 ]),
             ),
             new OA\Response(

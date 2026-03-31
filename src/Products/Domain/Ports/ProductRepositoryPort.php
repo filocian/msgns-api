@@ -84,4 +84,13 @@ interface ProductRepositoryPort
      * } $params
      */
     public function listForAdmin(array $params): PaginatedResult;
+
+    /**
+     * Get global overview counters for a user's product portfolio.
+     * Applies only implicit filters (user scope, primary products, not soft-deleted).
+     * Ignores all search/filter parameters.
+     *
+     * @return array{total_products: int, pending_configuration: int, paused: int}
+     */
+    public function getUserProductOverview(int $userId): array;
 }

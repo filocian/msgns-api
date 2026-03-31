@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Product;
 use App\Models\ProductBusiness;
 use App\Models\ProductType;
+use App\Static\Permissions\StaticRoles;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ProductConfigurationStatusSeeder;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
@@ -453,5 +454,337 @@ describe('GET /api/v2/products/', function (): void {
 
         expect($response->json('data'))->toBe([])
             ->and($response->json('meta.total'))->toBe(3);
+    });
+
+    it('includes overview with correct counters on default request (S-25)', function (): void {
+        $productType = createListProductType();
+
+        foreach (range(1, 4) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::COMPLETED,
+                'active' => true,
+            ]);
+        }
+
+        foreach (range(1, 3) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+                'active' => false,
+            ]);
+        }
+
+        foreach (range(1, 3) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+                'active' => true,
+            ]);
+        }
+
+        $response = $this->getJson('/api/v2/products/');
+
+        $response->assertOk()
+            ->assertJsonPath('overview.total_products', 10)
+            ->assertJsonPath('overview.pending_configuration', 6)
+            ->assertJsonPath('overview.paused', 3);
+    });
+
+    it('overview ignores configuration_status filter (S-26)', function (): void {
+        $productType = createListProductType();
+
+        foreach (range(1, 4) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::COMPLETED,
+                'active' => true,
+            ]);
+        }
+
+        foreach (range(1, 6) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+                'active' => true,
+            ]);
+        }
+
+        foreach (range(1, 3) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+                'active' => false,
+            ]);
+        }
+
+        $response = $this->getJson('/api/v2/products/?configuration_status=completed');
+
+        $response->assertOk()
+            ->assertJsonCount(4, 'data')
+            ->assertJsonPath('meta.total', 4)
+            ->assertJsonPath('overview.total_products', 13)
+            ->assertJsonPath('overview.pending_configuration', 9)
+            ->assertJsonPath('overview.paused', 3);
+    });
+
+    it('overview ignores active filter (S-27)', function (): void {
+        $productType = createListProductType();
+
+        foreach (range(1, 7) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'active' => true,
+                'configuration_status' => ConfigurationStatus::COMPLETED,
+            ]);
+        }
+
+        foreach (range(1, 3) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'active' => false,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+            ]);
+        }
+
+        $response = $this->getJson('/api/v2/products/?active=false');
+
+        $response->assertOk()
+            ->assertJsonCount(3, 'data')
+            ->assertJsonPath('meta.total', 3)
+            ->assertJsonPath('overview.total_products', 10)
+            ->assertJsonPath('overview.paused', 3)
+            ->assertJsonPath('overview.pending_configuration', 3);
+    });
+
+    it('overview ignores pagination (S-28)', function (): void {
+        $productType = createListProductType();
+
+        foreach (range(1, 12) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::COMPLETED,
+                'active' => true,
+            ]);
+        }
+
+        foreach (range(1, 2) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+                'active' => true,
+            ]);
+        }
+
+        foreach (range(1, 3) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+                'active' => false,
+            ]);
+        }
+
+        $response = $this->getJson('/api/v2/products/?page=2&per_page=5');
+
+        $response->assertOk()
+            ->assertJsonCount(5, 'data')
+            ->assertJsonPath('meta.current_page', 2)
+            ->assertJsonPath('meta.total', 17)
+            ->assertJsonPath('overview.total_products', 17)
+            ->assertJsonPath('overview.pending_configuration', 5)
+            ->assertJsonPath('overview.paused', 3);
+    });
+
+    it('overview is zero when user has no products (S-29)', function (): void {
+        $response = $this->getJson('/api/v2/products/');
+
+        $response->assertOk()
+            ->assertJsonPath('data', [])
+            ->assertJsonPath('meta.total', 0)
+            ->assertJsonPath('overview.total_products', 0)
+            ->assertJsonPath('overview.pending_configuration', 0)
+            ->assertJsonPath('overview.paused', 0);
+    });
+
+    it('overview excludes soft-deleted products (S-30)', function (): void {
+        $productType = createListProductType();
+
+        createListProduct([
+            'user_id' => $this->user->id,
+            'product_type_id' => $productType->id,
+            'configuration_status' => ConfigurationStatus::ASSIGNED,
+            'active' => false,
+        ]);
+
+        $deleted = createListProduct([
+            'user_id' => $this->user->id,
+            'product_type_id' => $productType->id,
+            'configuration_status' => ConfigurationStatus::NOT_STARTED,
+            'active' => false,
+        ]);
+        $deleted->delete();
+
+        $response = $this->getJson('/api/v2/products/');
+
+        $response->assertOk()
+            ->assertJsonPath('overview.total_products', 1)
+            ->assertJsonPath('overview.pending_configuration', 1)
+            ->assertJsonPath('overview.paused', 1);
+    });
+
+    it('overview excludes secondary products (S-31)', function (): void {
+        $productType = createListProductType();
+
+        $primary = createListProduct([
+            'user_id' => $this->user->id,
+            'product_type_id' => $productType->id,
+            'configuration_status' => ConfigurationStatus::ASSIGNED,
+            'active' => false,
+        ]);
+
+        createListProduct([
+            'user_id' => $this->user->id,
+            'product_type_id' => $productType->id,
+            'linked_to_product_id' => $primary->id,
+            'configuration_status' => ConfigurationStatus::NOT_STARTED,
+            'active' => false,
+        ]);
+
+        $response = $this->getJson('/api/v2/products/');
+
+        $response->assertOk()
+            ->assertJsonPath('overview.total_products', 1)
+            ->assertJsonPath('overview.pending_configuration', 1)
+            ->assertJsonPath('overview.paused', 1);
+    });
+
+    it('counts product in both pending_configuration and paused when both conditions apply (S-32)', function (): void {
+        $productType = createListProductType();
+
+        createListProduct([
+            'user_id' => $this->user->id,
+            'product_type_id' => $productType->id,
+            'configuration_status' => ConfigurationStatus::NOT_STARTED,
+            'active' => false,
+        ]);
+        createListProduct([
+            'user_id' => $this->user->id,
+            'product_type_id' => $productType->id,
+            'configuration_status' => ConfigurationStatus::COMPLETED,
+            'active' => false,
+        ]);
+        createListProduct([
+            'user_id' => $this->user->id,
+            'product_type_id' => $productType->id,
+            'configuration_status' => ConfigurationStatus::ASSIGNED,
+            'active' => true,
+        ]);
+
+        $response = $this->getJson('/api/v2/products/');
+
+        $response->assertOk()
+            ->assertJsonPath('overview.total_products', 3)
+            ->assertJsonPath('overview.pending_configuration', 2)
+            ->assertJsonPath('overview.paused', 2);
+    });
+
+    it('overview only counts products belonging to the authenticated user (S-33)', function (): void {
+        $otherUser = $this->create_user(['email' => 'overview-other@example.com']);
+        $productType = createListProductType();
+
+        foreach (range(1, 3) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::COMPLETED,
+                'active' => true,
+            ]);
+        }
+
+        foreach (range(1, 2) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+                'active' => true,
+            ]);
+        }
+
+        createListProduct([
+            'user_id' => $this->user->id,
+            'product_type_id' => $productType->id,
+            'configuration_status' => ConfigurationStatus::COMPLETED,
+            'active' => false,
+        ]);
+
+        foreach (range(1, 8) as $_) {
+            createListProduct([
+                'user_id' => $otherUser->id,
+                'product_type_id' => $productType->id,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+                'active' => false,
+            ]);
+        }
+
+        $response = $this->getJson('/api/v2/products/');
+
+        $response->assertOk()
+            ->assertJsonPath('overview.total_products', 6)
+            ->assertJsonPath('overview.pending_configuration', 2)
+            ->assertJsonPath('overview.paused', 1);
+    });
+
+    it('other endpoints using ApiResponseFactory paginated do not include overview (S-34)', function (): void {
+        $admin = $this->create_user(['email' => 'admin-overview@example.com']);
+        $admin->assignRole($this->createRole(StaticRoles::DEV_ROLE));
+
+        $response = $this->actingAs($admin, 'stateful-api')->getJson('/api/v2/products/admin/');
+
+        $response->assertOk()
+            ->assertJsonMissingPath('overview');
+    });
+
+    it('overview ignores all combined filters (S-35)', function (): void {
+        $productTypeNfc = createListProductType(['primary_model' => 'nfc']);
+        $productTypeWhatsapp = createListProductType(['primary_model' => 'whatsapp']);
+
+        foreach (range(1, 8) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productTypeNfc->id,
+                'model' => 'nfc',
+                'active' => true,
+                'configuration_status' => ConfigurationStatus::ASSIGNED,
+            ]);
+        }
+
+        foreach (range(1, 12) as $_) {
+            createListProduct([
+                'user_id' => $this->user->id,
+                'product_type_id' => $productTypeWhatsapp->id,
+                'model' => 'whatsapp',
+                'active' => false,
+                'configuration_status' => ConfigurationStatus::COMPLETED,
+            ]);
+        }
+
+        $response = $this->getJson('/api/v2/products/?model=nfc&active=true&configuration_status=assigned');
+
+        $response->assertOk()
+            ->assertJsonCount(8, 'data')
+            ->assertJsonPath('overview.total_products', 20)
+            ->assertJsonPath('overview.pending_configuration', 8)
+            ->assertJsonPath('overview.paused', 12);
     });
 });

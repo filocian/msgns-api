@@ -27,7 +27,7 @@ final class ApiResponseFactory
 
 	public static function paginated(PaginatedResult $result): JsonResponse
 	{
-		return response()->json([
+		$response = [
 			'data' => $result->items,
 			'meta' => [
 				'current_page' => $result->currentPage,
@@ -35,6 +35,12 @@ final class ApiResponseFactory
 				'total' => $result->total,
 				'last_page' => $result->lastPage,
 			],
-		]);
+		];
+
+		if ($result->overview !== null) {
+			$response['overview'] = $result->overview;
+		}
+
+		return response()->json($response);
 	}
 }

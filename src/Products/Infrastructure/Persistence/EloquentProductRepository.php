@@ -316,8 +316,10 @@ final class EloquentProductRepository implements ProductRepositoryPort
         }
 
         if ($targetUrl !== null && $targetUrl !== '') {
-            $escapedTargetUrl = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $targetUrl);
-            $query->where('products.target_url', 'LIKE', '%' . $escapedTargetUrl . '%');
+            $query->whereRaw(
+                "products.target_url LIKE ? ESCAPE '\\'",
+                ['%' . $this->escapeLike($targetUrl) . '%'],
+            );
         }
 
         if ($hasBusinessInfo === true) {
@@ -485,7 +487,10 @@ final class EloquentProductRepository implements ProductRepositoryPort
         }
 
         if ($targetUrl !== null) {
-            $query->where('products.target_url', 'LIKE', '%' . $this->escapeLike($targetUrl) . '%');
+            $query->whereRaw(
+                "products.target_url LIKE ? ESCAPE '\\'",
+                ['%' . $this->escapeLike($targetUrl) . '%'],
+            );
         }
 
         if ($businessType !== null) {
@@ -569,6 +574,32 @@ final class EloquentProductRepository implements ProductRepositoryPort
             total: $paginated->total(),
             lastPage: $paginated->lastPage(),
         );
+    }
+
+    /**
+     * @return array{total_products: int, pending_configuration: int, paused: int}
+     */
+    public function getUserProductOverview(int $userId): array
+    {
+        $baseQuery = EloquentProduct::query()
+            ->where('products.user_id', $userId)
+            ->whereNull('products.linked_to_product_id');
+
+        $total = (clone $baseQuery)->count();
+
+        $pendingConfiguration = (clone $baseQuery)
+            ->where('products.configuration_status', '!=', 'completed')
+            ->count();
+
+        $paused = (clone $baseQuery)
+            ->where('products.active', false)
+            ->count();
+
+        return [
+            'total_products' => $total,
+            'pending_configuration' => $pendingConfiguration,
+            'paused' => $paused,
+        ];
     }
 
     private function normalizeStringFilter(?string $value): ?string

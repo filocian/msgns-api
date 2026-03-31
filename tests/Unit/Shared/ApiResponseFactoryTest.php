@@ -25,4 +25,57 @@ describe('ApiResponseFactory', function () {
 			],
 		]);
 	});
+
+	it('includes overview key when PaginatedResult has a non-null overview', function () {
+		$result = new PaginatedResult(
+			items: [['id' => 1]],
+			currentPage: 1,
+			perPage: 15,
+			total: 1,
+			lastPage: 1,
+			overview: ['total_products' => 10, 'pending_configuration' => 3, 'paused' => 2],
+		);
+
+		$response = ApiResponseFactory::paginated($result);
+		$data = $response->getData(true);
+
+		expect($data)->toHaveKey('overview');
+		expect($data['overview'])->toBe([
+			'total_products' => 10,
+			'pending_configuration' => 3,
+			'paused' => 2,
+		]);
+	});
+
+	it('excludes overview key when PaginatedResult has null overview', function () {
+		$result = new PaginatedResult(
+			items: [],
+			currentPage: 1,
+			perPage: 15,
+			total: 0,
+			lastPage: 1,
+		);
+
+		$response = ApiResponseFactory::paginated($result);
+		$data = $response->getData(true);
+
+		expect($data)->not->toHaveKey('overview');
+		expect($data)->toHaveKeys(['data', 'meta']);
+	});
+
+	it('serialises overview after meta', function () {
+		$result = new PaginatedResult(
+			items: [],
+			currentPage: 1,
+			perPage: 15,
+			total: 0,
+			lastPage: 1,
+			overview: ['total_products' => 5, 'pending_configuration' => 1, 'paused' => 0],
+		);
+
+		$response = ApiResponseFactory::paginated($result);
+		$keys = array_keys($response->getData(true));
+
+		expect($keys)->toBe(['data', 'meta', 'overview']);
+	});
 });

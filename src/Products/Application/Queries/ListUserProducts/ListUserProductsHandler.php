@@ -19,7 +19,7 @@ final class ListUserProductsHandler implements QueryHandler
     {
         assert($query instanceof ListUserProductsQuery);
 
-        return $this->repo->listForUser([
+        $paginated = $this->repo->listForUser([
             'userId' => $query->userId,
             'page' => $query->page,
             'perPage' => $query->perPage,
@@ -31,5 +31,16 @@ final class ListUserProductsHandler implements QueryHandler
             'targetUrl' => $query->targetUrl,
             'hasBusinessInfo' => $query->hasBusinessInfo,
         ]);
+
+        $overview = $this->repo->getUserProductOverview($query->userId);
+
+        return new PaginatedResult(
+            items: $paginated->items,
+            currentPage: $paginated->currentPage,
+            perPage: $paginated->perPage,
+            total: $paginated->total,
+            lastPage: $paginated->lastPage,
+            overview: $overview,
+        );
     }
 }

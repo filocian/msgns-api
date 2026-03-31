@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Src\Products\Infrastructure\Persistence;
 
+use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Src\Products\Application\Resources\AdminProductListItemResource;
 use Src\Products\Application\Resources\ProductListItemResource;
 use Src\Products\Domain\Entities\Product;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
@@ -377,5 +380,210 @@ final class EloquentProductRepository implements ProductRepositoryPort
             total: $paginated->total(),
             lastPage: $paginated->lastPage(),
         );
+    }
+
+    /**
+     * @param array{
+     *   page?: int,
+     *   perPage?: int,
+     *   sortBy?: string,
+     *   sortDir?: string,
+     *   productTypeCode?: string|null,
+     *   productTypeId?: int|null,
+     *   model?: string|null,
+     *   name?: string|null,
+     *   userId?: int|null,
+     *   userEmail?: string|null,
+     *   assignedAtFrom?: string|null,
+     *   assignedAtTo?: string|null,
+     *   configurationStatus?: string|null,
+     *   active?: bool|null,
+     *   targetUrl?: string|null,
+     *   businessType?: string|null,
+     *   businessSize?: string|null,
+     * } $params
+     */
+    public function listForAdmin(array $params): PaginatedResult
+    {
+        $page = max(1, $params['page'] ?? 1);
+        $perPage = min(100, max(1, $params['perPage'] ?? 15));
+        $sortBy = $params['sortBy'] ?? 'assigned_at';
+        $sortDir = $params['sortDir'] ?? 'desc';
+        $productTypeCode = $this->normalizeStringFilter($params['productTypeCode'] ?? null);
+        $productTypeId = $params['productTypeId'] ?? null;
+        $model = $this->normalizeStringFilter($params['model'] ?? null);
+        $name = $this->normalizeStringFilter($params['name'] ?? null);
+        $userId = $params['userId'] ?? null;
+        $userEmail = $this->normalizeStringFilter($params['userEmail'] ?? null);
+        $assignedAtFrom = $this->normalizeStringFilter($params['assignedAtFrom'] ?? null);
+        $assignedAtTo = $this->normalizeStringFilter($params['assignedAtTo'] ?? null);
+        $configurationStatus = $this->normalizeStringFilter($params['configurationStatus'] ?? null);
+        $active = $params['active'] ?? null;
+        $targetUrl = $this->normalizeStringFilter($params['targetUrl'] ?? null);
+        $businessType = $this->normalizeStringFilter($params['businessType'] ?? null);
+        $businessSize = $this->normalizeStringFilter($params['businessSize'] ?? null);
+
+        if (!in_array($sortDir, ['asc', 'desc'], true)) {
+            $sortDir = 'desc';
+        }
+
+        $allowedSortFields = ['name', 'usage', 'active', 'configuration_status', 'model', 'assigned_at', 'created_at'];
+
+        $query = EloquentProduct::query()
+            ->whereNull('products.linked_to_product_id')
+            ->with([
+                'productType:id,code,name',
+                'productBusiness:id,product_id,types,size',
+                'pairedProduct:id,linked_to_product_id,name,model',
+                'user:id,name,email',
+            ]);
+
+        if ($productTypeCode !== null) {
+            $query->whereHas('productType', static function ($relation) use ($productTypeCode): void {
+                $relation->where('code', $productTypeCode);
+            });
+        }
+
+        if ($productTypeId !== null) {
+            $query->where('products.product_type_id', $productTypeId);
+        }
+
+        if ($model !== null) {
+            $query->where('products.model', $model);
+        }
+
+        if ($name !== null) {
+            $query->where('products.name', 'LIKE', '%' . $this->escapeLike($name) . '%');
+        }
+
+        if ($userId !== null) {
+            $query->where('products.user_id', $userId);
+        }
+
+        if ($userEmail !== null) {
+            $escapedUserEmail = $this->escapeLike($userEmail);
+
+            $query->whereHas('user', static function ($relation) use ($escapedUserEmail): void {
+                $relation->where('email', 'LIKE', '%' . $escapedUserEmail . '%');
+            });
+        }
+
+        if ($assignedAtFrom !== null) {
+            $query->where('products.assigned_at', '>=', CarbonImmutable::parse($assignedAtFrom)->startOfDay());
+        }
+
+        if ($assignedAtTo !== null) {
+            $query->where('products.assigned_at', '<', CarbonImmutable::parse($assignedAtTo)->addDay()->startOfDay());
+        }
+
+        if ($configurationStatus !== null) {
+            $query->where('products.configuration_status', $configurationStatus);
+        }
+
+        if ($active !== null) {
+            $query->where('products.active', $active);
+        }
+
+        if ($targetUrl !== null) {
+            $query->where('products.target_url', 'LIKE', '%' . $this->escapeLike($targetUrl) . '%');
+        }
+
+        if ($businessType !== null) {
+            $query->whereHas('productBusiness', static function ($relation) use ($businessType): void {
+                $relation->whereNotNull('types->' . $businessType);
+            });
+        }
+
+        if ($businessSize !== null) {
+            $query->whereHas('productBusiness', static function ($relation) use ($businessSize): void {
+                $relation->where('size', $businessSize);
+            });
+        }
+
+        if ($sortBy === 'configuration_status') {
+            $query->orderByRaw(
+                "CASE WHEN products.configuration_status = 'completed' THEN 0 ELSE 1 END {$sortDir}"
+            )->orderBy('products.assigned_at', 'desc');
+        } elseif (in_array($sortBy, $allowedSortFields, true)) {
+            $query->orderBy('products.' . $sortBy, $sortDir);
+        } else {
+            $query->orderBy('products.assigned_at', 'desc');
+        }
+
+        $paginated = $query->paginate($perPage, ['*'], 'page', $page);
+
+        /** @var list<EloquentProduct> $models */
+        $models = $paginated->items();
+
+        $items = array_map(
+            function (EloquentProduct $product): array {
+                /** @var ProductTypeModel|null $productType */
+                $productType = $product->getRelation('productType');
+                /** @var EloquentProductBusiness|null $business */
+                $business = $product->getRelation('productBusiness');
+                /** @var EloquentProduct|null $pairedProduct */
+                $pairedProduct = $product->getRelation('pairedProduct');
+                /** @var User|null $user */
+                $user = $product->getRelation('user');
+
+                $resource = new AdminProductListItemResource(
+                    id: $product->id,
+                    name: $product->name,
+                    model: $product->model,
+                    active: $product->active,
+                    configurationStatus: $product->configuration_status,
+                    usage: $product->usage,
+                    targetUrl: $product->target_url,
+                    assignedAt: $product->assigned_at?->toIso8601String(),
+                    createdAt: $product->created_at?->toIso8601String(),
+                    productType: [
+                        'id' => $productType?->id ?? $product->product_type_id,
+                        'code' => $productType?->code ?? '',
+                        'name' => $productType?->name ?? '',
+                    ],
+                    business: $business !== null ? [
+                        'types' => is_array($business->types) ? $business->types : [],
+                        'size' => $business->size,
+                    ] : null,
+                    pairedProduct: $pairedProduct !== null ? [
+                        'id' => $pairedProduct->id,
+                        'name' => $pairedProduct->name,
+                        'model' => $pairedProduct->model,
+                    ] : null,
+                    user: $user !== null ? [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                    ] : null,
+                );
+
+                return $resource->toArray();
+            },
+            $models,
+        );
+
+        return new PaginatedResult(
+            items: $items,
+            currentPage: $paginated->currentPage(),
+            perPage: $paginated->perPage(),
+            total: $paginated->total(),
+            lastPage: $paginated->lastPage(),
+        );
+    }
+
+    private function normalizeStringFilter(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
+    }
+
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
     }
 }

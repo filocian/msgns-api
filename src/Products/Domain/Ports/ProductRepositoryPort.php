@@ -59,4 +59,29 @@ interface ProductRepositoryPort
      * } $params
      */
     public function listForUser(array $params): PaginatedResult;
+
+    /**
+     * List products for the administration panel with filtering, sorting, and pagination.
+     *
+     * @param array{
+     *   page?: int,
+     *   perPage?: int,
+     *   sortBy?: string,
+     *   sortDir?: string,
+     *   productTypeCode?: string|null,
+     *   productTypeId?: int|null,
+     *   model?: string|null,
+     *   name?: string|null,
+     *   userId?: int|null,
+     *   userEmail?: string|null,
+     *   assignedAtFrom?: string|null,
+     *   assignedAtTo?: string|null,
+     *   configurationStatus?: string|null,
+     *   active?: bool|null,
+     *   targetUrl?: string|null,
+     *   businessType?: string|null,
+     *   businessSize?: string|null,
+     * } $params
+     */
+    public function listForAdmin(array $params): PaginatedResult;
 }

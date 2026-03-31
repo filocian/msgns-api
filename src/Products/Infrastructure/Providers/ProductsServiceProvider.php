@@ -28,6 +28,7 @@ use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductHandler
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
 use Src\Products\Application\Queries\ResolveProductRedirection\ResolveProductRedirectionHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
+use Src\Products\Application\Queries\ListAdminProducts\ListAdminProductsHandler;
 use Src\Products\Application\Queries\ListUserProducts\ListUserProductsHandler;
 use Src\Products\Application\Queries\ListProductTypes\ListProductTypesHandler;
 use Src\Products\Domain\Contracts\ProductRedirectionStrategy;
@@ -125,6 +126,7 @@ final class ProductsServiceProvider extends ServiceProvider
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);
         $queryBus->register('products.list_product_types', ListProductTypesHandler::class);
+        $queryBus->register('products.list_admin_products', ListAdminProductsHandler::class);
         $queryBus->register('products.list_user_products', ListUserProductsHandler::class);
         $queryBus->register('products.get_product_type', GetProductTypeHandler::class);
         $queryBus->register('products.resolve_product_redirection', ResolveProductRedirectionHandler::class);

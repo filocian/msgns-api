@@ -47,6 +47,10 @@ return [
 		'system_alias' => env('MIXPANEL_SYSTEM_ALIAS', 'SYS@API'),
 	],
 
+	'google' => [
+		'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+	],
+
 	'products' => [
 		'front_url' => env('FRONT_URL', 'https://app.msgns.local'),
 		'default_password_length' => (int) env('DEFAULT_PRODUCT_PASSWORD_LENGTH', 12),

@@ -3301,6 +3301,743 @@
                     }
                 ]
             }
+        },
+        "/places/search": {
+            "get": {
+                "tags": [
+                    "Places"
+                ],
+                "summary": "Search Google Places",
+                "description": "Searches the Google Places API for place candidates matching the query. Rate limited to 12 requests per minute per user. Results are cached for 30 minutes.",
+                "operationId": "searchPlaces",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Place name or search term",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255,
+                            "minLength": 2
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful search",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlaceSearchResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DomainError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "error"
+                                    ],
+                                    "properties": {
+                                        "error": {
+                                            "required": [
+                                                "code",
+                                                "context"
+                                            ],
+                                            "properties": {
+                                                "code": {
+                                                    "type": "string",
+                                                    "example": "validation_error"
+                                                },
+                                                "context": {
+                                                    "required": [
+                                                        "errors"
+                                                    ],
+                                                    "properties": {
+                                                        "errors": {
+                                                            "type": "object",
+                                                            "additionalProperties": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded (12 requests/minute)"
+                    },
+                    "502": {
+                        "description": "Google Places API unavailable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DomainError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/products/admin/": {
+            "get": {
+                "tags": [
+                    "Products - Admin"
+                ],
+                "summary": "List all products for the administration panel",
+                "description": "Returns a paginated list of primary products across all users with filtering and sorting support for developer and backoffice roles.",
+                "operationId": "listAdminProducts",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 15,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "assigned_at",
+                            "enum": [
+                                "name",
+                                "usage",
+                                "active",
+                                "configuration_status",
+                                "model",
+                                "assigned_at",
+                                "created_at"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "product_type_code",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_type_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "model",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "user_email",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "email"
+                        }
+                    },
+                    {
+                        "name": "assigned_at_from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "assigned_at_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "configuration_status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "not-started",
+                                "assigned",
+                                "target-set",
+                                "business-set",
+                                "completed"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "active",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "target_url",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "business_type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "business_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated admin product list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 42
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "My NFC Card"
+                                                    },
+                                                    "model": {
+                                                        "type": "string",
+                                                        "example": "nfc"
+                                                    },
+                                                    "active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "configuration_status": {
+                                                        "type": "string",
+                                                        "example": "completed"
+                                                    },
+                                                    "usage": {
+                                                        "type": "integer",
+                                                        "example": 157
+                                                    },
+                                                    "target_url": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/profile",
+                                                        "nullable": true
+                                                    },
+                                                    "assigned_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-10-15T14:30:00+00:00",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-01T10:00:00+00:00",
+                                                        "nullable": true
+                                                    },
+                                                    "product_type": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "code": {
+                                                                "type": "string",
+                                                                "example": "nfc-card"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "NFC Card"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "business": {
+                                                        "properties": {
+                                                            "types": {
+                                                                "type": "object",
+                                                                "example": {
+                                                                    "restaurant": true
+                                                                }
+                                                            },
+                                                            "size": {
+                                                                "type": "string",
+                                                                "example": "small",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
+                                                    "paired_product": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 43
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Paired NFC"
+                                                            },
+                                                            "model": {
+                                                                "type": "string",
+                                                                "example": "nfc"
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "format": "email",
+                                                                "example": "john@example.com"
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginatedMeta"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DomainError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DomainError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/products/{id}/{password}/redirection-target": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Resolve redirection target for a product",
+                "operationId": "resolveProductRedirectionTarget",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redirection target resolved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "target_url": {
+                                                    "type": "string",
+                                                    "example": "https://google.com"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "external_url"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DomainError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Product misconfigured",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DomainError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/products/": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "List authenticated user's products",
+                "operationId": "listUserProducts",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "assigned_at",
+                            "enum": [
+                                "name",
+                                "usage",
+                                "active",
+                                "configuration_status",
+                                "model",
+                                "assigned_at"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_dir",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "configuration_status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "not-started",
+                                "assigned",
+                                "target-set",
+                                "business-set",
+                                "completed"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "active",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "model",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "target_url",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "has_business_info",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated product list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 42
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "My NFC Card"
+                                                    },
+                                                    "model": {
+                                                        "type": "string",
+                                                        "example": "nfc"
+                                                    },
+                                                    "active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "configuration_status": {
+                                                        "type": "string",
+                                                        "example": "completed"
+                                                    },
+                                                    "usage": {
+                                                        "type": "integer",
+                                                        "example": 157
+                                                    },
+                                                    "target_url": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/profile",
+                                                        "nullable": true
+                                                    },
+                                                    "assigned_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-10-15T14:30:00+00:00",
+                                                        "nullable": true
+                                                    },
+                                                    "product_type": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "code": {
+                                                                "type": "string",
+                                                                "example": "nfc-card"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "NFC Card"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "business": {
+                                                        "properties": {
+                                                            "types": {
+                                                                "type": "object",
+                                                                "example": {
+                                                                    "restaurant": true
+                                                                }
+                                                            },
+                                                            "size": {
+                                                                "type": "string",
+                                                                "example": "small",
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginatedMeta"
+                                        },
+                                        "overview": {
+                                            "required": [
+                                                "total_products",
+                                                "pending_configuration",
+                                                "paused"
+                                            ],
+                                            "properties": {
+                                                "total_products": {
+                                                    "description": "Total root products for this user",
+                                                    "type": "integer",
+                                                    "example": 47
+                                                },
+                                                "pending_configuration": {
+                                                    "description": "Products with incomplete configuration",
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "paused": {
+                                                    "description": "Inactive (paused) products",
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DomainError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -3682,6 +4419,146 @@
                     }
                 },
                 "type": "object"
+            },
+            "PlaceCandidateResource": {
+                "required": [
+                    "place_id",
+                    "name",
+                    "formatted_address",
+                    "types",
+                    "geometry"
+                ],
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/MessageResponse"
+                    },
+                    {
+                        "properties": {
+                            "place_id": {
+                                "type": "string",
+                                "example": "ChIJN1t_tDeuEmsRUsoyG83frY4"
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Restaurant Example"
+                            },
+                            "formatted_address": {
+                                "type": "string",
+                                "example": "123 Main St, City, Country"
+                            },
+                            "rating": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 4.5,
+                                "nullable": true
+                            },
+                            "user_ratings_total": {
+                                "type": "integer",
+                                "example": 200,
+                                "nullable": true
+                            },
+                            "types": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "restaurant",
+                                    "food",
+                                    "establishment"
+                                ]
+                            },
+                            "geometry": {
+                                "required": [
+                                    "location"
+                                ],
+                                "properties": {
+                                    "location": {
+                                        "required": [
+                                            "lat",
+                                            "lng"
+                                        ],
+                                        "properties": {
+                                            "lat": {
+                                                "type": "number",
+                                                "example": 40.416
+                                            },
+                                            "lng": {
+                                                "type": "number",
+                                                "example": -3.703
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "photos": {
+                                "type": "array",
+                                "items": {
+                                    "properties": {
+                                        "photo_reference": {
+                                            "type": "string",
+                                            "example": "Aap_uEAtExamplePhotoRef"
+                                        },
+                                        "width": {
+                                            "type": "integer",
+                                            "example": 400
+                                        },
+                                        "height": {
+                                            "type": "integer",
+                                            "example": 300
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "nullable": true
+                            },
+                            "opening_hours": {
+                                "properties": {
+                                    "open_now": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "PlaceSearchResponse": {
+                "required": [
+                    "data"
+                ],
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/MessageResponse"
+                    },
+                    {
+                        "properties": {
+                            "data": {
+                                "required": [
+                                    "candidates"
+                                ],
+                                "properties": {
+                                    "candidates": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/PlaceCandidateResource"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
             }
         },
         "securitySchemes": {
@@ -3705,6 +4582,14 @@
         {
             "name": "Products",
             "description": "Product type management endpoints"
+        },
+        {
+            "name": "Places",
+            "description": "Place search endpoints"
+        },
+        {
+            "name": "Products - Admin",
+            "description": "Administration endpoints for product listings"
         }
     ],
     "security": [

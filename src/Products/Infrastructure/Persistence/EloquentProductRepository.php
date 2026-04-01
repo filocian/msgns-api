@@ -455,7 +455,10 @@ final class EloquentProductRepository implements ProductRepositoryPort
         }
 
         if ($name !== null) {
-            $query->where('products.name', 'LIKE', '%' . $this->escapeLike($name) . '%');
+            $query->whereRaw(
+                "products.name LIKE ? ESCAPE '\\'",
+                ['%' . $this->escapeLike($name) . '%'],
+            );
         }
 
         if ($userId !== null) {
@@ -466,7 +469,10 @@ final class EloquentProductRepository implements ProductRepositoryPort
             $escapedUserEmail = $this->escapeLike($userEmail);
 
             $query->whereHas('user', static function ($relation) use ($escapedUserEmail): void {
-                $relation->where('email', 'LIKE', '%' . $escapedUserEmail . '%');
+                $relation->whereRaw(
+                    "email LIKE ? ESCAPE '\\'",
+                    ['%' . $escapedUserEmail . '%'],
+                );
             });
         }
 

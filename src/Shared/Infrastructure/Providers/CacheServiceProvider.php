@@ -17,7 +17,7 @@ final class CacheServiceProvider extends ServiceProvider
 			/** @var CacheFactory $cache */
 			$cache = $app->make(CacheFactory::class);
 
-			return new RedisCache($cache->store('redis'));
+			return new RedisCache($cache->store());
 		});
 	}
 }

@@ -22,11 +22,7 @@ describe('Product configuration', function () {
 
 	it('Unauthenticated user cannot configure a product', function () {
 		$response = $this->putWithHeaders('/api/products/1/configure', [
-			'configuration' => [
-				'configuration' => [
-					'target_url' => 'http://test.target.url',
-				],
-			],
+			'target_url' => 'http://test.target.url',
 		]);
 
 		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
@@ -36,9 +32,7 @@ describe('Product configuration', function () {
 		$user = User::where('email', 'designer@test.com')->first();
 		$this->actingAs($user);
 		$response = $this->putWithHeaders('/api/products/1/configure', [
-			'configuration' => [
-				'target_url' => 'http://test.target.url',
-			],
+			'target_url' => 'http://test.target.url',
 		]);
 
 		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
@@ -48,9 +42,7 @@ describe('Product configuration', function () {
 		$user = User::where('email', 'user@test.com')->first();
 		$this->actingAs($user);
 		$response = $this->putWithHeaders('/api/products/1025/configure', [
-			'configuration' => [
-				'target_url' => 'http://test.target.url',
-			],
+			'target_url' => 'http://test.target.url',
 		]);
 
 		$response->assertStatus(Response::HTTP_NOT_FOUND);
@@ -60,9 +52,7 @@ describe('Product configuration', function () {
 		$user = User::where('email', 'backoffice@test.com')->first();
 		$this->actingAs($user);
 		$response = $this->putWithHeaders('/api/products/1/configure', [
-			'config' => [
-				'target_url' => 'http://test.target.url',
-			],
+			'config' => 'http://test.target.url',
 		]);
 
 		$response->assertStatus(Response::HTTP_BAD_REQUEST);
@@ -134,9 +124,7 @@ describe('Product configuration', function () {
 		$user = User::where('email', 'backoffice@test.com')->first();
 		$this->actingAs($user);
 		$response = $this->putWithHeaders('/api/products/1/configure', [
-			'configuration' => [
-				'target_url' => 'http://test.target.url',
-			],
+			'target_url' => 'http://test.target.url',
 		]);
 
 		$response->assertStatus(Response::HTTP_OK);

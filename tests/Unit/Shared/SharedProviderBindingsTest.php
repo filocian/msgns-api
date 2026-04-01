@@ -37,7 +37,7 @@ describe('Shared service provider bindings', function () {
 	it('resolves shared infrastructure ports from the container', function () {
 		$cacheRepository = \Mockery::mock(Repository::class);
 		$cacheFactory = \Mockery::mock(CacheFactory::class);
-		$cacheFactory->shouldReceive('store')->once()->with('redis')->andReturn($cacheRepository);
+		$cacheFactory->shouldReceive('store')->once()->withNoArgs()->andReturn($cacheRepository);
 
 		app()->instance(CacheFactory::class, $cacheFactory);
 		app()->instance(QueueContract::class, \Mockery::mock(QueueContract::class));

@@ -16,6 +16,7 @@ final readonly class GenerateProductsCommand implements Command
         public array $items,
         public string $frontUrl,
         public int $passwordLength,
+        public ?int $userId = null,
     ) {}
 
     public function commandName(): string

@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace Src\Products\Application\Commands\GenerateProducts;
 
+use DateTimeImmutable;
+use DateTimeZone;
+use Src\Products\Domain\DataTransfer\GenerationHistorySummaryItem;
 use Src\Products\Domain\DataTransfer\GeneratedProductsResult;
 use Src\Products\Domain\DataTransfer\GenerateProductsInputItem;
+use Src\Products\Domain\Entities\GenerationHistory;
+use Src\Products\Domain\Ports\ExcelExportPort;
+use Src\Products\Domain\Ports\GenerationHistoryRepositoryPort;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Ports\ProductTypeRepository;
+use Src\Products\Domain\Entities\ProductType;
 use Src\Products\Domain\Services\ProductGenerationService;
 use Src\Shared\Core\Bus\Command;
 use Src\Shared\Core\Bus\CommandHandler;
@@ -21,6 +28,8 @@ final class GenerateProductsHandler implements CommandHandler
         private readonly ProductRepositoryPort $productRepo,
         private readonly ProductGenerationService $generationService,
         private readonly TransactionPort $transaction,
+        private readonly ExcelExportPort $excelExporter,
+        private readonly GenerationHistoryRepositoryPort $historyRepo,
     ) {}
 
     public function handle(Command $command): GeneratedProductsResult
@@ -67,7 +76,7 @@ final class GenerateProductsHandler implements CommandHandler
 
         // 4. Persist inside a DB transaction (chunked insert → fetch IDs → update names)
         /** @var GeneratedProductsResult $result */
-        $result = $this->transaction->run(function () use ($products, $command): GeneratedProductsResult {
+        $result = $this->transaction->run(function () use ($products, $command, $typeMap): GeneratedProductsResult {
             // Insert and get assigned IDs in insertion order
             $ids = $this->productRepo->bulkInsertAndReturnIds($products, chunkSize: 1000);
 
@@ -95,9 +104,42 @@ final class GenerateProductsHandler implements CommandHandler
             // Batch-update names in one query
             $this->productRepo->bulkUpdateNames($idToName);
 
-            return $this->generationService->buildResult($hydrated, $command->frontUrl);
+            $result = $this->generationService->buildResult($hydrated, $command->frontUrl);
+
+            $excelBytes = $this->excelExporter->generateBytes($result);
+            $summary = $this->buildHistorySummary($command->items, $typeMap);
+
+            $this->historyRepo->save(GenerationHistory::create(
+                generatedAt: new DateTimeImmutable('now', new DateTimeZone('UTC')),
+                totalCount: $result->totalCount,
+                summary: $summary,
+                excelBlob: $excelBytes,
+                generatedById: $command->userId,
+            ));
+
+            return $result;
         });
 
         return $result;
+    }
+
+    /**
+     * @param list<GenerateProductsInputItem> $items
+     * @param array<int, ProductType> $typeMap
+     * @return list<GenerationHistorySummaryItem>
+     */
+    private function buildHistorySummary(array $items, array $typeMap): array
+    {
+        return array_map(function (GenerateProductsInputItem $item) use ($typeMap): GenerationHistorySummaryItem {
+            $type = $typeMap[$item->typeId];
+
+            return new GenerationHistorySummaryItem(
+                typeCode: $type->code->value,
+                typeName: $type->name,
+                quantity: $item->quantity,
+                size: $item->size,
+                description: $item->description ?? $type->description,
+            );
+        }, $items);
     }
 }

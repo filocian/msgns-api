@@ -96,6 +96,54 @@ describe('POST /api/v2/products/generate', function () {
         expect($data['product_list']['P-SINGLE'])->toHaveCount(2);
     });
 
+    it('records a generation_history row with correct data after successful Excel generation', function () {
+        $typeId = createGenerateProductType([
+            'primary_model' => 'P-SINGLE',
+            'secondary_model' => null,
+        ]);
+
+        $this->json('POST', '/api/v2/products/generate', [
+            'items' => [['typeId' => $typeId, 'quantity' => 3]],
+        ], [
+            'Accept' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->assertOk();
+
+        $this->assertDatabaseCount('generation_history', 1);
+        $history = DB::table('generation_history')->first();
+
+        expect($history)->not->toBeNull();
+        expect($history->total_count)->toBe(3)
+            ->and($history->excel_blob)->not->toBeNull()
+            ->and(strlen((string) $history->excel_blob))->toBeGreaterThan(0)
+            ->and($history->generated_by_id)->toBe($this->user->id)
+            ->and((string) $history->generated_at)->not->toBe('');
+    });
+
+    it('records a generation_history row when Accept application json', function () {
+        $typeId = createGenerateProductType([
+            'primary_model' => 'P-SINGLE',
+            'secondary_model' => null,
+        ]);
+
+        $this->postJson('/api/v2/products/generate', [
+            'items' => [['typeId' => $typeId, 'quantity' => 2]],
+        ], ['Accept' => 'application/json'])->assertOk();
+
+        $this->assertDatabaseCount('generation_history', 1);
+        $this->assertDatabaseHas('generation_history', [
+            'total_count' => 2,
+            'generated_by_id' => $this->user->id,
+        ]);
+    });
+
+    it('does not record history when generation fails due to invalid typeId', function () {
+        $this->postJson('/api/v2/products/generate', [
+            'items' => [['typeId' => 999999, 'quantity' => 5]],
+        ])->assertStatus(422);
+
+        $this->assertDatabaseCount('generation_history', 0);
+    });
+
     it('creates 2500 products across 3 chunks with correct names (chunking coverage)', function () {
         // ~1-3s
         $typeId = createGenerateProductType([

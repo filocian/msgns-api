@@ -15,4 +15,9 @@ interface ExcelExportPort
      * Returns the absolute path to the generated temp file.
      */
     public function generate(GeneratedProductsResult $result): string;
+
+    /**
+     * Generate raw Excel bytes from the given products result.
+     */
+    public function generateBytes(GeneratedProductsResult $result): string;
 }

@@ -24,4 +24,6 @@ class Schemas
     public const DOMAIN_ERROR = 'DomainError';
     public const LOGIN_RESPONSE = 'LoginResponse';
     public const MESSAGE_RESPONSE = 'MessageResponse';
+    public const GENERATION_HISTORY_LIST_ITEM = 'GenerationHistoryListItem';
+    public const GENERATION_HISTORY_SUMMARY_ITEM = 'GenerationHistorySummaryItem';
 }

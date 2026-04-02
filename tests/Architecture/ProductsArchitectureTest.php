@@ -137,4 +137,39 @@ describe('Products module architecture', function () {
             ->and($content)->not->toContain('function softDelete')
             ->and($content)->not->toContain('function markDeleted');
     });
+
+    it('ensures GenerationHistory entity does not import Illuminate classes', function () {
+        $content = file_get_contents(__DIR__ . '/../../src/Products/Domain/Entities/GenerationHistory.php');
+        assert(is_string($content));
+
+        expect($content)->not->toContain('use Illuminate\\');
+    });
+
+    it('ensures GenerationHistorySummaryItem does not import Illuminate classes', function () {
+        $content = file_get_contents(__DIR__ . '/../../src/Products/Domain/DataTransfer/GenerationHistorySummaryItem.php');
+        assert(is_string($content));
+
+        expect($content)->not->toContain('use Illuminate\\');
+    });
+
+    it('ensures ListGenerationHistoryHandler does not import Illuminate classes', function () {
+        $content = file_get_contents(__DIR__ . '/../../src/Products/Application/Queries/ListGenerationHistory/ListGenerationHistoryHandler.php');
+        assert(is_string($content));
+
+        expect($content)->not->toContain('use Illuminate\\');
+    });
+
+    it('ensures DownloadGenerationExcelHandler does not import Illuminate classes', function () {
+        $content = file_get_contents(__DIR__ . '/../../src/Products/Application/Queries/DownloadGenerationExcel/DownloadGenerationExcelHandler.php');
+        assert(is_string($content));
+
+        expect($content)->not->toContain('use Illuminate\\');
+    });
+
+    it('ensures GenerationHistoryRepositoryPort does not import Illuminate classes', function () {
+        $content = file_get_contents(__DIR__ . '/../../src/Products/Domain/Ports/GenerationHistoryRepositoryPort.php');
+        assert(is_string($content));
+
+        expect($content)->not->toContain('use Illuminate\\');
+    });
 });

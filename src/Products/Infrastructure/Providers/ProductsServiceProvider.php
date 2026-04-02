@@ -27,8 +27,10 @@ use Src\Products\Application\Commands\SetTargetUrl\SetTargetUrlHandler;
 use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductHandler;
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
 use Src\Products\Application\Queries\ResolveProductRedirection\ResolveProductRedirectionHandler;
+use Src\Products\Application\Queries\DownloadGenerationExcel\DownloadGenerationExcelHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
 use Src\Products\Application\Queries\ListAdminProducts\ListAdminProductsHandler;
+use Src\Products\Application\Queries\ListGenerationHistory\ListGenerationHistoryHandler;
 use Src\Products\Application\Queries\ListUserProducts\ListUserProductsHandler;
 use Src\Products\Application\Queries\ListProductTypes\ListProductTypesHandler;
 use Src\Products\Domain\Contracts\ProductRedirectionStrategy;
@@ -41,6 +43,7 @@ use Src\Products\Domain\Events\ProductReset;
 use Src\Products\Domain\Events\ProductTargetUrlSet;
 use Src\Products\Domain\Events\ProductsPaired;
 use Src\Products\Domain\Ports\ExcelExportPort;
+use Src\Products\Domain\Ports\GenerationHistoryRepositoryPort;
 use Src\Products\Domain\Ports\PasswordGeneratorPort;
 use Src\Products\Domain\Ports\ProductBusinessPort;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
@@ -50,6 +53,7 @@ use Src\Products\Domain\Ports\ProductUsagePort;
 use Src\Products\Domain\Services\ProductGenerationService;
 use Src\Products\Domain\Services\Redirection\SimpleRedirectionStrategy;
 use Src\Products\Infrastructure\Persistence\DynamoDbProductUsageAdapter;
+use Src\Products\Infrastructure\Persistence\EloquentGenerationHistoryRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductBusinessRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeRepository;
@@ -92,6 +96,7 @@ final class ProductsServiceProvider extends ServiceProvider
         // Issue #10: Batch product generation ports
         $this->app->bind(PasswordGeneratorPort::class, AlphanumericPasswordGenerator::class);
         $this->app->bind(ExcelExportPort::class, PhpSpreadsheetExcelExporter::class);
+        $this->app->bind(GenerationHistoryRepositoryPort::class, EloquentGenerationHistoryRepository::class);
         $this->app->singleton(ProductGenerationService::class, function () {
             return new ProductGenerationService(
                 passwordGenerator: $this->app->make(PasswordGeneratorPort::class),
@@ -130,6 +135,8 @@ final class ProductsServiceProvider extends ServiceProvider
         $queryBus->register('products.list_user_products', ListUserProductsHandler::class);
         $queryBus->register('products.get_product_type', GetProductTypeHandler::class);
         $queryBus->register('products.resolve_product_redirection', ResolveProductRedirectionHandler::class);
+        $queryBus->register('products.list_generation_history', ListGenerationHistoryHandler::class);
+        $queryBus->register('products.download_generation_excel', DownloadGenerationExcelHandler::class);
 
         // Load routes
         Route::prefix('api/v2/products')

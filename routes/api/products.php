@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Products\GenerateProductsController;
+use App\Http\Controllers\Products\GenerationHistoryController;
 use App\Http\Controllers\Products\ProductActionController;
 use App\Http\Controllers\Products\ProductTypeController;
 use App\Http\Controllers\Products\ProductUsageController;
@@ -59,4 +60,8 @@ Route::middleware('auth:stateful-api')->group(function (): void {
 
     // Batch product generation — issue #10
     Route::post('/generate', [GenerateProductsController::class, 'generate']);
+
+    // Generation history — issue #46
+    Route::get('/generations', [GenerationHistoryController::class, 'index']);
+    Route::get('/generations/{id}/download', [GenerationHistoryController::class, 'download'])->whereNumber('id');
 });

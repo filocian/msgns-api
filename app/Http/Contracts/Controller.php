@@ -124,6 +124,23 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'message', type: 'string'),
     ]),
 ], required: ['data'])]
+#[OA\Schema(schema: 'GenerationHistorySummaryItem', type: 'object', properties: [
+    new OA\Property(property: 'type_code', type: 'string'),
+    new OA\Property(property: 'type_name', type: 'string'),
+    new OA\Property(property: 'quantity', type: 'integer'),
+    new OA\Property(property: 'size', type: 'string', nullable: true),
+    new OA\Property(property: 'description', type: 'string', nullable: true),
+], required: ['type_code', 'type_name', 'quantity'])]
+#[OA\Schema(schema: 'GenerationHistoryListItem', type: 'object', properties: [
+    new OA\Property(property: 'id', type: 'integer'),
+    new OA\Property(property: 'generated_at', type: 'string', format: 'date-time'),
+    new OA\Property(property: 'total_count', type: 'integer'),
+    new OA\Property(property: 'summary', type: 'array', items: new OA\Items(ref: '#/components/schemas/GenerationHistorySummaryItem')),
+    new OA\Property(property: 'generated_by', nullable: true, properties: [
+        new OA\Property(property: 'id', type: 'integer'),
+        new OA\Property(property: 'email', type: 'string', format: 'email'),
+    ], type: 'object'),
+], required: ['id', 'generated_at', 'total_count', 'summary'])]
 abstract class Controller
 {
     //

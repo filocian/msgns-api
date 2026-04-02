@@ -107,6 +107,7 @@ final class GenerateProductsController extends Controller
             items: array_values($items),
             frontUrl: (string) config('services.products.front_url'),
             passwordLength: (int) config('services.products.default_password_length', 12),
+            userId: $request->user()?->id,
         ));
 
         // Content negotiation: JSON if explicitly requested, Excel otherwise

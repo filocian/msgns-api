@@ -20,17 +20,40 @@ final class PhpSpreadsheetExcelExporter implements ExcelExportPort
      */
     public function generate(GeneratedProductsResult $result): string
     {
+        $spreadsheet = $this->buildSpreadsheet($result);
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'msgns_products_') . '.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        return $tempFile;
+    }
+
+    public function generateBytes(GeneratedProductsResult $result): string
+    {
+        $spreadsheet = $this->buildSpreadsheet($result);
+        $writer = new Xlsx($spreadsheet);
+
+        ob_start();
+        $writer->save('php://output');
+
+        $bytes = ob_get_clean();
+
+        return is_string($bytes) ? $bytes : '';
+    }
+
+    private function buildSpreadsheet(GeneratedProductsResult $result): Spreadsheet
+    {
         $spreadsheet = new Spreadsheet();
-        $spreadsheet->removeSheetByIndex(0); // Remove the default empty sheet
+        $spreadsheet->removeSheetByIndex(0);
 
         $sheetIndex = 0;
 
         foreach ($result->productsByTypeCode as $code => $items) {
             $sheet = $spreadsheet->createSheet($sheetIndex);
-            // Sheet title max 31 chars — truncate if necessary
             $sheet->setTitle(mb_substr($code, 0, 31));
 
-            // Header row
             $sheet->setCellValue('A1', 'Name');
             $sheet->setCellValue('B1', 'Redirect URL');
 
@@ -45,16 +68,10 @@ final class PhpSpreadsheetExcelExporter implements ExcelExportPort
             $sheetIndex++;
         }
 
-        // Set first sheet active
         if ($spreadsheet->getSheetCount() > 0) {
             $spreadsheet->setActiveSheetIndex(0);
         }
 
-        $tempFile = tempnam(sys_get_temp_dir(), 'msgns_products_') . '.xlsx';
-
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($tempFile);
-
-        return $tempFile;
+        return $spreadsheet;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Database\Seeders\ProductConfigurationStatusSeeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Src\Products\Domain\Ports\ProductUsagePort;
 
 function createRedirectionProductType(): int
@@ -56,6 +57,7 @@ function createRedirectionProduct(array $overrides = []): array
 
 beforeEach(function () {
     $this->seed(ProductConfigurationStatusSeeder::class);
+    Cache::flush();
 
     app()->bind(ProductUsagePort::class, static fn (): ProductUsagePort => new class implements ProductUsagePort
     {
@@ -76,7 +78,7 @@ describe('GET /api/v2/products/{id}/{password}/redirection-target', function () 
 
         $this->getJson("/api/v2/products/{$product['id']}/test-pass/redirection-target")
             ->assertOk()
-            ->assertJsonPath('data.target_url', 'https://google.com')
+            ->assertJsonPath('data.url', 'https://google.com')
             ->assertJsonPath('data.type', 'external_url');
     });
 
@@ -85,7 +87,7 @@ describe('GET /api/v2/products/{id}/{password}/redirection-target', function () 
 
         $this->getJson("/api/v2/products/{$product['id']}/test-pass/redirection-target")
             ->assertOk();
-    })->with(['instagram', 'youtube', 'tiktok', 'facebook']);
+    })->with(['instagram', 'youtube', 'tiktok', 'facebook', 'info']);
 
     it('returns 404 for non-existent product', function () {
         $this->getJson('/api/v2/products/999999/fake-pass/redirection-target')

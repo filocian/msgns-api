@@ -8,6 +8,7 @@ use App\Http\Controllers\Products\ProductActionController;
 use App\Http\Controllers\Products\ProductTypeController;
 use App\Http\Controllers\Products\ProductUsageController;
 use Illuminate\Support\Facades\Route;
+use Src\Products\Infrastructure\Http\Controllers\CompleteConfigurationController;
 
 // Products module v2 routes.
 // Loaded by ProductsServiceProvider with prefix `api/v2/products` and `api` middleware.
@@ -47,6 +48,7 @@ Route::middleware('auth:stateful-api')->group(function (): void {
     // Composed actions — issue #12
     Route::post('/{id}/register', [ProductActionController::class, 'register'])->whereNumber('id');
     Route::put('/{id}/configure', [ProductActionController::class, 'configure'])->whereNumber('id');
+    Route::post('/{id}/complete-configuration', CompleteConfigurationController::class)->whereNumber('id');
     Route::post('/{referenceId}/group/{candidateId}', [ProductActionController::class, 'group'])
         ->whereNumber('referenceId')
         ->whereNumber('candidateId');

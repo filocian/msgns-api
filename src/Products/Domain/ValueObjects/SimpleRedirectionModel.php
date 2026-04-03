@@ -11,6 +11,7 @@ enum SimpleRedirectionModel: string
     case YOUTUBE = 'youtube';
     case TIKTOK = 'tiktok';
     case FACEBOOK = 'facebook';
+    case INFO = 'info';
 
     public static function supports(string $value): bool
     {

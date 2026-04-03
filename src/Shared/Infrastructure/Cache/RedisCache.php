@@ -36,4 +36,9 @@ final class RedisCache implements CachePort
 	{
 		return $this->cache->forget($key);
 	}
+
+	public function setForever(string $key, mixed $value): void
+	{
+		$this->cache->forever($key, $value);
+	}
 }

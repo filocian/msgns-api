@@ -13,7 +13,7 @@ use Src\Products\Domain\Ports\ProductUsagePort;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 use Src\Products\Domain\ValueObjects\RedirectionContext;
 use Src\Products\Domain\ValueObjects\RedirectionTarget;
-use Src\Shared\Core\Bus\DomainEvent;
+use Src\Products\Infrastructure\Cache\ProductRedirectionCacheService;
 use Src\Shared\Core\Bus\EventBus;
 use Src\Shared\Core\Bus\Query;
 use Src\Shared\Core\Bus\QueryHandler;
@@ -26,11 +26,24 @@ final class ResolveProductRedirectionHandler implements QueryHandler
         private readonly ProductRedirectionStrategy $strategy,
         private readonly ProductUsagePort $usagePort,
         private readonly EventBus $eventBus,
+        private readonly ProductRedirectionCacheService $cacheService,
     ) {}
 
     public function handle(Query $query): RedirectionTarget
     {
         assert($query instanceof ResolveProductRedirectionQuery);
+
+        $cached = $this->resolveFromCache($query->productId, $query->password);
+
+        if ($cached !== null) {
+            $this->trackUsage(
+                userId: $cached['meta']['userId'],
+                productId: $query->productId,
+                productName: $cached['meta']['productName'],
+            );
+
+            return $cached['target'];
+        }
 
         $product = $this->repository->findByIdAndPassword(
             $query->productId,
@@ -58,28 +71,63 @@ final class ResolveProductRedirectionHandler implements QueryHandler
             new RedirectionContext($query->browserLocales),
         );
 
-        $now = new DateTimeImmutable();
-
-        $product->recordEvent(new ProductScanned(
-            productId: $product->id,
-            userId: $product->userId,
-            productName: $product->name->value,
-            scannedAt: $now,
-        ));
-
-        $this->usagePort->writeUsageEvent(
-            $product->id,
-            $product->userId ?? 0,
-            $product->name->value,
-            $now,
-        );
-
-        foreach ($product->releaseEvents() as $event) {
-            if ($event instanceof DomainEvent) {
-                $this->eventBus->publish($event);
-            }
+        try {
+            $this->cacheService->put($query->productId, $target, [
+                'userId' => $product->userId,
+                'productName' => $product->name->value,
+                'password' => $query->password,
+            ]);
+        } catch (\Throwable) {
+            // Cache is an optimization only.
         }
 
+        $this->trackUsage(
+            userId: $product->userId,
+            productId: $product->id,
+            productName: $product->name->value,
+        );
+
         return $target;
+    }
+
+    /**
+     * @return array{target: RedirectionTarget, meta: array{userId: ?int, productName: string, password: string}}|null
+     */
+    private function resolveFromCache(int $productId, string $password): ?array
+    {
+        try {
+            $cached = $this->cacheService->get($productId);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        if ($cached === null || $cached['meta']['password'] !== $password) {
+            return null;
+        }
+
+        return $cached;
+    }
+
+    private function trackUsage(?int $userId, int $productId, string $productName): void
+    {
+        $now = new DateTimeImmutable();
+
+        try {
+            $this->usagePort->writeUsageEvent(
+                $productId,
+                $userId ?? 0,
+                $productName,
+                $now,
+            );
+        } catch (\Throwable) {
+            // Usage persistence must not break redirection.
+        }
+
+        $this->eventBus->publish(new ProductScanned(
+            productId: $productId,
+            userId: $userId,
+            productName: $productName,
+            scannedAt: $now,
+        ));
     }
 }

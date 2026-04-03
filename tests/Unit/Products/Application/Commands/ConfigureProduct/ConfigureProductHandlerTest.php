@@ -7,19 +7,20 @@ use Src\Products\Application\Commands\ConfigureProduct\ConfigureProductCommand;
 use Src\Products\Application\Commands\ConfigureProduct\ConfigureProductHandler;
 use Src\Products\Domain\Entities\Product;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
+use Src\Products\Domain\Services\ConfigurationFlowResolver;
 use Src\Products\Domain\Services\ProductConfigStatusService;
 use Src\Products\Domain\Services\ProductConfigurationService;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 use Src\Shared\Core\Errors\NotFound;
 use Src\Shared\Core\Ports\TransactionPort;
 
-function makeConfigurableProduct(int $id = 42, string $status = ConfigurationStatus::ASSIGNED): Product
+function makeConfigurableProduct(int $id = 42, string $status = ConfigurationStatus::ASSIGNED, string $model = 'google'): Product
 {
     return Product::fromPersistence(
         id: $id,
         productTypeId: 1,
         userId: 7,
-        model: 'ModelA',
+        model: $model,
         linkedToProductId: null,
         password: 'secret',
         targetUrl: null,
@@ -37,7 +38,7 @@ function makeConfigurableProduct(int $id = 42, string $status = ConfigurationSta
 }
 
 describe('ConfigureProductHandler', function () {
-    it('sets target url and transitions assigned products to target-set', function () {
+    it('sets target url and auto-advances assigned simple products to completed', function () {
         $product = makeConfigurableProduct(status: ConfigurationStatus::ASSIGNED);
 
         /** @var MockInterface&ProductRepositoryPort $repo */
@@ -53,13 +54,14 @@ describe('ConfigureProductHandler', function () {
             $repo,
             new ProductConfigurationService(),
             new ProductConfigStatusService(),
+            new ConfigurationFlowResolver(),
             $transaction,
         );
 
         $result = $handler->handle(new ConfigureProductCommand(productId: 42, targetUrl: 'https://example.com'));
 
         expect($result->targetUrl)->toBe('https://example.com')
-            ->and($result->configurationStatus)->toBe(ConfigurationStatus::TARGET_SET);
+            ->and($result->configurationStatus)->toBe(ConfigurationStatus::COMPLETED);
     });
 
     it('keeps advanced status when already beyond target-set', function () {
@@ -78,6 +80,7 @@ describe('ConfigureProductHandler', function () {
             $repo,
             new ProductConfigurationService(),
             new ProductConfigStatusService(),
+            new ConfigurationFlowResolver(),
             $transaction,
         );
 
@@ -101,6 +104,7 @@ describe('ConfigureProductHandler', function () {
             $repo,
             new ProductConfigurationService(),
             new ProductConfigStatusService(),
+            new ConfigurationFlowResolver(),
             $transaction,
         );
 

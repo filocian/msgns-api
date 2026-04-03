@@ -15,4 +15,6 @@ interface CachePort
 	public function remember(string $key, int $ttl, Closure $callback): mixed;
 
 	public function forget(string $key): bool;
+
+	public function setForever(string $key, mixed $value): void;
 }

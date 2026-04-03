@@ -6,9 +6,11 @@ use Mockery\MockInterface;
 use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductCommand;
 use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductHandler;
 use Src\Products\Domain\Entities\Product;
+use Src\Products\Domain\Events\ProductSoftDeleted;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Services\ProductLifecycleService;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
+use Src\Shared\Core\Bus\EventBus;
 use Src\Shared\Core\Errors\NotFound;
 
 function makeSoftRemoveProduct(int $id = 42): Product
@@ -41,12 +43,15 @@ describe('SoftRemoveProductHandler', function () {
         /** @var MockInterface&ProductRepositoryPort $repo */
         $repo = Mockery::mock(ProductRepositoryPort::class);
         $service = new ProductLifecycleService($repo);
+        /** @var MockInterface&EventBus $eventBus */
+        $eventBus = Mockery::mock(EventBus::class);
 
         $repo->shouldReceive('findById')->once()->with(42)->andReturn($product);
         $repo->shouldNotReceive('save');
         $repo->shouldReceive('delete')->once()->with(42);
+        $eventBus->shouldReceive('publish')->once()->with(Mockery::type(ProductSoftDeleted::class));
 
-        $handler = new SoftRemoveProductHandler($repo, $service);
+        $handler = new SoftRemoveProductHandler($repo, $service, $eventBus);
 
         expect($handler->handle(new SoftRemoveProductCommand(productId: 42)))->toBeNull();
     });
@@ -55,12 +60,15 @@ describe('SoftRemoveProductHandler', function () {
         /** @var MockInterface&ProductRepositoryPort $repo */
         $repo = Mockery::mock(ProductRepositoryPort::class);
         $service = new ProductLifecycleService($repo);
+        /** @var MockInterface&EventBus $eventBus */
+        $eventBus = Mockery::mock(EventBus::class);
 
         $repo->shouldReceive('findById')->once()->with(999)->andReturn(null);
         $repo->shouldNotReceive('save');
         $repo->shouldNotReceive('delete');
+        $eventBus->shouldNotReceive('publish');
 
-        $handler = new SoftRemoveProductHandler($repo, $service);
+        $handler = new SoftRemoveProductHandler($repo, $service, $eventBus);
 
         expect(fn () => $handler->handle(new SoftRemoveProductCommand(productId: 999)))->toThrow(NotFound::class);
     });

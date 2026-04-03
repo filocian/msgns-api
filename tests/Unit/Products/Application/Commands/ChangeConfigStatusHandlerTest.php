@@ -6,6 +6,7 @@ use Mockery\MockInterface;
 use Src\Products\Application\Commands\ChangeConfigStatus\ChangeConfigStatusCommand;
 use Src\Products\Application\Commands\ChangeConfigStatus\ChangeConfigStatusHandler;
 use Src\Products\Domain\Entities\Product;
+use Src\Products\Domain\Events\ProductConfigStatusChanged;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Services\ProductConfigStatusService;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
@@ -38,19 +39,29 @@ function makeConfigStatusProduct(int $id = 42, string $status = ConfigurationSta
 describe('ChangeConfigStatusHandler', function () {
     it('changes the configuration status and returns a ProductResource', function () {
         $product = makeConfigStatusProduct(status: ConfigurationStatus::NOT_STARTED);
+        $recordedEvents = [];
 
         /** @var MockInterface&ProductRepositoryPort $repo */
         $repo = Mockery::mock(ProductRepositoryPort::class);
         $service = new ProductConfigStatusService();
 
         $repo->shouldReceive('findById')->once()->with(42)->andReturn($product);
-        $repo->shouldReceive('save')->once()->with($product)->andReturnUsing(static fn (Product $saved): Product => $saved);
+        $repo->shouldReceive('save')->once()->with($product)->andReturnUsing(static function (Product $saved) use (&$recordedEvents): Product {
+            $recordedEvents = $saved->releaseEvents();
+
+            return $saved;
+        });
 
         $handler = new ChangeConfigStatusHandler($repo, $service);
 
         $result = $handler->handle(new ChangeConfigStatusCommand(productId: 42, status: 'assigned'));
 
-        expect($result->configurationStatus)->toBe('assigned');
+        expect($result->configurationStatus)->toBe('assigned')
+            ->and($recordedEvents)->toHaveCount(1)
+            ->and($recordedEvents[0])->toBeInstanceOf(ProductConfigStatusChanged::class)
+            ->and($recordedEvents[0]->productId)->toBe(42)
+            ->and($recordedEvents[0]->previousStatus)->toBe(ConfigurationStatus::NOT_STARTED)
+            ->and($recordedEvents[0]->newStatus)->toBe(ConfigurationStatus::ASSIGNED);
     });
 
     it('throws NotFound when the product does not exist', function () {

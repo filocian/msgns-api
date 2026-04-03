@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Src\Products\Application\Commands\RestoreProduct;
 
 use Src\Products\Application\Resources\ProductResource;
+use Src\Products\Domain\Events\ProductRestored;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Services\ProductLifecycleService;
 use Src\Shared\Core\Bus\Command;
 use Src\Shared\Core\Bus\CommandHandler;
+use Src\Shared\Core\Bus\EventBus;
 use Src\Shared\Core\Errors\NotFound;
 
 final class RestoreProductHandler implements CommandHandler
@@ -16,6 +18,7 @@ final class RestoreProductHandler implements CommandHandler
     public function __construct(
         private readonly ProductRepositoryPort $productRepository,
         private readonly ProductLifecycleService $lifecycleService,
+        private readonly EventBus $eventBus,
     ) {}
 
     public function handle(Command $command): ProductResource
@@ -29,6 +32,7 @@ final class RestoreProductHandler implements CommandHandler
         }
 
         $this->lifecycleService->restore($command->productId);
+        $this->eventBus->publish(new ProductRestored(productId: $command->productId));
 
         $fresh = $this->productRepository->findById($command->productId);
 

@@ -71,7 +71,7 @@ final class ProductRedirectionController extends Controller
         ));
 
         return ApiResponseFactory::ok([
-            'target_url' => $target->url,
+            'url' => $target->url,
             'type' => $target->type->value,
         ]);
     }

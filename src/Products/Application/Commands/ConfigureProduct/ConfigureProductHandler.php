@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Src\Products\Application\Commands\ConfigureProduct;
 
+use DateTimeImmutable;
 use Src\Products\Application\Resources\ProductResource;
+use Src\Products\Domain\Events\ProductConfigurationCompleted;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
+use Src\Products\Domain\Services\ConfigurationFlowResolver;
 use Src\Products\Domain\Services\ProductConfigStatusService;
 use Src\Products\Domain\Services\ProductConfigurationService;
+use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 use Src\Shared\Core\Bus\Command;
 use Src\Shared\Core\Bus\CommandHandler;
 use Src\Shared\Core\Errors\NotFound;
@@ -19,6 +23,7 @@ final class ConfigureProductHandler implements CommandHandler
         private readonly ProductRepositoryPort $productRepository,
         private readonly ProductConfigurationService $configurationService,
         private readonly ProductConfigStatusService $configStatusService,
+        private readonly ConfigurationFlowResolver $flowResolver,
         private readonly TransactionPort $transaction,
     ) {}
 
@@ -35,10 +40,32 @@ final class ConfigureProductHandler implements CommandHandler
 
             $this->configurationService->setTargetUrl($product, $command->targetUrl);
 
-            try {
-                $this->configStatusService->transition($product, 'target-set');
-            } catch (\InvalidArgumentException) {
-                // Already advanced beyond target-set, keep current status.
+            if ($product->configurationStatus->value === ConfigurationStatus::COMPLETED) {
+                $product->recordEvent(new ProductConfigurationCompleted(
+                    productId: $product->id,
+                    model: $product->model->value,
+                    completedAt: new DateTimeImmutable(),
+                ));
+
+                return ProductResource::fromEntity($this->productRepository->save($product));
+            }
+
+            $nextState = $this->flowResolver->nextState($product->model->value, $product->configurationStatus);
+
+            if ($nextState !== null && $product->configurationStatus->canTransitionTo($nextState)) {
+                $this->configStatusService->transition($product, $nextState->value);
+            }
+
+            $completionState = $this->flowResolver->nextState($product->model->value, $product->configurationStatus);
+
+            if ($completionState?->value === ConfigurationStatus::COMPLETED
+                && $product->configurationStatus->canTransitionTo($completionState)) {
+                $this->configStatusService->transition($product, $completionState->value);
+                $product->recordEvent(new ProductConfigurationCompleted(
+                    productId: $product->id,
+                    model: $product->model->value,
+                    completedAt: new DateTimeImmutable(),
+                ));
             }
 
             return ProductResource::fromEntity($this->productRepository->save($product));

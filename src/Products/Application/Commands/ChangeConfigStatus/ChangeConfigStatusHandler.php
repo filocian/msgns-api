@@ -6,6 +6,7 @@ namespace Src\Products\Application\Commands\ChangeConfigStatus;
 
 use InvalidArgumentException;
 use Src\Products\Application\Resources\ProductResource;
+use Src\Products\Domain\Events\ProductConfigStatusChanged;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Services\ProductConfigStatusService;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
@@ -32,6 +33,7 @@ final class ChangeConfigStatusHandler implements CommandHandler
         }
 
         $status = ConfigurationStatus::from($command->status);
+        $previousStatus = $product->configurationStatus->value;
 
         try {
             $this->configStatusService->transition($product, $status->value);
@@ -41,6 +43,12 @@ final class ChangeConfigStatusHandler implements CommandHandler
                 'requested_status' => $status->value,
             ]);
         }
+
+        $product->recordEvent(new ProductConfigStatusChanged(
+            productId: $product->id,
+            previousStatus: $previousStatus,
+            newStatus: $status->value,
+        ));
 
         return ProductResource::fromEntity($this->productRepository->save($product));
     }

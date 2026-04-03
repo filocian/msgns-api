@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Database\Seeders\ProductConfigurationStatusSeeder;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 
@@ -54,6 +55,7 @@ function createActionProduct(array $overrides = []): int
 beforeEach(function () {
     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     $this->seed(ProductConfigurationStatusSeeder::class);
+    Cache::flush();
     $this->user = $this->create_user(['email' => 'product-actions@example.com']);
     $this->actingAs($this->user, 'stateful-api');
 });
@@ -341,5 +343,34 @@ describe('DELETE /api/v2/products/{id}/link', function () {
 
     it('returns 404 when removing a link from a missing product', function () {
         $this->deleteJson('/api/v2/products/999999/link')->assertStatus(404);
+    });
+});
+
+describe('POST /api/v2/products/{id}/complete-configuration', function () {
+    it('returns 200 with data.product when completing configuration', function () {
+        $productId = createActionProduct([
+            'model' => 'google',
+            'target_url' => 'https://example.com',
+            'configuration_status' => ConfigurationStatus::TARGET_SET,
+            'active' => true,
+        ]);
+
+        $this->postJson("/api/v2/products/{$productId}/complete-configuration")
+            ->assertOk()
+            ->assertJsonPath('data.product.id', $productId)
+            ->assertJsonPath('data.product.configurationStatus', ConfigurationStatus::COMPLETED);
+
+        $this->assertDatabaseHas('products', ['id' => $productId, 'configuration_status' => ConfigurationStatus::COMPLETED]);
+    });
+
+    it('returns 401 when unauthenticated', function () {
+        $productId = createActionProduct([
+            'model' => 'google',
+            'target_url' => 'https://example.com',
+            'configuration_status' => ConfigurationStatus::TARGET_SET,
+        ]);
+        auth()->guard('stateful-api')->logout();
+
+        $this->postJson("/api/v2/products/{$productId}/complete-configuration")->assertStatus(401);
     });
 });

@@ -31,4 +31,12 @@ describe('RedisCache', function () {
 		expect($cache->remember('shared:remembered', 120, fn () => ['fresh' => true]))->toBe(['fresh' => true])
 			->and($cache->forget('shared:remembered'))->toBeTrue();
 	});
+
+	it('stores values forever through the cache repository', function () {
+		$repository = \Mockery::mock(Repository::class);
+		$repository->shouldReceive('forever')->once()->with('shared:forever', ['cached' => true]);
+
+		$cache = new RedisCache($repository);
+		$cache->setForever('shared:forever', ['cached' => true]);
+	});
 });

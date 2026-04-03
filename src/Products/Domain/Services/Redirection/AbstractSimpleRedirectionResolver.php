@@ -11,19 +11,19 @@ use Src\Products\Domain\ValueObjects\RedirectionContext;
 use Src\Products\Domain\ValueObjects\RedirectionTarget;
 use Src\Products\Domain\ValueObjects\SimpleRedirectionModel;
 
-final class SimpleRedirectionStrategy implements ProductRedirectionStrategy
+abstract class AbstractSimpleRedirectionResolver implements ProductRedirectionStrategy
 {
+    abstract protected function supportedModel(): SimpleRedirectionModel;
+
     public function supports(Product $product): bool
     {
-        return SimpleRedirectionModel::supports($product->model->value);
+        return $product->model->value === $this->supportedModel()->value;
     }
 
-    /**
-     * Note: $context is intentionally unused for simple redirections.
-     * It exists to keep the strategy contract compatible with future flows.
-     */
     public function resolve(Product $product, RedirectionContext $context): RedirectionTarget
     {
+        unset($context);
+
         if ($product->targetUrl === null) {
             throw ProductMisconfigured::missingTargetUrl($product->id);
         }

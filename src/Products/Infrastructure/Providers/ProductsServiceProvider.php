@@ -13,6 +13,7 @@ use Src\Products\Application\Commands\ActivateProduct\ActivateProductHandler;
 use Src\Products\Application\Commands\AssignToUser\AssignToUserHandler;
 use Src\Products\Application\Commands\ChangeConfigStatus\ChangeConfigStatusHandler;
 use Src\Products\Application\Commands\CloneFromProduct\CloneFromProductHandler;
+use Src\Products\Application\Commands\CompleteConfiguration\CompleteConfigurationHandler;
 use Src\Products\Application\Commands\ConfigureProduct\ConfigureProductHandler;
 use Src\Products\Application\Commands\DeactivateProduct\DeactivateProductHandler;
 use Src\Products\Application\Commands\GenerateProducts\GenerateProductsHandler;
@@ -37,10 +38,16 @@ use Src\Products\Domain\Contracts\ProductRedirectionStrategy;
 use Src\Products\Domain\Events\ProductActivated;
 use Src\Products\Domain\Events\ProductAssigned;
 use Src\Products\Domain\Events\ProductBusinessUpdated;
+use Src\Products\Domain\Events\ProductConfigStatusChanged;
+use Src\Products\Domain\Events\ProductConfigurationCompleted;
 use Src\Products\Domain\Events\ProductDeactivated;
 use Src\Products\Domain\Events\ProductRenamed;
+use Src\Products\Domain\Events\ProductRestored;
 use Src\Products\Domain\Events\ProductReset;
+use Src\Products\Domain\Events\ProductScanned;
+use Src\Products\Domain\Events\ProductSoftDeleted;
 use Src\Products\Domain\Events\ProductTargetUrlSet;
+use Src\Products\Domain\Events\ProductUnlinked;
 use Src\Products\Domain\Events\ProductsPaired;
 use Src\Products\Domain\Ports\ExcelExportPort;
 use Src\Products\Domain\Ports\GenerationHistoryRepositoryPort;
@@ -50,14 +57,24 @@ use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Ports\ProductTypeRepository;
 use Src\Products\Domain\Ports\ProductTypeUsagePort;
 use Src\Products\Domain\Ports\ProductUsagePort;
+use Src\Products\Domain\Services\ConfigurationFlowResolver;
 use Src\Products\Domain\Services\ProductGenerationService;
-use Src\Products\Domain\Services\Redirection\SimpleRedirectionStrategy;
+use Src\Products\Domain\Services\Redirection\CompositeRedirectionStrategy;
+use Src\Products\Domain\Services\Redirection\FacebookRedirectionResolver;
+use Src\Products\Domain\Services\Redirection\GoogleRedirectionResolver;
+use Src\Products\Domain\Services\Redirection\InfoRedirectionResolver;
+use Src\Products\Domain\Services\Redirection\InstagramRedirectionResolver;
+use Src\Products\Domain\Services\Redirection\TikTokRedirectionResolver;
+use Src\Products\Domain\Services\Redirection\YouTubeRedirectionResolver;
+use Src\Products\Infrastructure\Cache\ProductRedirectionCacheService;
 use Src\Products\Infrastructure\Persistence\DynamoDbProductUsageAdapter;
 use Src\Products\Infrastructure\Persistence\EloquentGenerationHistoryRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductBusinessRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeUsageAdapter;
+use Src\Products\Infrastructure\Listeners\IncrementProductUsage;
+use Src\Products\Infrastructure\Listeners\InvalidateProductRedirectionCache;
 use Src\Products\Infrastructure\Listeners\TrackProductActivated;
 use Src\Products\Infrastructure\Listeners\TrackProductAssigned;
 use Src\Products\Infrastructure\Listeners\TrackProductBusinessUpdated;
@@ -83,7 +100,18 @@ final class ProductsServiceProvider extends ServiceProvider
         // Product bindings (new for issue #9)
         $this->app->bind(ProductRepositoryPort::class, EloquentProductRepository::class);
         $this->app->bind(ProductBusinessPort::class, EloquentProductBusinessRepository::class);
-        $this->app->bind(ProductRedirectionStrategy::class, SimpleRedirectionStrategy::class);
+        $this->app->bind(ProductRedirectionStrategy::class, function () {
+            return new CompositeRedirectionStrategy([
+                new GoogleRedirectionResolver(),
+                new InstagramRedirectionResolver(),
+                new YouTubeRedirectionResolver(),
+                new TikTokRedirectionResolver(),
+                new FacebookRedirectionResolver(),
+                new InfoRedirectionResolver(),
+            ]);
+        });
+        $this->app->singleton(ProductRedirectionCacheService::class);
+        $this->app->singleton(ConfigurationFlowResolver::class);
 
         // Product usage port — backed by DynamoDB (issue #13)
         $this->app->bind(ProductUsagePort::class, function () {
@@ -124,6 +152,7 @@ final class ProductsServiceProvider extends ServiceProvider
         $commandBus->register('products.reset_product', ResetProductHandler::class);
         $commandBus->register('products.register_product', RegisterProductHandler::class);
         $commandBus->register('products.configure_product', ConfigureProductHandler::class);
+        $commandBus->register('products.complete_configuration', CompleteConfigurationHandler::class);
         $commandBus->register('products.group_products', GroupProductsHandler::class);
         $commandBus->register('products.clone_from_product', CloneFromProductHandler::class);
         $commandBus->register('products.add_business_info', AddBusinessInfoHandler::class);
@@ -151,5 +180,22 @@ final class ProductsServiceProvider extends ServiceProvider
         Event::listen(ProductBusinessUpdated::class, TrackProductBusinessUpdated::class);
         Event::listen(ProductsPaired::class, TrackProductsPaired::class);
         Event::listen(ProductAssigned::class, TrackProductAssigned::class);
+
+        Event::listen(ProductTargetUrlSet::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductActivated::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductDeactivated::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductReset::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductAssigned::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductBusinessUpdated::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductsPaired::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductRenamed::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductConfigurationCompleted::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductConfigStatusChanged::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductSoftDeleted::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductRestored::class, InvalidateProductRedirectionCache::class);
+        Event::listen(ProductUnlinked::class, InvalidateProductRedirectionCache::class);
+
+        // USAGE SYNC: Async increment of products.usage column on scan. See IncrementProductUsage.
+        Event::listen(ProductScanned::class, IncrementProductUsage::class);
     }
 }

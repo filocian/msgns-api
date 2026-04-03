@@ -6,9 +6,11 @@ use Mockery\MockInterface;
 use Src\Products\Application\Commands\RestoreProduct\RestoreProductCommand;
 use Src\Products\Application\Commands\RestoreProduct\RestoreProductHandler;
 use Src\Products\Domain\Entities\Product;
+use Src\Products\Domain\Events\ProductRestored;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Services\ProductLifecycleService;
 use Src\Products\Domain\ValueObjects\ConfigurationStatus;
+use Src\Shared\Core\Bus\EventBus;
 use Src\Shared\Core\Errors\NotFound;
 
 function makeRestorableProduct(int $id = 42, ?DateTimeImmutable $deletedAt = null): Product
@@ -42,13 +44,16 @@ describe('RestoreProductHandler', function () {
         /** @var MockInterface&ProductRepositoryPort $repo */
         $repo = Mockery::mock(ProductRepositoryPort::class);
         $service = new ProductLifecycleService($repo);
+        /** @var MockInterface&EventBus $eventBus */
+        $eventBus = Mockery::mock(EventBus::class);
 
         $repo->shouldReceive('findByIdWithTrashed')->once()->with(42)->andReturn($trashed);
         $repo->shouldReceive('restore')->once()->with(42);
         $repo->shouldReceive('findById')->once()->with(42)->andReturn($fresh);
         $repo->shouldNotReceive('save');
+        $eventBus->shouldReceive('publish')->once()->with(Mockery::type(ProductRestored::class));
 
-        $handler = new RestoreProductHandler($repo, $service);
+        $handler = new RestoreProductHandler($repo, $service, $eventBus);
 
         $result = $handler->handle(new RestoreProductCommand(productId: 42));
 
@@ -59,13 +64,16 @@ describe('RestoreProductHandler', function () {
         /** @var MockInterface&ProductRepositoryPort $repo */
         $repo = Mockery::mock(ProductRepositoryPort::class);
         $service = new ProductLifecycleService($repo);
+        /** @var MockInterface&EventBus $eventBus */
+        $eventBus = Mockery::mock(EventBus::class);
 
         $repo->shouldReceive('findByIdWithTrashed')->once()->with(999)->andReturn(null);
         $repo->shouldNotReceive('findById');
         $repo->shouldNotReceive('restore');
         $repo->shouldNotReceive('save');
+        $eventBus->shouldNotReceive('publish');
 
-        $handler = new RestoreProductHandler($repo, $service);
+        $handler = new RestoreProductHandler($repo, $service, $eventBus);
 
         expect(fn () => $handler->handle(new RestoreProductCommand(productId: 999)))->toThrow(NotFound::class);
     });

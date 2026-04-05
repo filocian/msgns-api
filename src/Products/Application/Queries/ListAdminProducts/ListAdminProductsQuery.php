@@ -26,6 +26,7 @@ final readonly class ListAdminProductsQuery implements Query
         public ?string $targetUrl = null,
         public ?string $businessType = null,
         public ?string $businessSize = null,
+        public ?string $timezone = null,
     ) {}
 
     public function queryName(): string

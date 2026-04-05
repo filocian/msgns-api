@@ -37,6 +37,7 @@ final class ListAdminProductsHandler implements QueryHandler
             'targetUrl' => $query->targetUrl,
             'businessType' => $query->businessType,
             'businessSize' => $query->businessSize,
+            'timezone' => $query->timezone,
         ]);
     }
 }

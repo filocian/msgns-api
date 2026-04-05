@@ -81,6 +81,7 @@ interface ProductRepositoryPort
      *   targetUrl?: string|null,
      *   businessType?: string|null,
      *   businessSize?: string|null,
+     *   timezone?: string|null,
      * } $params
      */
     public function listForAdmin(array $params): PaginatedResult;

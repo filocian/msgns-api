@@ -27,11 +27,11 @@ describe('ListAdminProductsHandler', function () {
         $expectation = $repository->shouldReceive('listForAdmin');
         $expectation
             ->once()
-            ->with([
-                'page' => 2,
-                'perPage' => 25,
-                'sortBy' => 'created_at',
-                'sortDir' => 'asc',
+             ->with([
+                 'page' => 2,
+                 'perPage' => 25,
+                 'sortBy' => 'created_at',
+                 'sortDir' => 'asc',
                 'productTypeCode' => 'nfc-card',
                 'productTypeId' => 9,
                 'model' => 'nfc',
@@ -42,11 +42,12 @@ describe('ListAdminProductsHandler', function () {
                 'assignedAtTo' => '2025-01-31',
                 'configurationStatus' => 'completed',
                 'active' => false,
-                'targetUrl' => 'shop.example.com',
-                'businessType' => 'restaurant',
-                'businessSize' => 'small',
-            ])
-            ->andReturn($expected);
+                 'targetUrl' => 'shop.example.com',
+                 'businessType' => 'restaurant',
+                 'businessSize' => 'small',
+                 'timezone' => null,
+             ])
+             ->andReturn($expected);
 
         $handler = new ListAdminProductsHandler($repository);
 
@@ -64,11 +65,12 @@ describe('ListAdminProductsHandler', function () {
             assignedAtFrom: '2025-01-01',
             assignedAtTo: '2025-01-31',
             configurationStatus: 'completed',
-            active: false,
-            targetUrl: 'shop.example.com',
-            businessType: 'restaurant',
-            businessSize: 'small',
-        ));
+             active: false,
+             targetUrl: 'shop.example.com',
+             businessType: 'restaurant',
+             businessSize: 'small',
+             timezone: null,
+         ));
 
         expect($result)->toBe($expected);
     });

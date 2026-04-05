@@ -44,7 +44,9 @@ function createAdminRepositoryProductType(array $overrides = []): ProductType
  */
 function createAdminRepositoryProduct(array $overrides = []): Product
 {
-    $productTypeId = $overrides['product_type_id'] ?? createAdminRepositoryProductType()->id;
+    $productTypeId = array_key_exists('product_type_id', $overrides)
+        ? $overrides['product_type_id']
+        : createAdminRepositoryProductType()->id;
 
     /** @var Product $product */
     $product = Product::factory()->create(array_merge([
@@ -217,5 +219,153 @@ describe('EloquentProductRepository::listForAdmin', function () {
                 'Completed New',
                 'Completed Old',
             ]);
+    });
+
+    it('listForAdmin interprets date-only assignedAtFrom as startOfDay in timezone', function () {
+        $repository = makeAdminRepository();
+
+        createAdminRepositoryProduct([
+            'name' => 'Excluded',
+            'assigned_at' => CarbonImmutable::create(2025, 1, 15, 4, 59, 59, 'UTC'),
+        ]);
+        createAdminRepositoryProduct([
+            'name' => 'Included',
+            'assigned_at' => CarbonImmutable::create(2025, 1, 15, 5, 0, 0, 'UTC'),
+        ]);
+
+        $result = $repository->listForAdmin([
+            'assignedAtFrom' => '2025-01-15',
+            'timezone' => 'America/New_York',
+            'sortBy' => 'assigned_at',
+            'sortDir' => 'asc',
+        ]);
+
+        expect($result->total)->toBe(1)
+            ->and($result->items[0]['name'])->toBe('Included');
+    });
+
+    it('listForAdmin interprets date-only assignedAtTo as endOfDay in timezone', function () {
+        $repository = makeAdminRepository();
+
+        createAdminRepositoryProduct([
+            'name' => 'Included',
+            'assigned_at' => CarbonImmutable::create(2025, 3, 16, 3, 59, 59, 'UTC'),
+        ]);
+        createAdminRepositoryProduct([
+            'name' => 'Excluded',
+            'assigned_at' => CarbonImmutable::create(2025, 3, 16, 5, 0, 0, 'UTC'),
+        ]);
+
+        $result = $repository->listForAdmin([
+            'assignedAtTo' => '2025-03-15',
+            'timezone' => 'America/New_York',
+            'sortBy' => 'assigned_at',
+            'sortDir' => 'asc',
+        ]);
+
+        expect($result->total)->toBe(1)
+            ->and($result->items[0]['name'])->toBe('Included');
+    });
+
+    it('listForAdmin normalizes ISO-8601 datetime with offset to UTC', function () {
+        $repository = makeAdminRepository();
+
+        createAdminRepositoryProduct([
+            'name' => 'Included',
+            'assigned_at' => CarbonImmutable::create(2025, 3, 15, 10, 0, 0, 'UTC'),
+        ]);
+        createAdminRepositoryProduct([
+            'name' => 'Excluded',
+            'assigned_at' => CarbonImmutable::create(2025, 3, 15, 9, 59, 0, 'UTC'),
+        ]);
+
+        $result = $repository->listForAdmin([
+            'assignedAtFrom' => '2025-03-15T09:00:00-01:00',
+            'timezone' => 'UTC',
+            'sortBy' => 'assigned_at',
+            'sortDir' => 'asc',
+        ]);
+
+        expect($result->total)->toBe(1)
+            ->and($result->items[0]['name'])->toBe('Included');
+    });
+
+    it('listForAdmin normalizes ISO-8601 assignedAtTo with offset to UTC', function () {
+        $repository = makeAdminRepository();
+
+        createAdminRepositoryProduct([
+            'name' => 'Included',
+            'assigned_at' => CarbonImmutable::create(2025, 3, 16, 4, 59, 59, 'UTC'),
+        ]);
+        createAdminRepositoryProduct([
+            'name' => 'Excluded',
+            'assigned_at' => CarbonImmutable::create(2025, 3, 16, 5, 0, 0, 'UTC'),
+        ]);
+
+        $result = $repository->listForAdmin([
+            'assignedAtTo' => '2025-03-15T23:59:59-05:00',
+            'timezone' => 'UTC',
+            'sortBy' => 'assigned_at',
+            'sortDir' => 'asc',
+        ]);
+
+        expect($result->total)->toBe(1)
+            ->and($result->items[0]['name'])->toBe('Included');
+    });
+
+    it('listForAdmin filters product_type_code by LIKE substring without inflating rows', function () {
+        $repository = makeAdminRepository();
+        $nfc = createAdminRepositoryProductType(['code' => 'nfc-card-pro']);
+        $qr = createAdminRepositoryProductType(['code' => 'qr-code']);
+
+        createAdminRepositoryProduct(['name' => 'NFC 1', 'product_type_id' => $nfc->id]);
+        createAdminRepositoryProduct(['name' => 'NFC 2', 'product_type_id' => $nfc->id]);
+        createAdminRepositoryProduct(['name' => 'QR', 'product_type_id' => $qr->id]);
+
+        $result = $repository->listForAdmin([
+            'productTypeCode' => 'nfc-card',
+            'sortBy' => 'assigned_at',
+            'sortDir' => 'asc',
+        ]);
+
+        expect($result->total)->toBe(2)
+            ->and(array_column($result->items, 'name'))->toBe(['NFC 1', 'NFC 2']);
+    });
+
+    it('listForAdmin filters model by LIKE substring', function () {
+        $repository = makeAdminRepository();
+
+        createAdminRepositoryProduct(['name' => 'NFC', 'model' => 'nfc']);
+        createAdminRepositoryProduct(['name' => 'NFC V2', 'model' => 'nfc-v2']);
+        createAdminRepositoryProduct(['name' => 'WhatsApp', 'model' => 'whatsapp']);
+
+        $result = $repository->listForAdmin([
+            'model' => 'nfc',
+            'sortBy' => 'model',
+            'sortDir' => 'asc',
+        ]);
+
+        expect($result->total)->toBe(2)
+            ->and(array_column($result->items, 'model'))->toBe(['nfc', 'nfc-v2']);
+    });
+
+    it('listForAdmin sort by product_type_code orders products with non-null product types', function () {
+        $repository = makeAdminRepository();
+        $aaa = createAdminRepositoryProductType(['code' => 'aaa']);
+        $mmm = createAdminRepositoryProductType(['code' => 'mmm']);
+        $zzz = createAdminRepositoryProductType(['code' => 'zzz']);
+
+        createAdminRepositoryProduct(['name' => 'AAA', 'product_type_id' => $aaa->id]);
+        createAdminRepositoryProduct(['name' => 'MMM', 'product_type_id' => $mmm->id]);
+        createAdminRepositoryProduct(['name' => 'ZZZ', 'product_type_id' => $zzz->id]);
+
+        $result = $repository->listForAdmin([
+            'sortBy' => 'product_type_code',
+            'sortDir' => 'asc',
+            'perPage' => 100,
+        ]);
+
+        expect($result->total)->toBe(3)
+            ->and(array_column($result->items, 'name'))->toBe(['AAA', 'MMM', 'ZZZ']);
     });
 });

@@ -317,7 +317,7 @@ final class EloquentProductRepository implements ProductRepositoryPort
 
         if ($targetUrl !== null && $targetUrl !== '') {
             $query->whereRaw(
-                "products.target_url LIKE ? ESCAPE '\\'",
+                "products.target_url LIKE ? ESCAPE '!'",
                 ['%' . $this->escapeLike($targetUrl) . '%'],
             );
         }
@@ -451,7 +451,7 @@ final class EloquentProductRepository implements ProductRepositoryPort
 
         if ($productTypeCode !== null) {
             $query->whereRaw(
-                "product_types.code LIKE ? ESCAPE '\\'",
+                "product_types.code LIKE ? ESCAPE '!'",
                 ['%' . $this->escapeLike($productTypeCode) . '%'],
             );
         }
@@ -462,14 +462,14 @@ final class EloquentProductRepository implements ProductRepositoryPort
 
         if ($model !== null) {
             $query->whereRaw(
-                "products.model LIKE ? ESCAPE '\\'",
+                "products.model LIKE ? ESCAPE '!'",
                 ['%' . $this->escapeLike($model) . '%'],
             );
         }
 
         if ($name !== null) {
             $query->whereRaw(
-                "products.name LIKE ? ESCAPE '\\'",
+                "products.name LIKE ? ESCAPE '!'",
                 ['%' . $this->escapeLike($name) . '%'],
             );
         }
@@ -483,7 +483,7 @@ final class EloquentProductRepository implements ProductRepositoryPort
 
             $query->whereHas('user', static function ($relation) use ($escapedUserEmail): void {
                 $relation->whereRaw(
-                    "email LIKE ? ESCAPE '\\'",
+                    "email LIKE ? ESCAPE '!'",
                     ['%' . $escapedUserEmail . '%'],
                 );
             });
@@ -507,7 +507,7 @@ final class EloquentProductRepository implements ProductRepositoryPort
 
         if ($targetUrl !== null) {
             $query->whereRaw(
-                "products.target_url LIKE ? ESCAPE '\\'",
+                "products.target_url LIKE ? ESCAPE '!'",
                 ['%' . $this->escapeLike($targetUrl) . '%'],
             );
         }
@@ -653,6 +653,6 @@ final class EloquentProductRepository implements ProductRepositoryPort
 
     private function escapeLike(string $value): string
     {
-        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+        return str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
     }
 }

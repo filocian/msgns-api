@@ -104,6 +104,22 @@ function responseModels(TestResponse $response): array
  * @param TestResponse<Response> $response
  * @return list<string>
  */
+function responseProductTypeCodes(TestResponse $response): array
+{
+    return array_map(
+        static function (array $item): string {
+            $productType = $item['product_type'] ?? null;
+
+            return is_array($productType) && is_string($productType['code'] ?? null) ? $productType['code'] : '';
+        },
+        responseItems($response),
+    );
+}
+
+/**
+ * @param TestResponse<Response> $response
+ * @return list<string>
+ */
 function responseUserEmails(TestResponse $response): array
 {
     return array_values(array_filter(array_map(
@@ -136,7 +152,9 @@ function createAdminListProductType(array $overrides = []): ProductType
  */
 function createAdminListProduct(array $overrides = []): Product
 {
-    $productTypeId = $overrides['product_type_id'] ?? createAdminListProductType()->id;
+    $productTypeId = array_key_exists('product_type_id', $overrides)
+        ? $overrides['product_type_id']
+        : createAdminListProductType()->id;
 
     /** @var Product $product */
     $product = Product::factory()->create(array_merge([
@@ -258,6 +276,22 @@ describe('GET /api/v2/products/admin/', function (): void {
             ->and($response->json('data.0.product_type.code'))->toBe('nfc-card');
     });
 
+    it('filters by product_type_code substring match', function (): void {
+        /** @var TestCase $test */
+        $test = $this;
+        $nfc = createAdminListProductType(['code' => 'nfc-card-v2']);
+        $qr = createAdminListProductType(['code' => 'qr-code']);
+
+        createAdminListProduct(['product_type_id' => $nfc->id, 'name' => 'NFC 1']);
+        createAdminListProduct(['product_type_id' => $nfc->id, 'name' => 'NFC 2']);
+        createAdminListProduct(['product_type_id' => $qr->id, 'name' => 'QR']);
+
+        $response = $test->getJson('/api/v2/products/admin/?product_type_code=nfc-card')->assertOk();
+
+        expect($response->json('meta.total'))->toBe(2)
+            ->and(responseProductTypeCodes($response))->toBe(['nfc-card-v2', 'nfc-card-v2']);
+    });
+
     it('filters by product_type_id exact match', function (): void {
         /** @var TestCase $test */
         $test = $this;
@@ -281,6 +315,20 @@ describe('GET /api/v2/products/admin/', function (): void {
 
         expect($response->json('meta.total'))->toBe(1)
             ->and($response->json('data.0.model'))->toBe('whatsapp');
+    });
+
+    it('filters by model substring match', function (): void {
+        /** @var TestCase $test */
+        $test = $this;
+        createAdminListProduct(['name' => 'NFC', 'model' => 'nfc']);
+        createAdminListProduct(['name' => 'NFC Plus', 'model' => 'nfc-plus']);
+        createAdminListProduct(['name' => 'WhatsApp', 'model' => 'whatsapp']);
+
+        $response = $test->getJson('/api/v2/products/admin/?model=nfc')->assertOk();
+
+        expect($response->json('meta.total'))->toBe(2)
+            ->and(responseModels($response))->toContain('nfc', 'nfc-plus')
+            ->and(responseModels($response))->not->toContain('whatsapp');
     });
 
     it('filters by name partial match and escapes wildcards', function (): void {
@@ -334,6 +382,44 @@ describe('GET /api/v2/products/admin/', function (): void {
 
         expect($response->json('meta.total'))->toBe(1)
             ->and($response->json('data.0.name'))->toBe('March 15');
+    });
+
+    it('date-only assigned_at range interpreted in given timezone', function (): void {
+        /** @var TestCase $test */
+        $test = $this;
+        createAdminListProduct(['name' => 'Before Range', 'assigned_at' => CarbonImmutable::create(2025, 1, 15, 4, 59, 59, 'UTC')]);
+        createAdminListProduct(['name' => 'In Range Noon', 'assigned_at' => CarbonImmutable::create(2025, 1, 15, 12, 0, 0, 'UTC')]);
+        createAdminListProduct(['name' => 'In Range Late', 'assigned_at' => CarbonImmutable::create(2025, 1, 16, 4, 59, 59, 'UTC')]);
+
+        $response = $test->getJson('/api/v2/products/admin/?assigned_at_from=2025-01-15&assigned_at_to=2025-01-15&timezone=America/New_York')->assertOk();
+
+        expect($response->json('meta.total'))->toBe(2)
+            ->and(responseNames($response))->toContain('In Range Noon', 'In Range Late')
+            ->and(responseNames($response))->not->toContain('Before Range');
+    });
+
+    it('ISO-8601 datetime with offset in assigned_at_from is normalized to UTC', function (): void {
+        /** @var TestCase $test */
+        $test = $this;
+        createAdminListProduct(['name' => 'Included', 'assigned_at' => CarbonImmutable::create(2025, 3, 15, 10, 0, 0, 'UTC')]);
+        createAdminListProduct(['name' => 'Excluded', 'assigned_at' => CarbonImmutable::create(2025, 3, 15, 8, 0, 0, 'UTC')]);
+
+        $response = $test->getJson('/api/v2/products/admin/?assigned_at_from=2025-03-15T09:00:00-01:00')->assertOk();
+
+        expect($response->json('meta.total'))->toBe(1)
+            ->and(responseNames($response))->toBe(['Included']);
+    });
+
+    it('ISO-8601 datetime with offset in assigned_at_to is normalized to UTC', function (): void {
+        /** @var TestCase $test */
+        $test = $this;
+        createAdminListProduct(['name' => 'Included', 'assigned_at' => CarbonImmutable::create(2025, 3, 16, 4, 59, 59, 'UTC')]);
+        createAdminListProduct(['name' => 'Excluded', 'assigned_at' => CarbonImmutable::create(2025, 3, 16, 5, 0, 0, 'UTC')]);
+
+        $response = $test->getJson('/api/v2/products/admin/?assigned_at_to=2025-03-15T23:59:59-05:00')->assertOk();
+
+        expect($response->json('meta.total'))->toBe(1)
+            ->and(responseNames($response))->toBe(['Included']);
     });
 
     it('filters by configuration_status exact match', function (): void {
@@ -540,30 +626,58 @@ describe('GET /api/v2/products/admin/', function (): void {
             ->toBe(['Old', 'Mid', 'New']);
     });
 
-    it('invalid sort_by falls back to assigned_at desc', function (): void {
+    it('sorts by product_type_code asc and desc with non-null product types', function (): void {
         /** @var TestCase $test */
         $test = $this;
-        createAdminListProduct(['name' => 'Oldest', 'assigned_at' => CarbonImmutable::now()->subDays(2)]);
-        createAdminListProduct(['name' => 'Newest', 'assigned_at' => CarbonImmutable::now()]);
-        createAdminListProduct(['name' => 'Middle', 'assigned_at' => CarbonImmutable::now()->subDay()]);
+        $aaa = createAdminListProductType(['code' => 'aaa-type']);
+        $mmm = createAdminListProductType(['code' => 'mmm-type']);
+        $zzz = createAdminListProductType(['code' => 'zzz-type']);
 
-        $response = $test->getJson('/api/v2/products/admin/?sort_by=unknown&sort_dir=asc')->assertOk();
+        createAdminListProduct(['name' => 'AAA', 'product_type_id' => $aaa->id]);
+        createAdminListProduct(['name' => 'MMM', 'product_type_id' => $mmm->id]);
+        createAdminListProduct(['name' => 'ZZZ', 'product_type_id' => $zzz->id]);
 
-        expect(array_slice(responseNames($response), 0, 3))
-            ->toBe(['Newest', 'Middle', 'Oldest']);
+        $asc = $test->getJson('/api/v2/products/admin/?sort_by=product_type_code&sort_dir=asc')->assertOk();
+        $desc = $test->getJson('/api/v2/products/admin/?sort_by=product_type_code&sort_dir=desc')->assertOk();
+
+        expect(array_slice(responseProductTypeCodes($asc), 0, 3))->toBe(['aaa-type', 'mmm-type', 'zzz-type'])
+            ->and($asc->json('meta.total'))->toBe(3)
+            ->and(array_slice(responseProductTypeCodes($desc), 0, 3))->toBe(['zzz-type', 'mmm-type', 'aaa-type'])
+            ->and($desc->json('meta.total'))->toBe(3);
     });
 
-    it('invalid sort_dir falls back to desc', function (): void {
+    it('invalid sort_by returns 422', function (): void {
         /** @var TestCase $test */
         $test = $this;
-        createAdminListProduct(['name' => 'Apple']);
-        createAdminListProduct(['name' => 'Mango']);
-        createAdminListProduct(['name' => 'Zebra']);
+        $test->getJson('/api/v2/products/admin/?sort_by=unknown')
+            ->assertStatus(422)
+            ->assertJsonStructure(['message', 'errors' => ['sort_by']]);
+    });
 
-        $response = $test->getJson('/api/v2/products/admin/?sort_by=name&sort_dir=sideways')->assertOk();
+    it('invalid sort_dir returns 422', function (): void {
+        /** @var TestCase $test */
+        $test = $this;
+        $test->getJson('/api/v2/products/admin/?sort_by=name&sort_dir=sideways')
+            ->assertStatus(422)
+            ->assertJsonStructure(['message', 'errors' => ['sort_dir']]);
+    });
 
-        expect(array_slice(responseNames($response), 0, 3))
-            ->toBe(['Zebra', 'Mango', 'Apple']);
+    it('invalid timezone returns 422', function (): void {
+        /** @var TestCase $test */
+        $test = $this;
+
+        $test->getJson('/api/v2/products/admin/?timezone=Not/ATimezone')
+            ->assertStatus(422)
+            ->assertJsonStructure(['message', 'errors' => ['timezone']]);
+    });
+
+    it('returns 422 when assigned_at_to is before assigned_at_from', function (): void {
+        /** @var TestCase $test */
+        $test = $this;
+
+        $test->getJson('/api/v2/products/admin/?assigned_at_from=2025-06-10&assigned_at_to=2025-06-01')
+            ->assertStatus(422)
+            ->assertJsonStructure(['message', 'errors' => ['assigned_at_to']]);
     });
 
     it('clamps per_page between 1 and 100', function (): void {

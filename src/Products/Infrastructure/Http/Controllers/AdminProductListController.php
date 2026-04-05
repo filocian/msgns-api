@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Src\Products\Infrastructure\Http\Controllers;
 
 use App\Http\Contracts\Controller;
+use App\Http\Requests\Products\ListAdminProductsRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 use Src\Products\Application\Queries\ListAdminProducts\ListAdminProductsQuery;
 use Src\Shared\Core\Bus\PaginatedResult;
@@ -30,7 +30,7 @@ final class AdminProductListController extends Controller
         parameters: [
             new OA\Parameter(name: 'page', in: 'query', schema: new OA\Schema(type: 'integer', default: 1, minimum: 1)),
             new OA\Parameter(name: 'per_page', in: 'query', schema: new OA\Schema(type: 'integer', default: 15, minimum: 1, maximum: 100)),
-            new OA\Parameter(name: 'sort_by', in: 'query', schema: new OA\Schema(type: 'string', default: 'assigned_at', enum: ['name', 'usage', 'active', 'configuration_status', 'model', 'assigned_at', 'created_at'])),
+            new OA\Parameter(name: 'sort_by', in: 'query', schema: new OA\Schema(type: 'string', default: 'assigned_at', enum: ['name', 'usage', 'active', 'configuration_status', 'model', 'assigned_at', 'created_at', 'product_type_code'])),
             new OA\Parameter(name: 'sort_dir', in: 'query', schema: new OA\Schema(type: 'string', default: 'desc', enum: ['asc', 'desc'])),
             new OA\Parameter(name: 'product_type_code', in: 'query', schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'product_type_id', in: 'query', schema: new OA\Schema(type: 'integer')),
@@ -38,13 +38,14 @@ final class AdminProductListController extends Controller
             new OA\Parameter(name: 'name', in: 'query', schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'user_id', in: 'query', schema: new OA\Schema(type: 'integer')),
             new OA\Parameter(name: 'user_email', in: 'query', schema: new OA\Schema(type: 'string', format: 'email')),
-            new OA\Parameter(name: 'assigned_at_from', in: 'query', schema: new OA\Schema(type: 'string', format: 'date')),
-            new OA\Parameter(name: 'assigned_at_to', in: 'query', schema: new OA\Schema(type: 'string', format: 'date')),
+            new OA\Parameter(name: 'assigned_at_from', in: 'query', description: 'Accepts date-only values or ISO-8601 datetimes with offset.', schema: new OA\Schema(type: 'string', format: 'date-time')),
+            new OA\Parameter(name: 'assigned_at_to', in: 'query', description: 'Accepts date-only values or ISO-8601 datetimes with offset.', schema: new OA\Schema(type: 'string', format: 'date-time')),
             new OA\Parameter(name: 'configuration_status', in: 'query', schema: new OA\Schema(type: 'string', enum: ['not-started', 'assigned', 'target-set', 'business-set', 'completed'])),
             new OA\Parameter(name: 'active', in: 'query', schema: new OA\Schema(type: 'boolean')),
             new OA\Parameter(name: 'target_url', in: 'query', schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'business_type', in: 'query', schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'business_size', in: 'query', schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'timezone', in: 'query', schema: new OA\Schema(type: 'string', example: 'America/New_York')),
         ],
         responses: [
             new OA\Response(
@@ -93,9 +94,10 @@ final class AdminProductListController extends Controller
             ),
             new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
             new OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
+            new OA\Response(response: 422, description: 'Validation error'),
         ],
     )]
-    public function index(Request $request): JsonResponse
+    public function index(ListAdminProductsRequest $request): JsonResponse
     {
         /** @var PaginatedResult $result */
         $result = $this->queryBus->dispatch(new ListAdminProductsQuery(
@@ -103,60 +105,22 @@ final class AdminProductListController extends Controller
             perPage: min(100, max(1, (int) $request->input('per_page', 15))),
             sortBy: (string) $request->input('sort_by', 'assigned_at'),
             sortDir: (string) $request->input('sort_dir', 'desc'),
-            productTypeCode: $this->nullableString($request, 'product_type_code'),
-            productTypeId: $this->nullableInt($request, 'product_type_id'),
-            model: $this->nullableString($request, 'model'),
-            name: $this->nullableString($request, 'name'),
-            userId: $this->nullableInt($request, 'user_id'),
-            userEmail: $this->nullableString($request, 'user_email'),
-            assignedAtFrom: $this->nullableString($request, 'assigned_at_from'),
-            assignedAtTo: $this->nullableString($request, 'assigned_at_to'),
-            configurationStatus: $this->nullableString($request, 'configuration_status'),
-            active: $this->nullableBool($request, 'active'),
-            targetUrl: $this->nullableString($request, 'target_url'),
-            businessType: $this->nullableString($request, 'business_type'),
-            businessSize: $this->nullableString($request, 'business_size'),
+            productTypeCode: $request->filled('product_type_code') ? trim((string) $request->input('product_type_code')) : null,
+            productTypeId: $request->filled('product_type_id') ? (int) $request->input('product_type_id') : null,
+            model: $request->filled('model') ? trim((string) $request->input('model')) : null,
+            name: $request->filled('name') ? trim((string) $request->input('name')) : null,
+            userId: $request->filled('user_id') ? (int) $request->input('user_id') : null,
+            userEmail: $request->filled('user_email') ? trim((string) $request->input('user_email')) : null,
+            assignedAtFrom: $request->filled('assigned_at_from') ? trim((string) $request->input('assigned_at_from')) : null,
+            assignedAtTo: $request->filled('assigned_at_to') ? trim((string) $request->input('assigned_at_to')) : null,
+            configurationStatus: $request->filled('configuration_status') ? trim((string) $request->input('configuration_status')) : null,
+            active: $request->exists('active') && $request->input('active') !== '' ? $request->boolean('active') : null,
+            targetUrl: $request->filled('target_url') ? trim((string) $request->input('target_url')) : null,
+            businessType: $request->filled('business_type') ? trim((string) $request->input('business_type')) : null,
+            businessSize: $request->filled('business_size') ? trim((string) $request->input('business_size')) : null,
+            timezone: $request->filled('timezone') ? trim((string) $request->input('timezone')) : null,
         ));
 
         return ApiResponseFactory::paginated($result);
-    }
-
-    private function nullableString(Request $request, string $key): ?string
-    {
-        $value = $request->input($key);
-
-        if (!is_string($value)) {
-            return null;
-        }
-
-        $value = trim($value);
-
-        return $value === '' ? null : $value;
-    }
-
-    private function nullableInt(Request $request, string $key): ?int
-    {
-        $value = $request->input($key);
-
-        if ($value === null || $value === '') {
-            return null;
-        }
-
-        return is_numeric($value) ? (int) $value : null;
-    }
-
-    private function nullableBool(Request $request, string $key): ?bool
-    {
-        if (!$request->exists($key)) {
-            return null;
-        }
-
-        $value = $request->input($key);
-
-        if ($value === '') {
-            return null;
-        }
-
-        return $request->boolean($key);
     }
 }

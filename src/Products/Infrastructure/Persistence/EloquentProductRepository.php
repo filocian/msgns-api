@@ -403,6 +403,7 @@ final class EloquentProductRepository implements ProductRepositoryPort
      *   targetUrl?: string|null,
      *   businessType?: string|null,
      *   businessSize?: string|null,
+     *   timezone?: string|null,
      * } $params
      */
     public function listForAdmin(array $params): PaginatedResult
@@ -424,12 +425,13 @@ final class EloquentProductRepository implements ProductRepositoryPort
         $targetUrl = $this->normalizeStringFilter($params['targetUrl'] ?? null);
         $businessType = $this->normalizeStringFilter($params['businessType'] ?? null);
         $businessSize = $this->normalizeStringFilter($params['businessSize'] ?? null);
+        $timezone = $this->normalizeStringFilter($params['timezone'] ?? null) ?? 'UTC';
 
         if (!in_array($sortDir, ['asc', 'desc'], true)) {
             $sortDir = 'desc';
         }
 
-        $allowedSortFields = ['name', 'usage', 'active', 'configuration_status', 'model', 'assigned_at', 'created_at'];
+        $allowedSortFields = ['name', 'usage', 'active', 'configuration_status', 'model', 'assigned_at', 'created_at', 'product_type_code'];
 
         $query = EloquentProduct::query()
             ->whereNull('products.linked_to_product_id')
@@ -440,10 +442,18 @@ final class EloquentProductRepository implements ProductRepositoryPort
                 'user:id,name,email',
             ]);
 
+        $needsProductTypeJoin = $productTypeCode !== null || $sortBy === 'product_type_code';
+
+        if ($needsProductTypeJoin) {
+            $query->select('products.*')
+                ->leftJoin('product_types', 'product_types.id', '=', 'products.product_type_id');
+        }
+
         if ($productTypeCode !== null) {
-            $query->whereHas('productType', static function ($relation) use ($productTypeCode): void {
-                $relation->where('code', $productTypeCode);
-            });
+            $query->whereRaw(
+                "product_types.code LIKE ? ESCAPE '\\'",
+                ['%' . $this->escapeLike($productTypeCode) . '%'],
+            );
         }
 
         if ($productTypeId !== null) {
@@ -451,7 +461,10 @@ final class EloquentProductRepository implements ProductRepositoryPort
         }
 
         if ($model !== null) {
-            $query->where('products.model', $model);
+            $query->whereRaw(
+                "products.model LIKE ? ESCAPE '\\'",
+                ['%' . $this->escapeLike($model) . '%'],
+            );
         }
 
         if ($name !== null) {
@@ -477,11 +490,11 @@ final class EloquentProductRepository implements ProductRepositoryPort
         }
 
         if ($assignedAtFrom !== null) {
-            $query->where('products.assigned_at', '>=', CarbonImmutable::parse($assignedAtFrom)->startOfDay());
+            $query->where('products.assigned_at', '>=', $this->normalizeDateToUtc($assignedAtFrom, $timezone, false));
         }
 
         if ($assignedAtTo !== null) {
-            $query->where('products.assigned_at', '<', CarbonImmutable::parse($assignedAtTo)->addDay()->startOfDay());
+            $query->where('products.assigned_at', '<=', $this->normalizeDateToUtc($assignedAtTo, $timezone, true));
         }
 
         if ($configurationStatus !== null) {
@@ -515,6 +528,10 @@ final class EloquentProductRepository implements ProductRepositoryPort
             $query->orderByRaw(
                 "CASE WHEN products.configuration_status = 'completed' THEN 0 ELSE 1 END {$sortDir}"
             )->orderBy('products.assigned_at', 'desc');
+        } elseif ($sortBy === 'product_type_code') {
+            $query->orderByRaw('product_types.code IS NULL')
+                ->orderBy('product_types.code', $sortDir)
+                ->orderBy('products.assigned_at', 'desc');
         } elseif (in_array($sortBy, $allowedSortFields, true)) {
             $query->orderBy('products.' . $sortBy, $sortDir);
         } else {
@@ -617,6 +634,21 @@ final class EloquentProductRepository implements ProductRepositoryPort
         $trimmed = trim($value);
 
         return $trimmed === '' ? null : $trimmed;
+    }
+
+    private function normalizeDateToUtc(string $value, string $timezone, bool $isEndBound): string
+    {
+        if (str_contains($value, 'T') || str_contains($value, ' ')) {
+            return CarbonImmutable::parse($value, $timezone)->utc()->format('Y-m-d H:i:s');
+        }
+
+        $carbon = CarbonImmutable::parse($value, $timezone);
+
+        if ($isEndBound) {
+            return $carbon->endOfDay()->utc()->format('Y-m-d H:i:s');
+        }
+
+        return $carbon->startOfDay()->utc()->format('Y-m-d H:i:s');
     }
 
     private function escapeLike(string $value): string

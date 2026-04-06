@@ -29,7 +29,7 @@ describe('Legacy FormRequest authorization after rbac:reconcile', function () {
 
         $this->getJson('/api/users/list-roles')
             ->assertStatus(200);
-    });
+    })->group('legacy');
 
     it('allows developer user to access legacy list-roles endpoint after reconciliation', function () {
         $user = $this->create_user(['email' => 'developer-legacy@example.com']);
@@ -38,7 +38,7 @@ describe('Legacy FormRequest authorization after rbac:reconcile', function () {
 
         $this->getJson('/api/users/list-roles')
             ->assertStatus(200);
-    });
+    })->group('legacy');
 
     it('denies user role from accessing legacy list-roles endpoint after reconciliation', function () {
         $user = $this->create_user(['email' => 'user-legacy@example.com']);
@@ -48,7 +48,7 @@ describe('Legacy FormRequest authorization after rbac:reconcile', function () {
         // ActionNotAllowedException maps to 401 in bootstrap/app.php
         $this->getJson('/api/users/list-roles')
             ->assertStatus(401);
-    });
+    })->group('legacy');
 
     it('denies designer role from accessing legacy list-roles endpoint after reconciliation', function () {
         $user = $this->create_user(['email' => 'designer-legacy@example.com']);
@@ -58,7 +58,7 @@ describe('Legacy FormRequest authorization after rbac:reconcile', function () {
         // ActionNotAllowedException maps to 401 in bootstrap/app.php
         $this->getJson('/api/users/list-roles')
             ->assertStatus(401);
-    });
+    })->group('legacy');
 
     it('backoffice hasAnyRole check resolves correctly after running reconciliation twice (idempotent parity)', function () {
         // Run reconcile a second time to verify idempotency does not break auth.
@@ -71,5 +71,5 @@ describe('Legacy FormRequest authorization after rbac:reconcile', function () {
 
         $this->getJson('/api/users/list-roles')
             ->assertStatus(200);
-    });
+    })->group('legacy');
 });

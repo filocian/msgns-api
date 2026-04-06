@@ -19,6 +19,18 @@ use Tests\TestCase;
 uses(TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class)->in('Feature');
 uses(TestCase::class)->in('Unit');
 
+/*
+|--------------------------------------------------------------------------
+| Legacy test convention
+|--------------------------------------------------------------------------
+|
+| Default CI runs `composer test`, which excludes only the explicit `legacy`
+| group. Every legacy-only test must therefore (1) live in the inventory at
+| `tests/Support/LegacyTestInventory.php` and (2) mark its cases with
+| `->group('legacy')` in the test source file.
+|
+*/
+
 beforeEach(function (): void {
 	/** @var TestCase $this */
 	if (str_contains((string) $this::class, 'Feature')) {

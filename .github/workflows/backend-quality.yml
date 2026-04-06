@@ -1,0 +1,72 @@
+name: Backend Quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  phpstan:
+    name: PHPStan (modern src scope)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout backend repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          extensions: mbstring, pdo_sqlite, sqlite3, dom
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      # Static analysis intentionally stays aligned to modern src/** scope via phpstan.neon.
+      - name: Run PHPStan
+        run: composer run phpstan
+
+  tests:
+    name: Modern default test suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout backend repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          extensions: mbstring, pdo_sqlite, sqlite3, dom
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Verify explicit legacy inventory before running defaults
+        run: composer run test:verify-legacy
+
+      # Default backend validation must keep Architecture coverage while excluding only
+      # explicitly marked legacy tests, even though Laravel bootstrap still touches App\* transitively.
+      - name: Run modern default backend suite
+        run: composer test

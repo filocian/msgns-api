@@ -18,4 +18,4 @@ it('maps supported languages and falls back to en_UK', function (?string $langua
     ['en', 'en_UK'],
     ['unknown', 'en_UK'],
     [null, 'en_UK'],
-]);
+])->group('legacy');

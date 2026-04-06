@@ -50,6 +50,11 @@
         }
     },
     "scripts": {
+        "phpstan": "vendor/bin/phpstan analyse --memory-limit=1G",
+        "test": "@test:modern",
+        "test:modern": "vendor/bin/pest --exclude-group=legacy tests/Architecture tests/Unit tests/Feature",
+        "test:legacy": "vendor/bin/pest --group=legacy",
+        "test:verify-legacy": "php tools/ci/verify-legacy-test-groups.php",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

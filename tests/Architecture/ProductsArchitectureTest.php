@@ -178,30 +178,60 @@ describe('Products module architecture', function () {
 
 	it('keeps PATCH details contract owned by v2 Products module', function () {
 		$routesContent = file_get_contents(__DIR__ . '/../../routes/api/products.php');
-		$legacyControllerContent = file_get_contents(
-			__DIR__ . '/../../app/Http/Controllers/Products/ProductActionController.php'
-		);
-		$legacyRequestContent = file_get_contents(__DIR__ . '/../../app/Http/Requests/Products/RenameProductRequest.php');
-
 		assert(is_string($routesContent));
-		assert(is_string($legacyControllerContent));
-		assert(is_string($legacyRequestContent));
 
 		expect($routesContent)
 			->toContain('use Src\\Products\\Infrastructure\\Http\\Controllers\\UpdateProductDetailsController;')
 			->and($routesContent)->toContain("Route::patch('/{id}/details', UpdateProductDetailsController::class)")
 			->and($routesContent)->not->toContain("Route::patch('/{id}/details', [ProductActionController::class");
-
-		expect($legacyControllerContent)->not->toContain('/products/{id}/details')
-			->and($legacyRequestContent)->not->toContain('/products/{id}/details');
 	});
 
-	it('does not import App classes inside UpdateProductDetailsController', function () {
-		$controllerContent = file_get_contents(
-			__DIR__ . '/../../src/Products/Infrastructure/Http/Controllers/UpdateProductDetailsController.php'
-		);
-		assert(is_string($controllerContent));
+	// ─── V2 controller contract tests ───────────────────────────────────────
 
-		expect($controllerContent)->not->toContain('use App\\');
+	$v2Controllers = [
+		'UpdateProductDetailsController',
+		'CompleteConfigurationController',
+		'AssignToUserController',
+		'SetTargetUrlController',
+		'RegisterProductController',
+		'ConfigureProductController',
+		'GroupProductsController',
+		'CloneFromProductController',
+		'AddBusinessInfoController',
+		'ActivateProductController',
+		'DeactivateProductController',
+		'ChangeConfigStatusController',
+		'SoftDeleteProductController',
+		'RestoreProductController',
+		'RemoveProductLinkController',
+		'ResetProductController',
+		'ListProductTypesController',
+		'GetProductTypeController',
+		'CreateProductTypeController',
+		'UpdateProductTypeController',
+		'ReportUsageController',
+		'GenerateProductsController',
+		'ListGenerationHistoryController',
+		'DownloadGenerationExcelController',
+	];
+
+	foreach ($v2Controllers as $controller) {
+		it("does not import App classes inside {$controller}", function () use ($controller) {
+			$controllerContent = file_get_contents(
+				__DIR__ . "/../../src/Products/Infrastructure/Http/Controllers/{$controller}.php"
+			);
+			assert(is_string($controllerContent));
+
+			expect($controllerContent)->not->toContain('use App\\');
+		});
+	}
+
+	// ─── Route ownership: all product routes point to Src\ controllers ──────
+
+	it('routes file contains no App\\Http\\Controllers\\Products imports', function () {
+		$routesContent = file_get_contents(__DIR__ . '/../../routes/api/products.php');
+		assert(is_string($routesContent));
+
+		expect($routesContent)->not->toContain('use App\\Http\\Controllers\\Products\\');
 	});
 });

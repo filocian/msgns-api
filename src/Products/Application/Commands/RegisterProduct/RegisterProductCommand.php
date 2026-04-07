@@ -12,6 +12,7 @@ final readonly class RegisterProductCommand implements Command
         public int $productId,
         public int $userId,
         public string $password,
+        public int $actorUserId,
     ) {}
 
     public function commandName(): string

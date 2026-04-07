@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Src\Products\Infrastructure\Http\Controllers;
 
-use App\Http\Contracts\Controller;
 use Illuminate\Http\JsonResponse;
 use Src\Products\Application\Commands\CompleteConfiguration\CompleteConfigurationCommand;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Infrastructure\Http\ApiResponseFactory;
 
-final class CompleteConfigurationController extends Controller
+final class CompleteConfigurationController
 {
     public function __construct(
         private readonly CommandBus $commandBus,

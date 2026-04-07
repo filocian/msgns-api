@@ -9,6 +9,7 @@ use App\Http\Controllers\Products\ProductTypeController;
 use App\Http\Controllers\Products\ProductUsageController;
 use Illuminate\Support\Facades\Route;
 use Src\Products\Infrastructure\Http\Controllers\CompleteConfigurationController;
+use Src\Products\Infrastructure\Http\Controllers\UpdateProductDetailsController;
 
 // Products module v2 routes.
 // Loaded by ProductsServiceProvider with prefix `api/v2/products` and `api` middleware.
@@ -40,7 +41,7 @@ Route::middleware('auth:stateful-api')->group(function (): void {
     Route::post('/{id}/activate', [ProductActionController::class, 'activate'])->whereNumber('id');
     Route::post('/{id}/deactivate', [ProductActionController::class, 'deactivate'])->whereNumber('id');
     Route::patch('/{id}/config-status', [ProductActionController::class, 'changeConfigStatus'])->whereNumber('id');
-    Route::patch('/{id}/name', [ProductActionController::class, 'rename'])->whereNumber('id');
+    Route::patch('/{id}/details', UpdateProductDetailsController::class)->whereNumber('id');
     Route::delete('/{id}', [ProductActionController::class, 'softDelete'])->whereNumber('id');
     Route::post('/{id}/restore', [ProductActionController::class, 'restore'])->whereNumber('id');
     Route::delete('/{id}/link', [ProductActionController::class, 'removeLink'])->whereNumber('id');

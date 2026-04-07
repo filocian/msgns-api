@@ -9,7 +9,6 @@ use App\Http\Requests\Products\AddBusinessInfoRequest;
 use App\Http\Requests\Products\AssignToUserRequest;
 use App\Http\Requests\Products\ChangeConfigStatusRequest;
 use App\Http\Requests\Products\ConfigureProductRequest;
-use App\Http\Requests\Products\RenameProductRequest;
 use App\Http\Requests\Products\RegisterProductRequest;
 use App\Http\Requests\Products\SetTargetUrlRequest;
 use Illuminate\Http\JsonResponse;
@@ -25,7 +24,6 @@ use Src\Products\Application\Commands\ConfigureProduct\ConfigureProductCommand;
 use Src\Products\Application\Commands\DeactivateProduct\DeactivateProductCommand;
 use Src\Products\Application\Commands\GroupProducts\GroupProductsCommand;
 use Src\Products\Application\Commands\RemoveProductLink\RemoveProductLinkCommand;
-use Src\Products\Application\Commands\RenameProduct\RenameProductCommand;
 use Src\Products\Application\Commands\RegisterProduct\RegisterProductCommand;
 use Src\Products\Application\Commands\ResetProduct\ResetProductCommand;
 use Src\Products\Application\Commands\RestoreProduct\RestoreProductCommand;
@@ -352,37 +350,6 @@ final class ProductActionController extends Controller
         $product = $this->commandBus->dispatch(new ChangeConfigStatusCommand(
             productId: $id,
             status: (string) $request->validated('status'),
-        ));
-
-        return ApiResponseFactory::ok(['product' => $product]);
-    }
-
-    #[OA\Patch(
-        path: '/products/{id}/name',
-        summary: 'Rename a product',
-        operationId: 'renameProduct',
-        tags: ['Products'],
-        security: [['bearerAuth' => []]],
-        parameters: [new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['name'],
-                properties: [new OA\Property(property: 'name', type: 'string', maxLength: 255)],
-            ),
-        ),
-        responses: [
-            new OA\Response(response: 200, description: 'Product renamed', content: new OA\JsonContent(ref: '#/components/schemas/ProductEnvelope')),
-            new OA\Response(response: 401, description: 'Unauthenticated'),
-            new OA\Response(response: 404, description: 'Product not found'),
-            new OA\Response(response: 422, description: 'Validation error'),
-        ],
-    )]
-    public function rename(RenameProductRequest $request, int $id): JsonResponse
-    {
-        $product = $this->commandBus->dispatch(new RenameProductCommand(
-            productId: $id,
-            name: (string) $request->validated('name'),
         ));
 
         return ApiResponseFactory::ok(['product' => $product]);

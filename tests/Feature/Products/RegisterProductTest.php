@@ -61,6 +61,9 @@ beforeEach(function () {
     $this->actingAs($this->user, 'stateful-api');
 
     $this->app->bind(ProductUsagePort::class, NullProductUsageAdapter::class);
+
+    $this->createRole('developer');
+    $this->createRole('backoffice');
 });
 
 describe('POST /api/v2/products/{id}/register', function () {
@@ -119,5 +122,56 @@ describe('POST /api/v2/products/{id}/register', function () {
             'user_id' => $this->user->id,
             'password' => 'secret-pass',
         ])->assertStatus(401);
+    });
+
+    it('returns 403 when a regular user tries to register an already-owned product', function () {
+        $owner = $this->create_user(['email' => 'existing-owner@example.com']);
+        $productId = createRegisterProduct([
+            'password' => 'my-secret',
+            'user_id' => $owner->id,
+        ]);
+
+        $this->postJson("/api/v2/products/{$productId}/register", [
+            'user_id' => $this->user->id,
+            'password' => 'my-secret',
+        ])->assertForbidden();
+    });
+
+    it('allows a backoffice admin to reassign an already-owned product', function () {
+        $admin = $this->create_user(['email' => 'backoffice-register@example.com']);
+        $admin->assignRole('backoffice');
+        $this->actingAs($admin, 'stateful-api');
+
+        $owner = $this->create_user(['email' => 'current-owner-register@example.com']);
+        $productId = createRegisterProduct([
+            'password' => 'my-secret',
+            'user_id' => $owner->id,
+        ]);
+
+        $this->postJson("/api/v2/products/{$productId}/register", [
+            'user_id' => $admin->id,
+            'password' => 'my-secret',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.product.userId', $admin->id);
+    });
+
+    it('allows a developer admin to reassign an already-owned product', function () {
+        $admin = $this->create_user(['email' => 'developer-register@example.com']);
+        $admin->assignRole('developer');
+        $this->actingAs($admin, 'stateful-api');
+
+        $owner = $this->create_user(['email' => 'current-owner-dev@example.com']);
+        $productId = createRegisterProduct([
+            'password' => 'my-secret',
+            'user_id' => $owner->id,
+        ]);
+
+        $this->postJson("/api/v2/products/{$productId}/register", [
+            'user_id' => $admin->id,
+            'password' => 'my-secret',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.product.userId', $admin->id);
     });
 });

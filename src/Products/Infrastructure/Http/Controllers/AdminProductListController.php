@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Src\Products\Infrastructure\Http\Controllers;
 
-use App\Http\Contracts\Controller;
-use App\Http\Requests\Products\ListAdminProductsRequest;
+use Src\Products\Infrastructure\Http\Requests\ListAdminProductsRequest;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
 use Src\Products\Application\Queries\ListAdminProducts\ListAdminProductsQuery;
@@ -14,7 +13,7 @@ use Src\Shared\Core\Bus\QueryBus;
 use Src\Shared\Infrastructure\Http\ApiResponseFactory;
 
 #[OA\Tag(name: 'Products - Admin', description: 'Administration endpoints for product listings')]
-final class AdminProductListController extends Controller
+final class AdminProductListController
 {
     public function __construct(
         private readonly QueryBus $queryBus,

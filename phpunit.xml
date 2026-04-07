@@ -23,20 +23,23 @@
     <php>
         <ini name="memory_limit" value="512M"/>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:dGVzdGluZy1vbmx5LWtleS1mb3ItY2ktcGhwdW5pdCE=" force="true"/>
         <env name="APP_URL" value="http://localhost"/>
-		<env name="AUTH_MODEL" value="App\Models\User"/>
-		<env name="HTTP_REFERER" value="http://localhost:3000"/>
+        <env name="AUTH_MODEL" value="App\Models\User"/>
+        <env name="HTTP_REFERER" value="http://localhost:3000"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
-		<env name="CACHE_STORE" value="array" force="true"/>
-         <env name="DB_CONNECTION" value="sqlite" force="true"/>
-         <env name="DB_DATABASE" value=":memory:" force="true"/>
-         <server name="DB_CONNECTION" value="sqlite"/>
-         <server name="DB_DATABASE" value=":memory:"/>
+        <env name="CACHE_STORE" value="array" force="true"/>
+        <env name="DB_CONNECTION" value="sqlite" force="true"/>
+        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <server name="DB_CONNECTION" value="sqlite"/>
+        <server name="DB_DATABASE" value=":memory:"/>
+        <env name="LOG_CHANNEL" value="null" force="true"/>
+        <env name="LOG_DEPRECATIONS_CHANNEL" value="null" force="true"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="file"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>
 </phpunit>

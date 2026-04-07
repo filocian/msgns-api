@@ -63,6 +63,12 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
+      # Create an empty .env so Laravel's Dotenv::safeLoad() does not emit
+      # file_get_contents warnings. All test configuration lives in phpunit.xml
+      # with force="true" — this file intentionally carries no values.
+      - name: Provide empty .env for Dotenv bootstrap
+        run: touch .env
+
       - name: Verify explicit legacy inventory before running defaults
         run: composer run test:verify-legacy
 

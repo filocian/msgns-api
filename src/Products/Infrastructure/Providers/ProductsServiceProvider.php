@@ -27,6 +27,7 @@ use Src\Products\Application\Commands\RestoreProduct\RestoreProductHandler;
 use Src\Products\Application\Commands\SetTargetUrl\SetTargetUrlHandler;
 use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductHandler;
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
+use Src\Products\Application\Commands\UpdateProductDetails\UpdateProductDetailsHandler;
 use Src\Products\Application\Queries\ResolveProductRedirection\ResolveProductRedirectionHandler;
 use Src\Products\Application\Queries\DownloadGenerationExcel\DownloadGenerationExcelHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
@@ -156,6 +157,7 @@ final class ProductsServiceProvider extends ServiceProvider
         $commandBus->register('products.group_products', GroupProductsHandler::class);
         $commandBus->register('products.clone_from_product', CloneFromProductHandler::class);
         $commandBus->register('products.add_business_info', AddBusinessInfoHandler::class);
+        $commandBus->register('products.update_product_details', UpdateProductDetailsHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);

@@ -3,173 +3,205 @@
 declare(strict_types=1);
 
 describe('Products module architecture', function () {
+	// ─── Domain layer — no Illuminate\* ──────────────────────────────────────
 
-    // ─── Domain layer — no Illuminate\* ──────────────────────────────────────
+	it('does not import Illuminate classes inside Products Domain', function () {
+		$directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Domain');
+		$iterator = new RecursiveIteratorIterator($directory);
 
-    it('does not import Illuminate classes inside Products Domain', function () {
-        $directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Domain');
-        $iterator  = new RecursiveIteratorIterator($directory);
+		foreach ($iterator as $file) {
+			if (!$file->isFile() || $file->getExtension() !== 'php') {
+				continue;
+			}
 
-        foreach ($iterator as $file) {
-            if (! $file->isFile() || $file->getExtension() !== 'php') {
-                continue;
-            }
+			$content = file_get_contents($file->getPathname());
+			assert(is_string($content));
 
-            $content = file_get_contents($file->getPathname());
-            assert(is_string($content));
+			expect($content)->not->toContain(
+				'use Illuminate\\',
+				"File {$file->getPathname()} must not import Illuminate classes inside Products Domain"
+			);
+		}
+	});
 
-            expect($content)->not->toContain(
-                'use Illuminate\\',
-                "File {$file->getPathname()} must not import Illuminate classes inside Products Domain"
-            );
-        }
-    });
+	// ─── Domain layer — no App\* ─────────────────────────────────────────────
 
-    // ─── Domain layer — no App\* ─────────────────────────────────────────────
+	it('does not import App classes inside Products Domain', function () {
+		$directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Domain');
+		$iterator = new RecursiveIteratorIterator($directory);
 
-    it('does not import App classes inside Products Domain', function () {
-        $directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Domain');
-        $iterator  = new RecursiveIteratorIterator($directory);
+		foreach ($iterator as $file) {
+			if (!$file->isFile() || $file->getExtension() !== 'php') {
+				continue;
+			}
 
-        foreach ($iterator as $file) {
-            if (! $file->isFile() || $file->getExtension() !== 'php') {
-                continue;
-            }
+			$content = file_get_contents($file->getPathname());
+			assert(is_string($content));
 
-            $content = file_get_contents($file->getPathname());
-            assert(is_string($content));
+			expect($content)->not->toContain(
+				'use App\\',
+				"File {$file->getPathname()} must not import App classes inside Products Domain"
+			);
+		}
+	});
 
-            expect($content)->not->toContain(
-                'use App\\',
-                "File {$file->getPathname()} must not import App classes inside Products Domain"
-            );
-        }
-    });
+	// ─── Application layer — no Illuminate\* ─────────────────────────────────
 
-    // ─── Application layer — no Illuminate\* ─────────────────────────────────
+	it('does not import Illuminate classes inside Products Application', function () {
+		$directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Application');
+		$iterator = new RecursiveIteratorIterator($directory);
 
-    it('does not import Illuminate classes inside Products Application', function () {
-        $directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Application');
-        $iterator  = new RecursiveIteratorIterator($directory);
+		foreach ($iterator as $file) {
+			if (!$file->isFile() || $file->getExtension() !== 'php') {
+				continue;
+			}
 
-        foreach ($iterator as $file) {
-            if (! $file->isFile() || $file->getExtension() !== 'php') {
-                continue;
-            }
+			$content = file_get_contents($file->getPathname());
+			assert(is_string($content));
 
-            $content = file_get_contents($file->getPathname());
-            assert(is_string($content));
+			expect($content)->not->toContain(
+				'use Illuminate\\',
+				"File {$file->getPathname()} must not import Illuminate classes inside Products Application"
+			);
+		}
+	});
 
-            expect($content)->not->toContain(
-                'use Illuminate\\',
-                "File {$file->getPathname()} must not import Illuminate classes inside Products Application"
-            );
-        }
-    });
+	// ─── Domain layer — no Application\* (dependency inversion) ─────────────
 
-    // ─── Domain layer — no Application\* (dependency inversion) ─────────────
+	it('does not import Application classes inside Products Domain', function () {
+		$directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Domain');
+		$iterator = new RecursiveIteratorIterator($directory);
 
-    it('does not import Application classes inside Products Domain', function () {
-        $directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Domain');
-        $iterator  = new RecursiveIteratorIterator($directory);
+		foreach ($iterator as $file) {
+			if (!$file->isFile() || $file->getExtension() !== 'php') {
+				continue;
+			}
 
-        foreach ($iterator as $file) {
-            if (! $file->isFile() || $file->getExtension() !== 'php') {
-                continue;
-            }
+			$content = file_get_contents($file->getPathname());
+			assert(is_string($content));
 
-            $content = file_get_contents($file->getPathname());
-            assert(is_string($content));
+			expect($content)->not->toContain(
+				'use Src\\Products\\Application\\',
+				"File {$file->getPathname()} must not import Application classes inside Products Domain"
+			);
+		}
+	});
 
-            expect($content)->not->toContain(
-                'use Src\\Products\\Application\\',
-                "File {$file->getPathname()} must not import Application classes inside Products Domain"
-            );
-        }
-    });
+	// ─── Application layer — no App\* ────────────────────────────────────────
 
-    // ─── Application layer — no App\* ────────────────────────────────────────
+	it('does not import App classes inside Products Application', function () {
+		$directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Application');
+		$iterator = new RecursiveIteratorIterator($directory);
 
-    it('does not import App classes inside Products Application', function () {
-        $directory = new RecursiveDirectoryIterator(__DIR__ . '/../../src/Products/Application');
-        $iterator  = new RecursiveIteratorIterator($directory);
+		foreach ($iterator as $file) {
+			if (!$file->isFile() || $file->getExtension() !== 'php') {
+				continue;
+			}
 
-        foreach ($iterator as $file) {
-            if (! $file->isFile() || $file->getExtension() !== 'php') {
-                continue;
-            }
+			$content = file_get_contents($file->getPathname());
+			assert(is_string($content));
 
-            $content = file_get_contents($file->getPathname());
-            assert(is_string($content));
+			expect($content)->not->toContain(
+				'use App\\',
+				"File {$file->getPathname()} must not import App classes inside Products Application"
+			);
+		}
+	});
 
-            expect($content)->not->toContain(
-                'use App\\',
-                "File {$file->getPathname()} must not import App classes inside Products Application"
-            );
-        }
-    });
+	// ─── No delete behavior (AC-008) ─────────────────────────────────────────
 
-    // ─── No delete behavior (AC-008) ─────────────────────────────────────────
+	it('does not expose any delete command in Products Application', function () {
+		$applicationDir = __DIR__ . '/../../src/Products/Application';
+		$directory = new RecursiveDirectoryIterator($applicationDir);
+		$iterator = new RecursiveIteratorIterator($directory);
 
-    it('does not expose any delete command in Products Application', function () {
-        $applicationDir = __DIR__ . '/../../src/Products/Application';
-        $directory = new RecursiveDirectoryIterator($applicationDir);
-        $iterator  = new RecursiveIteratorIterator($directory);
+		foreach ($iterator as $file) {
+			if (!$file->isFile() || $file->getExtension() !== 'php') {
+				continue;
+			}
 
-        foreach ($iterator as $file) {
-            if (! $file->isFile() || $file->getExtension() !== 'php') {
-                continue;
-            }
+			$basename = $file->getBasename('.php');
 
-            $basename = $file->getBasename('.php');
+			expect(str_contains(strtolower($basename), 'delete'))->toBeFalse(
+				"File {$file->getPathname()} must not exist — delete commands are not in scope for Phase 1 (AC-008)"
+			);
+		}
+	});
 
-            expect(str_contains(strtolower($basename), 'delete'))->toBeFalse(
-                "File {$file->getPathname()} must not exist — delete commands are not in scope for Phase 1 (AC-008)"
-            );
-        }
-    });
+	it('does not expose any delete method on the ProductType entity', function () {
+		$content = file_get_contents(__DIR__ . '/../../src/Products/Domain/Entities/ProductType.php');
+		assert(is_string($content));
 
-    it('does not expose any delete method on the ProductType entity', function () {
-        $content = file_get_contents(__DIR__ . '/../../src/Products/Domain/Entities/ProductType.php');
-        assert(is_string($content));
+		expect($content)->not->toContain('function delete')
+			->and($content)->not->toContain('function softDelete')
+			->and($content)->not->toContain('function markDeleted');
+	});
 
-        expect($content)->not->toContain('function delete')
-            ->and($content)->not->toContain('function softDelete')
-            ->and($content)->not->toContain('function markDeleted');
-    });
+	it('ensures GenerationHistory entity does not import Illuminate classes', function () {
+		$content = file_get_contents(__DIR__ . '/../../src/Products/Domain/Entities/GenerationHistory.php');
+		assert(is_string($content));
 
-    it('ensures GenerationHistory entity does not import Illuminate classes', function () {
-        $content = file_get_contents(__DIR__ . '/../../src/Products/Domain/Entities/GenerationHistory.php');
-        assert(is_string($content));
+		expect($content)->not->toContain('use Illuminate\\');
+	});
 
-        expect($content)->not->toContain('use Illuminate\\');
-    });
+	it('ensures GenerationHistorySummaryItem does not import Illuminate classes', function () {
+		$content = file_get_contents(__DIR__ . '/../../src/Products/Domain/DataTransfer/GenerationHistorySummaryItem.php');
+		assert(is_string($content));
 
-    it('ensures GenerationHistorySummaryItem does not import Illuminate classes', function () {
-        $content = file_get_contents(__DIR__ . '/../../src/Products/Domain/DataTransfer/GenerationHistorySummaryItem.php');
-        assert(is_string($content));
+		expect($content)->not->toContain('use Illuminate\\');
+	});
 
-        expect($content)->not->toContain('use Illuminate\\');
-    });
+	it('ensures ListGenerationHistoryHandler does not import Illuminate classes', function () {
+		$content = file_get_contents(
+			__DIR__ . '/../../src/Products/Application/Queries/ListGenerationHistory/ListGenerationHistoryHandler.php'
+		);
+		assert(is_string($content));
 
-    it('ensures ListGenerationHistoryHandler does not import Illuminate classes', function () {
-        $content = file_get_contents(__DIR__ . '/../../src/Products/Application/Queries/ListGenerationHistory/ListGenerationHistoryHandler.php');
-        assert(is_string($content));
+		expect($content)->not->toContain('use Illuminate\\');
+	});
 
-        expect($content)->not->toContain('use Illuminate\\');
-    });
+	it('ensures DownloadGenerationExcelHandler does not import Illuminate classes', function () {
+		$content = file_get_contents(
+			__DIR__ . '/../../src/Products/Application/Queries/DownloadGenerationExcel/DownloadGenerationExcelHandler.php'
+		);
+		assert(is_string($content));
 
-    it('ensures DownloadGenerationExcelHandler does not import Illuminate classes', function () {
-        $content = file_get_contents(__DIR__ . '/../../src/Products/Application/Queries/DownloadGenerationExcel/DownloadGenerationExcelHandler.php');
-        assert(is_string($content));
+		expect($content)->not->toContain('use Illuminate\\');
+	});
 
-        expect($content)->not->toContain('use Illuminate\\');
-    });
+	it('ensures GenerationHistoryRepositoryPort does not import Illuminate classes', function () {
+		$content = file_get_contents(__DIR__ . '/../../src/Products/Domain/Ports/GenerationHistoryRepositoryPort.php');
+		assert(is_string($content));
 
-    it('ensures GenerationHistoryRepositoryPort does not import Illuminate classes', function () {
-        $content = file_get_contents(__DIR__ . '/../../src/Products/Domain/Ports/GenerationHistoryRepositoryPort.php');
-        assert(is_string($content));
+		expect($content)->not->toContain('use Illuminate\\');
+	});
 
-        expect($content)->not->toContain('use Illuminate\\');
-    });
+	it('keeps PATCH details contract owned by v2 Products module', function () {
+		$routesContent = file_get_contents(__DIR__ . '/../../routes/api/products.php');
+		$legacyControllerContent = file_get_contents(
+			__DIR__ . '/../../app/Http/Controllers/Products/ProductActionController.php'
+		);
+		$legacyRequestContent = file_get_contents(__DIR__ . '/../../app/Http/Requests/Products/RenameProductRequest.php');
+
+		assert(is_string($routesContent));
+		assert(is_string($legacyControllerContent));
+		assert(is_string($legacyRequestContent));
+
+		expect($routesContent)
+			->toContain('use Src\\Products\\Infrastructure\\Http\\Controllers\\UpdateProductDetailsController;')
+			->and($routesContent)->toContain("Route::patch('/{id}/details', UpdateProductDetailsController::class)")
+			->and($routesContent)->not->toContain("Route::patch('/{id}/details', [ProductActionController::class");
+
+		expect($legacyControllerContent)->not->toContain('/products/{id}/details')
+			->and($legacyRequestContent)->not->toContain('/products/{id}/details');
+	});
+
+	it('does not import App classes inside UpdateProductDetailsController', function () {
+		$controllerContent = file_get_contents(
+			__DIR__ . '/../../src/Products/Infrastructure/Http/Controllers/UpdateProductDetailsController.php'
+		);
+		assert(is_string($controllerContent));
+
+		expect($controllerContent)->not->toContain('use App\\');
+	});
 });

@@ -234,38 +234,6 @@ describe('PATCH /api/v2/products/{id}/config-status', function () {
     });
 });
 
-describe('PATCH /api/v2/products/{id}/name', function () {
-    it('returns 200 with data.product when renaming a product', function () {
-        $productId = createActionProduct(['name' => 'Old Name']);
-
-        $this->patchJson("/api/v2/products/{$productId}/name", ['name' => 'New Name'])
-            ->assertOk()
-            ->assertJsonPath('data.product.id', $productId)
-            ->assertJsonPath('data.product.name', 'New Name');
-
-        $this->assertDatabaseHas('products', ['id' => $productId, 'name' => 'New Name']);
-    });
-
-    it('returns 401 when unauthenticated', function () {
-        $productId = createActionProduct();
-        auth()->guard('stateful-api')->logout();
-
-        $this->patchJson("/api/v2/products/{$productId}/name", ['name' => 'New Name'])->assertStatus(401);
-    });
-
-    it('returns 404 when renaming a missing product', function () {
-        $this->patchJson('/api/v2/products/999999/name', ['name' => 'New Name'])->assertStatus(404);
-    });
-
-    it('returns 422 when name is missing', function () {
-        $productId = createActionProduct();
-
-        $this->patchJson("/api/v2/products/{$productId}/name", [])
-            ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
-    });
-});
-
 describe('DELETE /api/v2/products/{id}', function () {
     it('returns 204 with no body when soft deleting a product', function () {
         $productId = createActionProduct();

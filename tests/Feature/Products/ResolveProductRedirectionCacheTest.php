@@ -14,7 +14,6 @@ use Src\Products\Domain\Ports\ProductUsagePort;
 
 beforeEach(function () {
     $this->seed(ProductConfigurationStatusSeeder::class);
-    Cache::flush();
     config()->set('queue.default', 'sync');
 
     app()->bind(ProductUsagePort::class, static fn (): ProductUsagePort => new class implements ProductUsagePort

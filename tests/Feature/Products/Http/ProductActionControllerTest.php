@@ -55,7 +55,6 @@ function createActionProduct(array $overrides = []): int
 beforeEach(function () {
     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     $this->seed(ProductConfigurationStatusSeeder::class);
-    Cache::flush();
     $this->user = $this->create_user(['email' => 'product-actions@example.com']);
     $this->actingAs($this->user, 'stateful-api');
 });

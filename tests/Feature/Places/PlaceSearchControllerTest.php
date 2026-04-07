@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
-	Cache::flush();
 	config()->set('services.google.places_api_key', 'test-google-key');
 });
 

@@ -57,7 +57,6 @@ function createRedirectionProduct(array $overrides = []): array
 
 beforeEach(function () {
     $this->seed(ProductConfigurationStatusSeeder::class);
-    Cache::flush();
 
     app()->bind(ProductUsagePort::class, static fn (): ProductUsagePort => new class implements ProductUsagePort
     {

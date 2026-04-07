@@ -98,9 +98,6 @@ it('overwrites existing pending_email on new request', function () {
 
 // --- AC-008: rate limit ---
 it('returns 429 after 3 requests within the rate limit window', function () {
-    // Clear all rate limiter state from previous tests
-    \Illuminate\Support\Facades\Cache::flush();
-
     for ($i = 1; $i <= 3; $i++) {
         $this->postJson('/api/v2/identity/me/email', [
             'new_email' => "rate{$i}@example.com",

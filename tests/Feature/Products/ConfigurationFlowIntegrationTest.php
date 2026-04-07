@@ -9,7 +9,6 @@ use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 
 beforeEach(function () {
     $this->seed(ProductConfigurationStatusSeeder::class);
-    Cache::flush();
     $this->user = $this->create_user(['email' => 'flow-tests@example.com']);
     $this->actingAs($this->user, 'stateful-api');
 });

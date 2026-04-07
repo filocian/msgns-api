@@ -34,6 +34,7 @@ uses(TestCase::class)->in('Unit');
 beforeEach(function (): void {
 	/** @var TestCase $this */
 	if (str_contains((string) $this::class, 'Feature')) {
+		\Illuminate\Support\Facades\Cache::flush();
 		$this->seed(RolePermissionsSeeder::class);
 	}
 });

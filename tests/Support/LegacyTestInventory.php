@@ -13,6 +13,7 @@ final class LegacyTestInventory
     {
         return [
             'Feature/Identity/LegacyFormRequestAuthorizationTest.php',
+            'Feature/ProductRegistrationTest.php',
             'Unit/Identity/Infrastructure/LegacyLocaleMapperTest.php',
         ];
     }

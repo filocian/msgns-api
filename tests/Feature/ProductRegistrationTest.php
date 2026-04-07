@@ -33,7 +33,7 @@ describe('Product Registration', function () {
 		$response = $this->postWithHeaders('/api/products/1/register/123456');
 
 		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
-	});
+	})->group('legacy');
 
 	it('Non existent product cannot be registered', function () {
 		$this->seed(DatabaseSeeder::class);

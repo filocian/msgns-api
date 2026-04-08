@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Mockery\MockInterface;
-use Src\Products\Application\Commands\ConfigureProduct\ConfigureProductCommand;
-use Src\Products\Application\Commands\ConfigureProduct\ConfigureProductHandler;
+use Src\Products\Application\Commands\ConfigureUrlProduct\ConfigureUrlProductCommand;
+use Src\Products\Application\Commands\ConfigureUrlProduct\ConfigureUrlProductHandler;
 use Src\Products\Domain\Entities\Product;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Services\ConfigurationFlowResolver;
@@ -14,7 +14,7 @@ use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 use Src\Shared\Core\Errors\NotFound;
 use Src\Shared\Core\Ports\TransactionPort;
 
-function makeConfigurableProduct(int $id = 42, string $status = ConfigurationStatus::ASSIGNED, string $model = 'google'): Product
+function makeConfigurableUrlProduct(int $id = 42, string $status = ConfigurationStatus::ASSIGNED, string $model = 'google'): Product
 {
     return Product::fromPersistence(
         id: $id,
@@ -37,9 +37,9 @@ function makeConfigurableProduct(int $id = 42, string $status = ConfigurationSta
     );
 }
 
-describe('ConfigureProductHandler', function () {
+describe('ConfigureUrlProductHandler', function () {
     it('sets target url and auto-advances assigned simple products to completed', function () {
-        $product = makeConfigurableProduct(status: ConfigurationStatus::ASSIGNED);
+        $product = makeConfigurableUrlProduct(status: ConfigurationStatus::ASSIGNED);
 
         /** @var MockInterface&ProductRepositoryPort $repo */
         $repo = Mockery::mock(ProductRepositoryPort::class);
@@ -50,7 +50,7 @@ describe('ConfigureProductHandler', function () {
         $repo->shouldReceive('findById')->once()->with(42)->andReturn($product);
         $repo->shouldReceive('save')->once()->with($product)->andReturnUsing(static fn (Product $saved): Product => $saved);
 
-        $handler = new ConfigureProductHandler(
+        $handler = new ConfigureUrlProductHandler(
             $repo,
             new ProductConfigurationService(),
             new ProductConfigStatusService(),
@@ -58,14 +58,14 @@ describe('ConfigureProductHandler', function () {
             $transaction,
         );
 
-        $result = $handler->handle(new ConfigureProductCommand(productId: 42, targetUrl: 'https://example.com'));
+        $result = $handler->handle(new ConfigureUrlProductCommand(productId: 42, targetUrl: 'https://example.com'));
 
         expect($result->targetUrl)->toBe('https://example.com')
             ->and($result->configurationStatus)->toBe(ConfigurationStatus::COMPLETED);
     });
 
     it('keeps advanced status when already beyond target-set', function () {
-        $product = makeConfigurableProduct(status: ConfigurationStatus::BUSINESS_SET);
+        $product = makeConfigurableUrlProduct(status: ConfigurationStatus::BUSINESS_SET);
 
         /** @var MockInterface&ProductRepositoryPort $repo */
         $repo = Mockery::mock(ProductRepositoryPort::class);
@@ -76,7 +76,7 @@ describe('ConfigureProductHandler', function () {
         $repo->shouldReceive('findById')->once()->with(42)->andReturn($product);
         $repo->shouldReceive('save')->once()->with($product)->andReturnUsing(static fn (Product $saved): Product => $saved);
 
-        $handler = new ConfigureProductHandler(
+        $handler = new ConfigureUrlProductHandler(
             $repo,
             new ProductConfigurationService(),
             new ProductConfigStatusService(),
@@ -84,7 +84,7 @@ describe('ConfigureProductHandler', function () {
             $transaction,
         );
 
-        $result = $handler->handle(new ConfigureProductCommand(productId: 42, targetUrl: 'https://example.com/new'));
+        $result = $handler->handle(new ConfigureUrlProductCommand(productId: 42, targetUrl: 'https://example.com/new'));
 
         expect($result->targetUrl)->toBe('https://example.com/new')
             ->and($result->configurationStatus)->toBe(ConfigurationStatus::BUSINESS_SET);
@@ -100,7 +100,7 @@ describe('ConfigureProductHandler', function () {
         $repo->shouldReceive('findById')->once()->with(999)->andReturn(null);
         $repo->shouldNotReceive('save');
 
-        $handler = new ConfigureProductHandler(
+        $handler = new ConfigureUrlProductHandler(
             $repo,
             new ProductConfigurationService(),
             new ProductConfigStatusService(),
@@ -108,7 +108,13 @@ describe('ConfigureProductHandler', function () {
             $transaction,
         );
 
-        expect(fn () => $handler->handle(new ConfigureProductCommand(productId: 999, targetUrl: 'https://example.com')))
+        expect(fn () => $handler->handle(new ConfigureUrlProductCommand(productId: 999, targetUrl: 'https://example.com')))
             ->toThrow(NotFound::class);
+    });
+
+    it('preserves the same commandName as the original ConfigureProduct', function () {
+        $command = new ConfigureUrlProductCommand(productId: 1, targetUrl: 'https://example.com');
+
+        expect($command->commandName())->toBe('products.configure_product');
     });
 });

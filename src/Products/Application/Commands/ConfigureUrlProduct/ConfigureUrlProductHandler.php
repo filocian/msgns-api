@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Src\Products\Application\Commands\ConfigureProduct;
+namespace Src\Products\Application\Commands\ConfigureUrlProduct;
 
 use DateTimeImmutable;
 use Src\Products\Application\Resources\ProductResource;
@@ -17,7 +17,7 @@ use Src\Shared\Core\Bus\CommandHandler;
 use Src\Shared\Core\Errors\NotFound;
 use Src\Shared\Core\Ports\TransactionPort;
 
-final class ConfigureProductHandler implements CommandHandler
+final class ConfigureUrlProductHandler implements CommandHandler
 {
     public function __construct(
         private readonly ProductRepositoryPort $productRepository,
@@ -29,7 +29,7 @@ final class ConfigureProductHandler implements CommandHandler
 
     public function handle(Command $command): ProductResource
     {
-        assert($command instanceof ConfigureProductCommand);
+        assert($command instanceof ConfigureUrlProductCommand);
 
         return $this->transaction->run(function () use ($command): ProductResource {
             $product = $this->productRepository->findById($command->productId);

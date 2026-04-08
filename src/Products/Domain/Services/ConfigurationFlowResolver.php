@@ -27,6 +27,7 @@ final class ConfigurationFlowResolver
         'tiktok' => [ConfigurationStatus::BUSINESS_SET],
         'facebook' => [ConfigurationStatus::BUSINESS_SET],
         'info' => [ConfigurationStatus::BUSINESS_SET],
+        'whatsapp' => [ConfigurationStatus::BUSINESS_SET],
     ];
 
     /**

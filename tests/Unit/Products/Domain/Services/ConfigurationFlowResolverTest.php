@@ -32,9 +32,21 @@ describe('ConfigurationFlowResolver', function () {
             ->and($resolver->canSkipTo('google', ConfigurationStatus::from(ConfigurationStatus::NOT_STARTED), ConfigurationStatus::from(ConfigurationStatus::COMPLETED)))->toBeFalse();
     });
 
+    it('returns applicable states for whatsapp model skipping business-set', function () {
+        $resolver = new ConfigurationFlowResolver();
+        $states = array_map(static fn (ConfigurationStatus $status): string => $status->value, $resolver->applicableStates('whatsapp'));
+
+        expect($states)->toBe([
+            ConfigurationStatus::NOT_STARTED,
+            ConfigurationStatus::ASSIGNED,
+            ConfigurationStatus::TARGET_SET,
+            ConfigurationStatus::COMPLETED,
+        ]);
+    });
+
     it('throws for unsupported models', function () {
         $resolver = new ConfigurationFlowResolver();
 
-        expect(fn () => $resolver->applicableStates('whatsapp'))->toThrow(UnsupportedProductModel::class);
+        expect(fn () => $resolver->applicableStates('unknown_model'))->toThrow(UnsupportedProductModel::class);
     });
 });

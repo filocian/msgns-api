@@ -15,8 +15,10 @@ use Src\Identity\Infrastructure\Http\Controllers\AdminDeactivateUserController;
 use Src\Identity\Infrastructure\Http\Controllers\AdminDeleteRoleController;
 use Src\Identity\Infrastructure\Http\Controllers\AdminExportUsersController;
 use Src\Identity\Infrastructure\Http\Controllers\AdminGetUserController;
+use Src\Identity\Infrastructure\Http\Controllers\AdminGetRoleController;
 use Src\Identity\Infrastructure\Http\Controllers\AdminListPermissionsController;
 use Src\Identity\Infrastructure\Http\Controllers\AdminListRolesController;
+use Src\Identity\Infrastructure\Http\Controllers\AdminSyncRolePermissionsController;
 use Src\Identity\Infrastructure\Http\Controllers\AdminListUsersController;
 use Src\Identity\Infrastructure\Http\Controllers\AdminRemoveRoleFromUserController;
 use Src\Identity\Infrastructure\Http\Controllers\AdminSetEmailVerifiedController;
@@ -67,7 +69,7 @@ Route::middleware('auth:stateful-api')->group(function () {
 });
 
 // Admin routes
-Route::middleware(['auth:stateful-api', 'role:developer|backoffice'])->prefix('/admin')->group(function () {
+Route::middleware(['auth:stateful-api', 'permission:manage_roles_and_permissions,stateful-api'])->prefix('/admin')->group(function () {
     // IMPORTANT: /users/export MUST come before /users/bulk/* and /users/{id} to avoid route parameter capture
     Route::get('/users/export', AdminExportUsersController::class)
          ->middleware('throttle:10,1');
@@ -92,7 +94,9 @@ Route::middleware(['auth:stateful-api', 'role:developer|backoffice'])->prefix('/
     Route::delete('/users/{id}/roles/{role}', AdminRemoveRoleFromUserController::class);
     Route::get('/roles', AdminListRolesController::class);
     Route::post('/roles', AdminCreateRoleController::class);
+    Route::get('/roles/{id}', AdminGetRoleController::class);
     Route::patch('/roles/{id}', AdminUpdateRoleController::class);
     Route::delete('/roles/{id}', AdminDeleteRoleController::class);
+    Route::put('/roles/{id}/permissions', AdminSyncRolePermissionsController::class);
     Route::get('/permissions', AdminListPermissionsController::class);
 });

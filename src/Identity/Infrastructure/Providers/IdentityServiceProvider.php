@@ -8,6 +8,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 use Src\Identity\Infrastructure\Http\RoleMiddleware;
 use Src\Identity\Application\Commands\AdminActivateUser\AdminActivateUserHandler;
 use Src\Identity\Application\Commands\AdminDeactivateUser\AdminDeactivateUserHandler;
@@ -41,7 +42,9 @@ use Src\Identity\Application\Commands\UpdateMyProfile\UpdateMyProfileHandler;
 use Src\Identity\Application\Commands\UpdateRole\UpdateRoleHandler;
 use Src\Identity\Application\Commands\VerifyEmail\VerifyEmailHandler;
 use Src\Identity\Application\Contracts\LocaleMapper;
+use Src\Identity\Application\Commands\SyncRolePermissions\SyncRolePermissionsHandler;
 use Src\Identity\Application\Queries\GetCurrentUser\GetCurrentUserHandler;
+use Src\Identity\Application\Queries\GetRole\GetRoleHandler;
 use Src\Identity\Application\Queries\GetUser\GetUserHandler;
 use Src\Identity\Application\Queries\ListPermissions\ListPermissionsHandler;
 use Src\Identity\Application\Queries\ListRoles\ListRolesHandler;
@@ -143,9 +146,15 @@ final class IdentityServiceProvider extends ServiceProvider
         $queryBus->register('identity.export_users', ExportUsersHandler::class);
         $queryBus->register('identity.list_roles', ListRolesHandler::class);
         $queryBus->register('identity.list_permissions', ListPermissionsHandler::class);
+        $queryBus->register('identity.get_role', GetRoleHandler::class);
+
+        $commandBus->register('identity.sync_role_permissions', SyncRolePermissionsHandler::class);
 
         // Register role middleware alias (needed for route-level ->middleware('role:...'))
         $this->app->make(Router::class)->aliasMiddleware('role', RoleMiddleware::class);
+
+        // Register Spatie permission middleware alias (needed for route-level ->middleware('permission:...'))
+        $this->app->make(Router::class)->aliasMiddleware('permission', PermissionMiddleware::class);
 
         // Load routes
         Route::prefix('api/v2/identity')

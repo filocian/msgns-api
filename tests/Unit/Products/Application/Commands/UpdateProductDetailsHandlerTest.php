@@ -149,6 +149,11 @@ final class StubRolePort implements RolePort
 		throw new RuntimeException('Not needed in this test.');
 	}
 
+	public function syncPermissionsByRoleId(int $roleId, array $permissionNames): void
+	{
+		throw new RuntimeException('Not needed in this test.');
+	}
+
 	public function syncRolePermissions(string $role, array $permissions): void
 	{
 		throw new RuntimeException('Not needed in this test.');

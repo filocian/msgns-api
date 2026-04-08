@@ -101,4 +101,38 @@ describe('CoreRolePolicy', function () {
         $this->policy->guardRename(99, 'custom-role-v2', $this->roles);
         expect(true)->toBeTrue();
     });
+
+    // ---------------------------------------------------------------
+    // guardPermissionSync (T-08)
+    // ---------------------------------------------------------------
+
+    it('throws Unauthorized when syncing permissions on core role developer', function () {
+        $this->policy->guardPermissionSync('developer');
+    })->throws(Unauthorized::class);
+
+    it('throws Unauthorized when syncing permissions on core role backoffice', function () {
+        $this->policy->guardPermissionSync('backoffice');
+    })->throws(Unauthorized::class);
+
+    it('throws Unauthorized when syncing permissions on core role user', function () {
+        $this->policy->guardPermissionSync('user');
+    })->throws(Unauthorized::class);
+
+    it('allows syncing permissions on non-core role designer', function () {
+        $this->policy->guardPermissionSync('designer');
+        expect(true)->toBeTrue();
+    });
+
+    it('allows syncing permissions on custom role', function () {
+        $this->policy->guardPermissionSync('custom-admin');
+        expect(true)->toBeTrue();
+    });
+
+    it('exception for core role permission sync contains core_role_protected code', function () {
+        try {
+            $this->policy->guardPermissionSync('developer');
+        } catch (Unauthorized $e) {
+            expect($e->getMessage())->toBe('core_role_protected');
+        }
+    });
 });

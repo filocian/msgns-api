@@ -158,20 +158,25 @@ describe('WhatsApp redirection resolution via GET /api/v2/products/{id}/{passwor
             ->assertStatus(404);
     });
 
-    it('returns 422 when product is not active', function () {
-        $productId = createWhatsappRedirProduct(['active' => false]);
+    it('returns 200 with frontend_route when product is not active (disabled)', function () {
+        $userId = \App\Models\User::factory()->create()->id;
+        $productId = createWhatsappRedirProduct(['active' => false, 'user_id' => $userId]);
 
         $this->getJson("/api/v2/products/{$productId}/secret/redirection-target")
-            ->assertStatus(422)
-            ->assertJsonPath('error.code', 'product_not_active');
+            ->assertOk()
+            ->assertJsonPath('data.type', 'frontend_route');
     });
 
-    it('returns 422 when product configuration is incomplete', function () {
-        $productId = createWhatsappRedirProduct(['configuration_status' => ConfigurationStatus::ASSIGNED]);
+    it('returns 200 with frontend_route when product configuration is incomplete', function () {
+        $productId = createWhatsappRedirProduct([
+            'configuration_status' => ConfigurationStatus::ASSIGNED,
+            'user_id' => null,
+            'target_url' => null,
+        ]);
 
         $this->getJson("/api/v2/products/{$productId}/secret/redirection-target")
-            ->assertStatus(422)
-            ->assertJsonPath('error.code', 'product_incomplete_configuration');
+            ->assertOk()
+            ->assertJsonPath('data.type', 'frontend_route');
     });
 
     it('prefers default over locale match', function () {

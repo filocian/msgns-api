@@ -52,13 +52,12 @@ final class ProductRedirectionController extends Controller
                 description: 'Redirection target resolved',
                 content: new OA\JsonContent(properties: [
                     new OA\Property(property: 'data', properties: [
-                        new OA\Property(property: 'target_url', type: 'string', example: 'https://google.com'),
-                        new OA\Property(property: 'type', type: 'string', example: 'external_url'),
+                        new OA\Property(property: 'url', type: 'string', example: 'https://google.com'),
+                        new OA\Property(property: 'type', type: 'string', enum: ['external_url', 'frontend_route'], example: 'external_url'),
                     ], type: 'object'),
                 ]),
             ),
             new OA\Response(response: 404, description: 'Product not found', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
-            new OA\Response(response: 422, description: 'Product misconfigured', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
         ],
     )]
     public function apiRedirect(Request $request, int $id, string $password): JsonResponse

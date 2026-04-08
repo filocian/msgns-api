@@ -37,6 +37,7 @@ use Src\Products\Application\Commands\UpdateProductDetails\UpdateProductDetailsH
 use Src\Products\Application\Queries\ListWhatsappLocales\ListWhatsappLocalesHandler;
 use Src\Products\Application\Queries\ListWhatsappMessages\ListWhatsappMessagesHandler;
 use Src\Products\Application\Queries\ListWhatsappPhones\ListWhatsappPhonesHandler;
+use Src\Products\Application\Queries\GetPublicProduct\GetPublicProductHandler;
 use Src\Products\Application\Queries\ResolveProductRedirection\ResolveProductRedirectionHandler;
 use Src\Products\Application\Queries\DownloadGenerationExcel\DownloadGenerationExcelHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
@@ -156,6 +157,10 @@ final class ProductsServiceProvider extends ServiceProvider
                 passwordGenerator: $this->app->make(PasswordGeneratorPort::class),
             );
         });
+
+        $this->app->when(ResolveProductRedirectionHandler::class)
+            ->needs('$frontUrl')
+            ->give(static fn () => (string) config('services.product.front_url'));
     }
 
     public function boot(): void
@@ -201,6 +206,8 @@ final class ProductsServiceProvider extends ServiceProvider
         $queryBus->register('products.resolve_product_redirection', ResolveProductRedirectionHandler::class);
         $queryBus->register('products.list_generation_history', ListGenerationHistoryHandler::class);
         $queryBus->register('products.download_generation_excel', DownloadGenerationExcelHandler::class);
+
+        $queryBus->register('products.get_public_product', GetPublicProductHandler::class);
 
         // WhatsApp query handlers — issue #61
         $queryBus->register('products.list_whatsapp_phones', ListWhatsappPhonesHandler::class);

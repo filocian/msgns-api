@@ -41,7 +41,8 @@ function redirectionHandlerProduct(int $id = 42, string $model = 'google', ?stri
 }
 
 describe('ResolveProductRedirectionHandler', function () {
-    it('returns cached targets without hitting the repository', function () {
+    it('returns cached targets for strategy-eligible products without hitting the strategy', function () {
+        $product = redirectionHandlerProduct();
         /** @var MockInterface&ProductRepositoryPort $repository */
         $repository = Mockery::mock(ProductRepositoryPort::class);
         /** @var MockInterface&ProductRedirectionStrategy $strategy */
@@ -54,7 +55,7 @@ describe('ResolveProductRedirectionHandler', function () {
         $cachePort = Mockery::mock(CachePort::class);
         $cache = new ProductRedirectionCacheService($cachePort);
 
-        $repository->shouldNotReceive('findByIdAndPassword');
+        $repository->shouldReceive('findByIdAndPassword')->once()->with(42, 'secret')->andReturn($product);
         $strategy->shouldNotReceive('supports');
         $cachePort->shouldReceive('get')->once()->with('products:redirection:42')->andReturn([
             'target' => ['url' => 'https://cached.com', 'type' => 'external_url'],
@@ -63,12 +64,12 @@ describe('ResolveProductRedirectionHandler', function () {
         $usage->shouldReceive('writeUsageEvent')->once();
         $eventBus->shouldReceive('publish')->once()->with(Mockery::type(ProductScanned::class));
 
-        $handler = new ResolveProductRedirectionHandler($repository, $strategy, $usage, $eventBus, $cache);
+        $handler = new ResolveProductRedirectionHandler($repository, $strategy, $usage, $eventBus, $cache, 'https://front.example.com');
 
         expect($handler->handle(new ResolveProductRedirectionQuery(42, 'secret', 'en'))->url)->toBe('https://cached.com');
     });
 
-    it('falls back to the database when cached password does not match', function () {
+    it('throws NotFound when product does not exist (cache is never consulted)', function () {
         /** @var MockInterface&ProductRepositoryPort $repository */
         $repository = Mockery::mock(ProductRepositoryPort::class);
         /** @var MockInterface&ProductRedirectionStrategy $strategy */
@@ -81,13 +82,10 @@ describe('ResolveProductRedirectionHandler', function () {
         $cachePort = Mockery::mock(CachePort::class);
         $cache = new ProductRedirectionCacheService($cachePort);
 
-        $cachePort->shouldReceive('get')->once()->with('products:redirection:42')->andReturn([
-            'target' => ['url' => 'https://cached.com', 'type' => 'external_url'],
-            'meta' => ['userId' => 9, 'productName' => 'Cached', 'password' => 'other'],
-        ]);
         $repository->shouldReceive('findByIdAndPassword')->once()->with(42, 'secret')->andReturn(null);
+        $cachePort->shouldNotReceive('get');
 
-        $handler = new ResolveProductRedirectionHandler($repository, $strategy, $usage, $eventBus, $cache);
+        $handler = new ResolveProductRedirectionHandler($repository, $strategy, $usage, $eventBus, $cache, 'https://front.example.com');
 
         expect(fn () => $handler->handle(new ResolveProductRedirectionQuery(42, 'secret', 'en')))->toThrow(NotFound::class);
     });
@@ -117,7 +115,7 @@ describe('ResolveProductRedirectionHandler', function () {
         $usage->shouldReceive('writeUsageEvent')->once();
         $eventBus->shouldReceive('publish')->once()->with(Mockery::type(ProductScanned::class));
 
-        $handler = new ResolveProductRedirectionHandler($repository, $strategy, $usage, $eventBus, $cache);
+        $handler = new ResolveProductRedirectionHandler($repository, $strategy, $usage, $eventBus, $cache, 'https://front.example.com');
 
         expect($handler->handle(new ResolveProductRedirectionQuery(42, 'secret', 'en'))->url)->toBe('https://resolved.com');
     });

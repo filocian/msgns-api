@@ -3,57 +3,11 @@
 declare(strict_types=1);
 
 use Database\Seeders\ProductConfigurationStatusSeeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Src\Products\Domain\Ports\ProductUsagePort;
 
-function createRedirectionProductType(): int
-{
-    $uid = uniqid();
-
-    return DB::table('product_types')->insertGetId([
-        'code' => 'TYPE-' . $uid,
-        'name' => 'Type ' . $uid,
-        'image_ref' => 'TYPE-' . $uid,
-        'primary_model' => 'google',
-        'secondary_model' => null,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-}
-
-/**
- * @param array<string, mixed> $overrides
- * @return array{id: int, data: array<string, mixed>}
- */
-function createRedirectionProduct(array $overrides = []): array
-{
-    $productTypeId = $overrides['product_type_id'] ?? createRedirectionProductType();
-    $password = $overrides['password'] ?? 'test-pass';
-    $defaults = [
-        'product_type_id' => $productTypeId,
-        'user_id' => null,
-        'model' => 'google',
-        'linked_to_product_id' => null,
-        'password' => $password,
-        'target_url' => 'https://google.com',
-        'usage' => 0,
-        'name' => 'Test Product',
-        'description' => null,
-        'active' => true,
-        'configuration_status' => 'completed',
-        'assigned_at' => null,
-        'size' => null,
-        'created_at' => now(),
-        'updated_at' => now(),
-        'deleted_at' => null,
-    ];
-
-    $data = array_merge($defaults, $overrides);
-    $id = DB::table('products')->insertGetId($data);
-
-    return ['id' => $id, 'data' => $data];
-}
+require_once __DIR__ . '/../../../Support/ProductRedirectionHelpers.php';
 
 beforeEach(function () {
     $this->seed(ProductConfigurationStatusSeeder::class);
@@ -109,28 +63,29 @@ describe('GET /api/v2/products/{id}/{password}/redirection-target', function () 
             ->assertNotFound();
     });
 
-    it('returns 422 for inactive product', function () {
-        $product = createRedirectionProduct(['active' => false]);
+    it('returns 200 with frontend_route for inactive (disabled) product', function () {
+        $userId = \App\Models\User::factory()->create()->id;
+        $product = createRedirectionProduct([
+            'active' => false,
+            'user_id' => $userId,
+            'configuration_status' => 'completed',
+        ]);
 
         $this->getJson("/api/v2/products/{$product['id']}/test-pass/redirection-target")
-            ->assertStatus(422)
-            ->assertJsonPath('error.code', 'product_not_active');
+            ->assertOk()
+            ->assertJsonPath('data.type', 'frontend_route');
     });
 
-    it('returns 422 for product with incomplete configuration', function () {
-        $product = createRedirectionProduct(['configuration_status' => 'assigned']);
+    it('returns 200 with frontend_route for product with incomplete configuration', function () {
+        $product = createRedirectionProduct([
+            'configuration_status' => 'assigned',
+            'user_id' => null,
+            'target_url' => null,
+        ]);
 
         $this->getJson("/api/v2/products/{$product['id']}/test-pass/redirection-target")
-            ->assertStatus(422)
-            ->assertJsonPath('error.code', 'product_incomplete_configuration');
-    });
-
-    it('returns 422 for product with null target_url', function () {
-        $product = createRedirectionProduct(['target_url' => null]);
-
-        $this->getJson("/api/v2/products/{$product['id']}/test-pass/redirection-target")
-            ->assertStatus(422)
-            ->assertJsonPath('error.code', 'product_missing_target_url');
+            ->assertOk()
+            ->assertJsonPath('data.type', 'frontend_route');
     });
 
     it('does not require authentication', function () {
@@ -154,11 +109,16 @@ describe('GET /v2/product/{id}/redirect/{password}', function () {
             ->assertNotFound();
     });
 
-    it('returns 422 for inactive product', function () {
-        $product = createRedirectionProduct(['active' => false]);
+    it('returns 302 redirect to frontend for inactive product', function () {
+        $userId = \App\Models\User::factory()->create()->id;
+        $product = createRedirectionProduct([
+            'active' => false,
+            'user_id' => $userId,
+            'configuration_status' => 'completed',
+        ]);
 
         $this->get("/v2/product/{$product['id']}/redirect/test-pass")
-            ->assertStatus(422);
+            ->assertStatus(302);
     });
 
     it('does not break the legacy redirect route', function () {

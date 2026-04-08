@@ -171,4 +171,30 @@ final class Product
     {
         return $this->events !== [];
     }
+
+    public function isVirgin(): bool
+    {
+        return $this->userId === null
+            && $this->targetUrl === null
+            && $this->configurationStatus->value === ConfigurationStatus::NOT_STARTED;
+    }
+
+    public function isDisabled(): bool
+    {
+        return !$this->active && !$this->isVirgin();
+    }
+
+    public function isMisconfigured(): bool
+    {
+        return in_array($this->configurationStatus->value, [
+            ConfigurationStatus::ASSIGNED,
+            ConfigurationStatus::TARGET_SET,
+            ConfigurationStatus::BUSINESS_SET,
+        ], true);
+    }
+
+    public function canBypassMisconfiguration(): bool
+    {
+        return $this->userId !== null && $this->targetUrl !== null;
+    }
 }

@@ -6,11 +6,10 @@ namespace Src\Products\Application\Queries\ResolveProductRedirection;
 
 use DateTimeImmutable;
 use Src\Products\Domain\Contracts\ProductRedirectionStrategy;
-use Src\Products\Domain\Errors\ProductMisconfigured;
+use Src\Products\Domain\Entities\Product;
 use Src\Products\Domain\Events\ProductScanned;
 use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Ports\ProductUsagePort;
-use Src\Products\Domain\ValueObjects\ConfigurationStatus;
 use Src\Products\Domain\ValueObjects\RedirectionContext;
 use Src\Products\Domain\ValueObjects\RedirectionTarget;
 use Src\Products\Infrastructure\Cache\ProductRedirectionCacheService;
@@ -27,23 +26,12 @@ final class ResolveProductRedirectionHandler implements QueryHandler
         private readonly ProductUsagePort $usagePort,
         private readonly EventBus $eventBus,
         private readonly ProductRedirectionCacheService $cacheService,
+        private readonly string $frontUrl,
     ) {}
 
     public function handle(Query $query): RedirectionTarget
     {
         assert($query instanceof ResolveProductRedirectionQuery);
-
-        $cached = $this->resolveFromCache($query->productId, $query->password);
-
-        if ($cached !== null) {
-            $this->trackUsage(
-                userId: $cached['meta']['userId'],
-                productId: $query->productId,
-                productName: $cached['meta']['productName'],
-            );
-
-            return $cached['target'];
-        }
 
         $product = $this->repository->findByIdAndPassword(
             $query->productId,
@@ -54,14 +42,48 @@ final class ResolveProductRedirectionHandler implements QueryHandler
             throw NotFound::entity('product', (string) $query->productId);
         }
 
-        if (!$product->active) {
-            throw ProductMisconfigured::notActive($product->id);
+        // Step 2: Virgin
+        if ($product->isVirgin()) {
+            return RedirectionTarget::frontendRoute($this->stepperUrl($product->id, $query->password));
         }
 
-        if ($product->configurationStatus->value !== ConfigurationStatus::COMPLETED) {
-            throw ProductMisconfigured::incompleteConfiguration($product->id);
+        // Step 3: Disabled
+        if ($product->isDisabled()) {
+            return RedirectionTarget::frontendRoute($this->disabledUrl($product->id));
         }
 
+        // Step 4: Misconfigured, cannot bypass
+        if ($product->isMisconfigured() && !$product->canBypassMisconfiguration()) {
+            return RedirectionTarget::frontendRoute($this->stepperUrl($product->id, $query->password));
+        }
+
+        // Steps 5+6: Strategy-eligible — consult cache first
+        $cached = $this->resolveFromCache($query->productId, $query->password);
+        if ($cached !== null) {
+            $this->trackUsage(
+                userId: $cached['meta']['userId'],
+                productId: $query->productId,
+                productName: $cached['meta']['productName'],
+            );
+
+            return $cached['target'];
+        }
+
+        return $this->resolveViaStrategy($product, $query);
+    }
+
+    private function stepperUrl(int $id, string $password): string
+    {
+        return "{$this->frontUrl}/products/{$id}/configure?password={$password}";
+    }
+
+    private function disabledUrl(int $id): string
+    {
+        return "{$this->frontUrl}/product/disabled?id={$id}";
+    }
+
+    private function resolveViaStrategy(Product $product, ResolveProductRedirectionQuery $query): RedirectionTarget
+    {
         if (!$this->strategy->supports($product)) {
             throw NotFound::entity('redirection-strategy', $product->model->value);
         }

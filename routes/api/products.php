@@ -35,6 +35,9 @@ Route::get('/{id}/{password}/redirection-target', [
     'apiRedirect',
 ])->whereNumber('id');
 
+Route::get('/{id}/{password}', \Src\Products\Infrastructure\Http\Controllers\GetPublicProductController::class)
+    ->whereNumber('id');
+
 Route::middleware('auth:stateful-api')->group(function (): void {
     // User product listing
     Route::get('/', [\Src\Products\Infrastructure\Http\Controllers\UserProductController::class, 'index']);

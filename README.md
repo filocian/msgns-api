@@ -1,66 +1,126 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# msgns API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend REST API for the msgns platform. Built with Laravel 12 and PHP 8.4, following a vertical slice architecture (S³ Lite) with CQRS and clean dependency boundaries.
 
-## About Laravel
+All modern code lives under `src/`. The `app/` directory contains legacy code that is being progressively retired.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Architecture
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The API is organized into vertical slices, each owning its domain logic, application handlers, infrastructure adapters, and HTTP layer:
 
-## Learning Laravel
+```
+src/
+├── Identity/    — authentication, users, roles, permissions
+├── Products/    — product management and configuration
+└── Places/      — location and Google Places integration
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Routes are versioned under `/api/v2/`. Each slice registers its own routes and service providers via `bootstrap/providers.php`.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Permissions
 
-## Laravel Sponsors
+### How permissions work
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Permissions are **code-defined** — they live in source code, not in the database. The canonical source of truth is:
 
-### Premium Partners
+```
+src/Identity/Domain/Permissions/DomainPermissions.php
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+This class holds every permission as a named constant and exposes two static methods:
 
-## Contributing
+- `DomainPermissions::all()` — returns the full list of permission name strings
+- `DomainPermissions::descriptions()` — returns a map of `permission_name => human-readable description`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+The database is a **projection** of this code. It is kept in sync by the `rbac:reconcile` artisan command, which reads the domain and creates or removes permissions and role assignments as needed.
 
-## Code of Conduct
+### How roles work
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Roles are defined in `DomainRoles.php` and their default permission sets in `DomainRolePermissions.php`. Three roles are **core** and cannot be deleted or have their permissions changed via the API:
 
-## Security Vulnerabilities
+| Role | Description |
+|---|---|
+| `developer` | Full access to everything |
+| `backoffice` | Full access to everything |
+| `user` | Standard end-user access |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Additional roles (`designer`, `marketing`, and any custom role created via the API) are non-core and fully manageable.
 
-## License
+### Adding a new permission
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1. Add a constant to `DomainPermissions.php`:
+
+```php
+const MY_NEW_PERMISSION = 'my_new_permission';
+```
+
+2. Add its description to the `descriptions()` method in the same file:
+
+```php
+'my_new_permission' => 'Allows doing X in the admin panel.',
+```
+
+3. Assign it to the roles that should have it by default in `DomainRolePermissions.php`. If it should be available to all admin roles, add it to the `developer` and `backoffice` arrays (or use `DomainPermissions::all()` if those roles already use it).
+
+4. Run `rbac:reconcile` as part of your deploy (see below). That's it — no migration, no manual DB step.
+
+> Legacy code (`app/Static/Permissions/StaticPermissions.php`) automatically picks up any permission added to `DomainPermissions` — it is a thin adapter that delegates to the domain class. You do not need to touch legacy.
+
+### rbac:reconcile
+
+```bash
+php artisan rbac:reconcile
+```
+
+Syncs the permission and role catalog from code to the database. It is:
+
+- **Idempotent** — safe to run multiple times, produces the same result.
+- **Non-destructive for custom roles** — only core roles and their default permission sets are reconciled. Custom roles created via the API are left untouched.
+
+**Deploy ordering** — reconcile must run after `migrate` and before the web server reloads:
+
+```bash
+php artisan migrate --force
+php artisan rbac:reconcile
+# reload web server
+```
+
+This matters because the permission-based middleware (`permission:manage_roles_and_permissions`) checks the database. If reconcile has not run yet, the new permission does not exist in the DB and the middleware will return 403 until it does.
+
+### Admin API endpoints
+
+All endpoints below require the `manage_roles_and_permissions` permission. By default this is assigned to the `developer` and `backoffice` roles. Any custom role can also be granted this permission via the API.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v2/identity/admin/roles` | List all roles |
+| `POST` | `/api/v2/identity/admin/roles` | Create a custom role |
+| `GET` | `/api/v2/identity/admin/roles/{id}` | Get a single role |
+| `PATCH` | `/api/v2/identity/admin/roles/{id}` | Rename a role |
+| `DELETE` | `/api/v2/identity/admin/roles/{id}` | Delete a custom role |
+| `PUT` | `/api/v2/identity/admin/roles/{id}/permissions` | Sync permissions on a role (full replace) |
+| `GET` | `/api/v2/identity/admin/permissions` | List all permissions with descriptions |
+
+Core roles (`developer`, `backoffice`, `user`) are protected — delete and permission sync return 403 for them.
+
+---
+
+## Running tests
+
+```bash
+# Modern suite only (recommended)
+php artisan test --group=modern
+
+# Full suite
+php artisan test
+```
+
+Static analysis:
+
+```bash
+./vendor/bin/phpstan analyse src/ --memory-limit=512M
+```

@@ -23,8 +23,8 @@ describe('RbacCatalog', function () {
             ->and($names)->toContain('user');
     });
 
-    it('exposes exactly 23 permissions', function () {
-        expect(RbacCatalog::allPermissions())->toHaveCount(23);
+    it('exposes exactly 24 permissions', function () {
+        expect(RbacCatalog::allPermissions())->toHaveCount(24);
     });
 
     it('marks developer, backoffice, and user as core roles', function () {
@@ -42,16 +42,16 @@ describe('RbacCatalog', function () {
             ->and($entries['marketing']->isCore)->toBeFalse();
     });
 
-    it('assigns all 23 permissions to developer role', function () {
+    it('assigns all 24 permissions to developer role', function () {
         $entries = collect(RbacCatalog::entries())->keyBy('name');
 
-        expect($entries['developer']->permissions)->toHaveCount(23);
+        expect($entries['developer']->permissions)->toHaveCount(24);
     });
 
-    it('assigns all 23 permissions to backoffice role', function () {
+    it('assigns all 24 permissions to backoffice role', function () {
         $entries = collect(RbacCatalog::entries())->keyBy('name');
 
-        expect($entries['backoffice']->permissions)->toHaveCount(23);
+        expect($entries['backoffice']->permissions)->toHaveCount(24);
     });
 
     it('assigns only export_data to designer role', function () {
@@ -100,7 +100,7 @@ describe('RbacCatalog', function () {
         }
     });
 
-    it('permission names match legacy StaticPermissions exactly', function () {
+    it('permission names match DomainPermissions::all() exactly', function () {
         $allPerms = RbacCatalog::allPermissions();
 
         $expectedPermissions = [
@@ -127,6 +127,7 @@ describe('RbacCatalog', function () {
             'assign_permission',
             'edit_user',
             'export_data',
+            'manage_roles_and_permissions',
         ];
 
         expect($allPerms)->toEqual($expectedPermissions);

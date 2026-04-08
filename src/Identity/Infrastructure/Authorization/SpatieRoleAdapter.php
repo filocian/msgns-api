@@ -84,7 +84,7 @@ final class SpatieRoleAdapter implements RolePort
 
     public function findById(int $id): RoleData
     {
-        $role = Role::find($id);
+        $role = Role::withCount('users')->find($id);
         if (!$role) {
             throw NotFound::because('role_not_found');
         }
@@ -92,7 +92,7 @@ final class SpatieRoleAdapter implements RolePort
             id: (int) $role->id,
             name: $role->name,
             permissions: $role->permissions->pluck('name')->toArray(),
-            usersCount: 0,
+            usersCount: (int) ($role->users_count ?? 0),
         );
     }
 
@@ -125,6 +125,20 @@ final class SpatieRoleAdapter implements RolePort
             throw NotFound::because('role_not_found');
         }
         $role->delete();
+    }
+
+    public function syncPermissionsByRoleId(int $roleId, array $permissionNames): void
+    {
+        $role = Role::find($roleId);
+        if (!$role) {
+            throw NotFound::because('role_not_found');
+        }
+
+        $permissionModels = collect($permissionNames)->map(
+            fn(string $name) => Permission::findOrCreate($name, self::GUARD)
+        );
+
+        $role->syncPermissions($permissionModels);
     }
 
     /**

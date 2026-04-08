@@ -36,6 +36,45 @@ final class DomainPermissions
     public const string ASSIGN_PERMISSION = 'assign_permission';
     public const string EDIT_USER = 'edit_user';
     public const string EXPORT_DATA = 'export_data';
+    public const string MANAGE_ROLES_AND_PERMISSIONS = 'manage_roles_and_permissions';
+
+    /**
+     * Human-readable English descriptions for every permission.
+     *
+     * Every value returned by all() MUST have a corresponding entry here.
+     * Enforced by DomainPermissionsDescriptionsTest.
+     *
+     * @return array<string, string>
+     */
+    public static function descriptions(): array
+    {
+        return [
+            self::CREATE_PRODUCT_TYPE                => 'Create new product types',
+            self::EDIT_PRODUCT_TYPE                  => 'Edit existing product types',
+            self::SINGLE_PRODUCT_ACTIVATION          => 'Activate a single product',
+            self::SINGLE_PRODUCT_DEACTIVATION        => 'Deactivate a single product',
+            self::BULK_PRODUCT_ACTIVATION            => 'Activate products in bulk',
+            self::BULK_PRODUCT_DEACTIVATION          => 'Deactivate products in bulk',
+            self::SINGLE_PRODUCT_ASSIGNMENT          => 'Assign a single product to a user',
+            self::BULK_PRODUCT_ASSIGNMENT            => 'Assign products to users in bulk',
+            self::SINGLE_PRODUCT_CONFIGURATION       => 'Configure a single product',
+            self::BULK_PRODUCT_CONFIGURATION         => 'Configure products in bulk',
+            self::CREATE_BUSINESS                    => 'Create new businesses',
+            self::EDIT_BUSINESS                      => 'Edit existing businesses',
+            self::SINGLE_PRODUCT_BUSINESS_ASSIGNMENT => 'Assign a single product to a business',
+            self::BULK_PRODUCT_BUSINESS_ASSIGNMENT   => 'Assign products to businesses in bulk',
+            self::PRODUCT_GENERATION                 => 'Generate products',
+            self::CREATE_ROLE                        => 'Create new custom roles',
+            self::EDIT_ROLE                          => 'Edit existing roles',
+            self::ASSIGN_ROLE                        => 'Assign roles to users',
+            self::CREATE_PERMISSION                  => 'Create new permissions',
+            self::EDIT_PERMISSION                    => 'Edit existing permissions',
+            self::ASSIGN_PERMISSION                  => 'Assign permissions to roles',
+            self::EDIT_USER                          => 'Edit user profiles',
+            self::EXPORT_DATA                        => 'Export data from the system',
+            self::MANAGE_ROLES_AND_PERMISSIONS       => 'Manage roles and permissions (admin RBAC panel access)',
+        ];
+    }
 
     /** @return string[] */
     public static function all(): array
@@ -64,6 +103,7 @@ final class DomainPermissions
             self::ASSIGN_PERMISSION,
             self::EDIT_USER,
             self::EXPORT_DATA,
+            self::MANAGE_ROLES_AND_PERMISSIONS,
         ];
     }
 }

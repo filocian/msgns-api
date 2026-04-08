@@ -4,6 +4,18 @@ declare(strict_types=1);
 
 namespace App\Static\Permissions;
 
+use Src\Identity\Domain\Permissions\DomainPermissions;
+
+/**
+ * Thin adapter over DomainPermissions.
+ *
+ * This class is kept for backward compatibility with legacy code that
+ * references App\Static\Permissions\StaticPermissions. All logic now
+ * delegates to the domain layer. Adding a constant to DomainPermissions
+ * automatically makes it available here with zero changes.
+ *
+ * Direction: App\ → Src\ is explicitly allowed (App adapts to Src).
+ */
 final class StaticPermissions
 {
 	/*
@@ -19,56 +31,43 @@ final class StaticPermissions
 	 *
 	 * */
 
-	public const string CREATE_PRODUCT_TYPE = 'create_product_type';
-	public const string EDIT_PRODUCT_TYPE = 'edit_product_type';
-	public const string SINGLE_PRODUCT_ACTIVATION = 'single_product_activation';
-	public const string SINGLE_PRODUCT_DEACTIVATION = 'single_product_deactivation';
-	public const string BULK_PRODUCT_ACTIVATION = 'bulk_product_activation';
-	public const string BULK_PRODUCT_DEACTIVATION = 'bulk_product_deactivation';
-	public const string SINGLE_PRODUCT_ASSIGNMENT = 'single_product_assignment';
-	public const string BULK_PRODUCT_ASSIGNMENT = 'bulk_product_assignment';
-	public const string SINGLE_PRODUCT_CONFIGURATION = 'single_product_configuration';
-	public const string BULK_PRODUCT_CONFIGURATION = 'bulk_product_configuration';
-	public const string CREATE_BUSINESS = 'create_business';
-	public const string EDIT_BUSINESS = 'edit_business';
-	public const string SINGLE_PRODUCT_BUSINESS_ASSIGNMENT = 'single_product_business_assignment';
-	public const string BULK_PRODUCT_BUSINESS_ASSIGNMENT = 'bulk_product_business_assignment';
-	public const string PRODUCT_GENERATION = 'product_generation';
-	public const string CREATE_ROLE = 'create_role';
-	public const string EDIT_ROLE = 'edit_role';
-	public const string ASSIGN_ROLE = 'assign_role';
-	public const string CREATE_PERMISSION = 'create_permission';
-	public const string EDIT_PERMISSION = 'edit_permission';
-	public const string ASSIGN_PERMISSION = 'assign_permission';
-	public const string EDIT_USER = 'edit_user';
-	public const string EXPORT_DATA = 'export_data';
+	// Pass-through constants kept for legacy code that references them directly.
+	// Do NOT add new constants here — add them to DomainPermissions instead.
+	public const string CREATE_PRODUCT_TYPE = DomainPermissions::CREATE_PRODUCT_TYPE;
+	public const string EDIT_PRODUCT_TYPE = DomainPermissions::EDIT_PRODUCT_TYPE;
+	public const string SINGLE_PRODUCT_ACTIVATION = DomainPermissions::SINGLE_PRODUCT_ACTIVATION;
+	public const string SINGLE_PRODUCT_DEACTIVATION = DomainPermissions::SINGLE_PRODUCT_DEACTIVATION;
+	public const string BULK_PRODUCT_ACTIVATION = DomainPermissions::BULK_PRODUCT_ACTIVATION;
+	public const string BULK_PRODUCT_DEACTIVATION = DomainPermissions::BULK_PRODUCT_DEACTIVATION;
+	public const string SINGLE_PRODUCT_ASSIGNMENT = DomainPermissions::SINGLE_PRODUCT_ASSIGNMENT;
+	public const string BULK_PRODUCT_ASSIGNMENT = DomainPermissions::BULK_PRODUCT_ASSIGNMENT;
+	public const string SINGLE_PRODUCT_CONFIGURATION = DomainPermissions::SINGLE_PRODUCT_CONFIGURATION;
+	public const string BULK_PRODUCT_CONFIGURATION = DomainPermissions::BULK_PRODUCT_CONFIGURATION;
+	public const string CREATE_BUSINESS = DomainPermissions::CREATE_BUSINESS;
+	public const string EDIT_BUSINESS = DomainPermissions::EDIT_BUSINESS;
+	public const string SINGLE_PRODUCT_BUSINESS_ASSIGNMENT = DomainPermissions::SINGLE_PRODUCT_BUSINESS_ASSIGNMENT;
+	public const string BULK_PRODUCT_BUSINESS_ASSIGNMENT = DomainPermissions::BULK_PRODUCT_BUSINESS_ASSIGNMENT;
+	public const string PRODUCT_GENERATION = DomainPermissions::PRODUCT_GENERATION;
+	public const string CREATE_ROLE = DomainPermissions::CREATE_ROLE;
+	public const string EDIT_ROLE = DomainPermissions::EDIT_ROLE;
+	public const string ASSIGN_ROLE = DomainPermissions::ASSIGN_ROLE;
+	public const string CREATE_PERMISSION = DomainPermissions::CREATE_PERMISSION;
+	public const string EDIT_PERMISSION = DomainPermissions::EDIT_PERMISSION;
+	public const string ASSIGN_PERMISSION = DomainPermissions::ASSIGN_PERMISSION;
+	public const string EDIT_USER = DomainPermissions::EDIT_USER;
+	public const string EXPORT_DATA = DomainPermissions::EXPORT_DATA;
+	public const string MANAGE_ROLES_AND_PERMISSIONS = DomainPermissions::MANAGE_ROLES_AND_PERMISSIONS;
 
+	/**
+	 * Delegates to DomainPermissions::all().
+	 *
+	 * Any new permission added to DomainPermissions::all() is automatically
+	 * included here — no changes required in this file.
+	 *
+	 * @return string[]
+	 */
 	public static function all(): array
 	{
-		return [
-			self::CREATE_PRODUCT_TYPE,
-			self::EDIT_PRODUCT_TYPE,
-			self::SINGLE_PRODUCT_ACTIVATION,
-			self::SINGLE_PRODUCT_DEACTIVATION,
-			self::BULK_PRODUCT_ACTIVATION,
-			self::BULK_PRODUCT_DEACTIVATION,
-			self::SINGLE_PRODUCT_ASSIGNMENT,
-			self::BULK_PRODUCT_ASSIGNMENT,
-			self::SINGLE_PRODUCT_CONFIGURATION,
-			self::BULK_PRODUCT_CONFIGURATION,
-			self::CREATE_BUSINESS,
-			self::EDIT_BUSINESS,
-			self::SINGLE_PRODUCT_BUSINESS_ASSIGNMENT,
-			self::BULK_PRODUCT_BUSINESS_ASSIGNMENT,
-			self::PRODUCT_GENERATION,
-			self::CREATE_ROLE,
-			self::EDIT_ROLE,
-			self::ASSIGN_ROLE,
-			self::CREATE_PERMISSION,
-			self::EDIT_PERMISSION,
-			self::ASSIGN_PERMISSION,
-			self::EDIT_USER,
-			self::EXPORT_DATA,
-		];
+		return DomainPermissions::all();
 	}
 }

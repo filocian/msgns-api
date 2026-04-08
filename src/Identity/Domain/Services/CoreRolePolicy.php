@@ -35,6 +35,24 @@ final class CoreRolePolicy
     }
 
     /**
+     * Guard against syncing permissions on a core role.
+     *
+     * Core role permissions are managed exclusively by the RBAC catalog
+     * reconciliation process. Manual sync is not allowed.
+     *
+     * @throws Unauthorized with code 'core_role_protected'
+     */
+    public function guardPermissionSync(string $roleName): void
+    {
+        if (in_array($roleName, RbacCatalog::coreRoleNames(), strict: true)) {
+            throw Unauthorized::because('core_role_protected', [
+                'role' => $roleName,
+                'reason' => 'Core role permissions are managed by the RBAC catalog and cannot be manually synced',
+            ]);
+        }
+    }
+
+    /**
      * Guard against renaming a core role.
      *
      * Resolves the current name from the RolePort by ID, then checks the

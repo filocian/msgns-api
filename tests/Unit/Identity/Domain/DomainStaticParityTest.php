@@ -33,6 +33,14 @@ describe('Domain* vs Static* parity (drift detection)', function () {
         expect($domain)->toBe($static);
     });
 
+    it('StaticPermissions::all() delegates to DomainPermissions::all() — identical reference', function () {
+        // After delegation, StaticPermissions::all() must return exactly the same array
+        // as DomainPermissions::all() — not a separate sorted copy, but the same values.
+        // This proves the delegation wire is active: any change to DomainPermissions::all()
+        // is automatically reflected in StaticPermissions::all() without touching the legacy file.
+        expect(StaticPermissions::all())->toBe(DomainPermissions::all());
+    });
+
     it('DomainRolePermissions methods match StaticRolePermissions methods', function () {
         $methods = [
             'devRolePermissions',

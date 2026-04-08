@@ -76,3 +76,20 @@ jobs:
       # explicitly marked legacy tests, even though Laravel bootstrap still touches App\* transitively.
       - name: Run modern default backend suite
         run: composer test
+
+# ─── DEPLOY PIPELINE NOTE (T-28) ──────────────────────────────────────────────
+#
+# No dedicated deploy pipeline exists yet. When one is created, ensure that
+# `php artisan rbac:reconcile` runs in the following order:
+#
+#   1. php artisan migrate
+#   2. php artisan rbac:reconcile   ← REQUIRED: creates any new permissions in DB
+#                                     and assigns them to developer/backoffice roles
+#   3. Reload web server (php-fpm restart / Octane reload)
+#
+# ORDERING IS CRITICAL: the admin route group uses `permission:manage_roles_and_permissions`
+# middleware. If the web server reloads before rbac:reconcile runs, the permission
+# will not exist in the DB and ALL admin routes will return 403.
+#
+# Run after every deploy that changes DomainPermissions::all().
+# ──────────────────────────────────────────────────────────────────────────────

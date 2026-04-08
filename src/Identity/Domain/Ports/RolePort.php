@@ -26,6 +26,19 @@ interface RolePort
     public function deleteRole(int $id): void;
 
     /**
+     * Sync the given role's permissions by role ID.
+     *
+     * Unlike syncRolePermissions (which takes a role name and is used by
+     * the reconcile process), this method takes a role ID and is intended
+     * for admin-initiated permission changes on custom roles.
+     *
+     * This operation REPLACES the full permission set — it is NOT additive.
+     *
+     * @param string[] $permissionNames
+     */
+    public function syncPermissionsByRoleId(int $roleId, array $permissionNames): void;
+
+    /**
      * Sync the given role's permissions to exactly match the provided list.
      *
      * This operation REPLACES the full permission set for the role — it is NOT

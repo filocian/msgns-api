@@ -8,8 +8,10 @@ use Src\Identity\Domain\Events\UserDeactivated;
 
 beforeEach(function () {
     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    $this->artisan('rbac:reconcile')->assertExitCode(0);
+    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     $this->admin = $this->create_user(['email' => 'admin@example.com']);
-    $adminRole = $this->createRole('developer');
+    $adminRole = \Spatie\Permission\Models\Role::where('name', 'developer')->where('guard_name', 'stateful-api')->first();
     $this->admin->assignRole($adminRole);
     $this->actingAs($this->admin, 'stateful-api');
 });

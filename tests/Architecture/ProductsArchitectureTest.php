@@ -194,7 +194,7 @@ describe('Products module architecture', function () {
 		'AssignToUserController',
 		'SetTargetUrlController',
 		'RegisterProductController',
-		'ConfigureProductController',
+		'ConfigureUrlProductController',
 		'GroupProductsController',
 		'CloneFromProductController',
 		'AddBusinessInfoController',

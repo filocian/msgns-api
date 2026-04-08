@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
 
-final class ConfigureProductRequest extends FormRequest
+final class AddWhatsappPhoneRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -22,7 +22,8 @@ final class ConfigureProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'target_url' => ['required', 'string', 'url', 'max:2048'],
+            'phone' => ['required', 'string', 'max:40'],
+            'prefix' => ['required', 'string', 'max:15'],
         ];
     }
 

@@ -9,7 +9,7 @@ use Src\Products\Infrastructure\Http\Controllers\AssignToUserController;
 use Src\Products\Infrastructure\Http\Controllers\ChangeConfigStatusController;
 use Src\Products\Infrastructure\Http\Controllers\CloneFromProductController;
 use Src\Products\Infrastructure\Http\Controllers\CompleteConfigurationController;
-use Src\Products\Infrastructure\Http\Controllers\ConfigureProductController;
+use Src\Products\Infrastructure\Http\Controllers\ConfigureUrlProductController;
 use Src\Products\Infrastructure\Http\Controllers\CreateProductTypeController;
 use Src\Products\Infrastructure\Http\Controllers\DeactivateProductController;
 use Src\Products\Infrastructure\Http\Controllers\DownloadGenerationExcelController;
@@ -64,7 +64,7 @@ Route::middleware('auth:stateful-api')->group(function (): void {
 
     // Composed actions — issue #12
     Route::post('/{id}/register', RegisterProductController::class)->whereNumber('id');
-    Route::put('/{id}/configure', ConfigureProductController::class)->whereNumber('id');
+    Route::put('/{id}/configure', ConfigureUrlProductController::class)->whereNumber('id');
     Route::post('/{id}/complete-configuration', CompleteConfigurationController::class)->whereNumber('id');
     Route::post('/{referenceId}/group/{candidateId}', GroupProductsController::class)
         ->whereNumber('referenceId')
@@ -83,4 +83,19 @@ Route::middleware('auth:stateful-api')->group(function (): void {
     // Generation history — issue #46
     Route::get('/generations', ListGenerationHistoryController::class);
     Route::get('/generations/{id}/download', DownloadGenerationExcelController::class)->whereNumber('id');
+
+    // WhatsApp configuration — issue #61
+    Route::post('/{id}/whatsapp/configure', \Src\Products\Infrastructure\Http\Controllers\ConfigureWhatsappProductController::class)->whereNumber('id');
+    Route::post('/{id}/whatsapp/phones', [\Src\Products\Infrastructure\Http\Controllers\WhatsappPhoneController::class, 'store'])->whereNumber('id');
+    Route::delete('/{id}/whatsapp/phones/{phoneId}', [\Src\Products\Infrastructure\Http\Controllers\WhatsappPhoneController::class, 'destroy'])
+        ->whereNumber('id')
+        ->whereNumber('phoneId');
+    Route::post('/{id}/whatsapp/messages', [\Src\Products\Infrastructure\Http\Controllers\WhatsappMessageController::class, 'store'])->whereNumber('id');
+    Route::delete('/{id}/whatsapp/messages/{messageId}', [\Src\Products\Infrastructure\Http\Controllers\WhatsappMessageController::class, 'destroy'])
+        ->whereNumber('id')
+        ->whereNumber('messageId');
+    Route::patch('/{id}/whatsapp/messages/{messageId}/default', [\Src\Products\Infrastructure\Http\Controllers\WhatsappMessageController::class, 'setDefault'])
+        ->whereNumber('id')
+        ->whereNumber('messageId');
+    Route::get('/whatsapp/locales', \Src\Products\Infrastructure\Http\Controllers\ListWhatsappLocalesController::class);
 });

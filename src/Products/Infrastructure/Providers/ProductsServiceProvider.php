@@ -14,20 +14,29 @@ use Src\Products\Application\Commands\AssignToUser\AssignToUserHandler;
 use Src\Products\Application\Commands\ChangeConfigStatus\ChangeConfigStatusHandler;
 use Src\Products\Application\Commands\CloneFromProduct\CloneFromProductHandler;
 use Src\Products\Application\Commands\CompleteConfiguration\CompleteConfigurationHandler;
-use Src\Products\Application\Commands\ConfigureProduct\ConfigureProductHandler;
+use Src\Products\Application\Commands\AddWhatsappMessage\AddWhatsappMessageHandler;
+use Src\Products\Application\Commands\AddWhatsappPhone\AddWhatsappPhoneHandler;
+use Src\Products\Application\Commands\ConfigureUrlProduct\ConfigureUrlProductHandler;
+use Src\Products\Application\Commands\ConfigureWhatsappProduct\ConfigureWhatsappProductHandler;
 use Src\Products\Application\Commands\DeactivateProduct\DeactivateProductHandler;
 use Src\Products\Application\Commands\GenerateProducts\GenerateProductsHandler;
 use Src\Products\Application\Commands\GroupProducts\GroupProductsHandler;
 use Src\Products\Application\Commands\RegisterProduct\RegisterProductHandler;
 use Src\Products\Application\Commands\RemoveProductLink\RemoveProductLinkHandler;
+use Src\Products\Application\Commands\RemoveWhatsappMessage\RemoveWhatsappMessageHandler;
+use Src\Products\Application\Commands\RemoveWhatsappPhone\RemoveWhatsappPhoneHandler;
 use Src\Products\Application\Commands\RenameProduct\RenameProductHandler;
 use Src\Products\Application\Commands\ResetProduct\ResetProductHandler;
 use Src\Products\Application\Commands\ReportUsage\ReportUsageHandler;
 use Src\Products\Application\Commands\RestoreProduct\RestoreProductHandler;
+use Src\Products\Application\Commands\SetDefaultWhatsappMessage\SetDefaultWhatsappMessageHandler;
 use Src\Products\Application\Commands\SetTargetUrl\SetTargetUrlHandler;
 use Src\Products\Application\Commands\SoftRemoveProduct\SoftRemoveProductHandler;
 use Src\Products\Application\Commands\UpdateProductType\UpdateProductTypeHandler;
 use Src\Products\Application\Commands\UpdateProductDetails\UpdateProductDetailsHandler;
+use Src\Products\Application\Queries\ListWhatsappLocales\ListWhatsappLocalesHandler;
+use Src\Products\Application\Queries\ListWhatsappMessages\ListWhatsappMessagesHandler;
+use Src\Products\Application\Queries\ListWhatsappPhones\ListWhatsappPhonesHandler;
 use Src\Products\Application\Queries\ResolveProductRedirection\ResolveProductRedirectionHandler;
 use Src\Products\Application\Queries\DownloadGenerationExcel\DownloadGenerationExcelHandler;
 use Src\Products\Application\Queries\GetProductType\GetProductTypeHandler;
@@ -50,6 +59,11 @@ use Src\Products\Domain\Events\ProductSoftDeleted;
 use Src\Products\Domain\Events\ProductTargetUrlSet;
 use Src\Products\Domain\Events\ProductUnlinked;
 use Src\Products\Domain\Events\ProductsPaired;
+use Src\Products\Domain\Events\WhatsappDefaultMessageChanged;
+use Src\Products\Domain\Events\WhatsappMessageAdded;
+use Src\Products\Domain\Events\WhatsappMessageRemoved;
+use Src\Products\Domain\Events\WhatsappPhoneAdded;
+use Src\Products\Domain\Events\WhatsappPhoneRemoved;
 use Src\Products\Domain\Ports\ExcelExportPort;
 use Src\Products\Domain\Ports\GenerationHistoryRepositoryPort;
 use Src\Products\Domain\Ports\PasswordGeneratorPort;
@@ -58,6 +72,9 @@ use Src\Products\Domain\Ports\ProductRepositoryPort;
 use Src\Products\Domain\Ports\ProductTypeRepository;
 use Src\Products\Domain\Ports\ProductTypeUsagePort;
 use Src\Products\Domain\Ports\ProductUsagePort;
+use Src\Products\Domain\Ports\WhatsappLocaleRepositoryPort;
+use Src\Products\Domain\Ports\WhatsappMessageRepositoryPort;
+use Src\Products\Domain\Ports\WhatsappPhoneRepositoryPort;
 use Src\Products\Domain\Services\ConfigurationFlowResolver;
 use Src\Products\Domain\Services\ProductGenerationService;
 use Src\Products\Domain\Services\Redirection\CompositeRedirectionStrategy;
@@ -66,6 +83,7 @@ use Src\Products\Domain\Services\Redirection\GoogleRedirectionResolver;
 use Src\Products\Domain\Services\Redirection\InfoRedirectionResolver;
 use Src\Products\Domain\Services\Redirection\InstagramRedirectionResolver;
 use Src\Products\Domain\Services\Redirection\TikTokRedirectionResolver;
+use Src\Products\Domain\Services\Redirection\WhatsappRedirectionResolver;
 use Src\Products\Domain\Services\Redirection\YouTubeRedirectionResolver;
 use Src\Products\Infrastructure\Cache\ProductRedirectionCacheService;
 use Src\Products\Infrastructure\Persistence\DynamoDbProductUsageAdapter;
@@ -74,6 +92,9 @@ use Src\Products\Infrastructure\Persistence\EloquentProductBusinessRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeRepository;
 use Src\Products\Infrastructure\Persistence\EloquentProductTypeUsageAdapter;
+use Src\Products\Infrastructure\Persistence\EloquentWhatsappLocaleRepository;
+use Src\Products\Infrastructure\Persistence\EloquentWhatsappMessageRepository;
+use Src\Products\Infrastructure\Persistence\EloquentWhatsappPhoneRepository;
 use Src\Products\Infrastructure\Listeners\IncrementProductUsage;
 use Src\Products\Infrastructure\Listeners\InvalidateProductRedirectionCache;
 use Src\Products\Infrastructure\Listeners\TrackProductActivated;
@@ -101,6 +122,9 @@ final class ProductsServiceProvider extends ServiceProvider
         // Product bindings (new for issue #9)
         $this->app->bind(ProductRepositoryPort::class, EloquentProductRepository::class);
         $this->app->bind(ProductBusinessPort::class, EloquentProductBusinessRepository::class);
+        $this->app->bind(WhatsappPhoneRepositoryPort::class, EloquentWhatsappPhoneRepository::class);
+        $this->app->bind(WhatsappMessageRepositoryPort::class, EloquentWhatsappMessageRepository::class);
+        $this->app->bind(WhatsappLocaleRepositoryPort::class, EloquentWhatsappLocaleRepository::class);
         $this->app->bind(ProductRedirectionStrategy::class, function () {
             return new CompositeRedirectionStrategy([
                 new GoogleRedirectionResolver(),
@@ -109,6 +133,7 @@ final class ProductsServiceProvider extends ServiceProvider
                 new TikTokRedirectionResolver(),
                 new FacebookRedirectionResolver(),
                 new InfoRedirectionResolver(),
+                $this->app->make(WhatsappRedirectionResolver::class),
             ]);
         });
         $this->app->singleton(ProductRedirectionCacheService::class);
@@ -152,12 +177,20 @@ final class ProductsServiceProvider extends ServiceProvider
         $commandBus->register('products.remove_product_link', RemoveProductLinkHandler::class);
         $commandBus->register('products.reset_product', ResetProductHandler::class);
         $commandBus->register('products.register_product', RegisterProductHandler::class);
-        $commandBus->register('products.configure_product', ConfigureProductHandler::class);
+        $commandBus->register('products.configure_product', ConfigureUrlProductHandler::class);
         $commandBus->register('products.complete_configuration', CompleteConfigurationHandler::class);
         $commandBus->register('products.group_products', GroupProductsHandler::class);
         $commandBus->register('products.clone_from_product', CloneFromProductHandler::class);
         $commandBus->register('products.add_business_info', AddBusinessInfoHandler::class);
         $commandBus->register('products.update_product_details', UpdateProductDetailsHandler::class);
+
+        // WhatsApp command handlers — issue #61
+        $commandBus->register('products.configure_whatsapp_product', ConfigureWhatsappProductHandler::class);
+        $commandBus->register('products.add_whatsapp_phone', AddWhatsappPhoneHandler::class);
+        $commandBus->register('products.remove_whatsapp_phone', RemoveWhatsappPhoneHandler::class);
+        $commandBus->register('products.add_whatsapp_message', AddWhatsappMessageHandler::class);
+        $commandBus->register('products.remove_whatsapp_message', RemoveWhatsappMessageHandler::class);
+        $commandBus->register('products.set_default_whatsapp_message', SetDefaultWhatsappMessageHandler::class);
 
         // Register query handlers
         $queryBus = $this->app->make(QueryBus::class);
@@ -168,6 +201,11 @@ final class ProductsServiceProvider extends ServiceProvider
         $queryBus->register('products.resolve_product_redirection', ResolveProductRedirectionHandler::class);
         $queryBus->register('products.list_generation_history', ListGenerationHistoryHandler::class);
         $queryBus->register('products.download_generation_excel', DownloadGenerationExcelHandler::class);
+
+        // WhatsApp query handlers — issue #61
+        $queryBus->register('products.list_whatsapp_phones', ListWhatsappPhonesHandler::class);
+        $queryBus->register('products.list_whatsapp_messages', ListWhatsappMessagesHandler::class);
+        $queryBus->register('products.list_whatsapp_locales', ListWhatsappLocalesHandler::class);
 
         // Load routes
         Route::prefix('api/v2/products')
@@ -196,6 +234,13 @@ final class ProductsServiceProvider extends ServiceProvider
         Event::listen(ProductSoftDeleted::class, InvalidateProductRedirectionCache::class);
         Event::listen(ProductRestored::class, InvalidateProductRedirectionCache::class);
         Event::listen(ProductUnlinked::class, InvalidateProductRedirectionCache::class);
+
+        // WhatsApp cache invalidation — issue #61
+        Event::listen(WhatsappPhoneAdded::class, InvalidateProductRedirectionCache::class);
+        Event::listen(WhatsappPhoneRemoved::class, InvalidateProductRedirectionCache::class);
+        Event::listen(WhatsappMessageAdded::class, InvalidateProductRedirectionCache::class);
+        Event::listen(WhatsappMessageRemoved::class, InvalidateProductRedirectionCache::class);
+        Event::listen(WhatsappDefaultMessageChanged::class, InvalidateProductRedirectionCache::class);
 
         // USAGE SYNC: Async increment of products.usage column on scan. See IncrementProductUsage.
         Event::listen(ProductScanned::class, IncrementProductUsage::class);

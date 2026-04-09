@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../../Support/ProductRedirectionHelpers.php';
 beforeEach(function () {
     $this->seed(ProductConfigurationStatusSeeder::class);
 
-    config(['services.product.front_url' => 'https://test-front.example.com']);
+    config(['services.products.front_url' => 'https://test-front.example.com']);
 
     app()->bind(ProductUsagePort::class, static fn (): ProductUsagePort => new class implements ProductUsagePort
     {

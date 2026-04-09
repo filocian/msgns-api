@@ -10,8 +10,20 @@ Route::get('/', function () {
 	return redirect()->away('https://messagenes.com');
 });
 
-Route::get('/nfc/{data}', [RedirectionController::class, 'legacyRedirect']);
-Route::get('/product/{id}/redirect/{password}', [RedirectionController::class, 'v2Redirect']);
+if (config('app.v2_enabled')) {
+	Route::get('/nfc/{data}', [
+		\Src\Products\Infrastructure\Http\Controllers\ProductRedirectionController::class,
+		'nfcRedirect',
+	]);
+	Route::get('/product/{id}/redirect/{password}', [
+		\Src\Products\Infrastructure\Http\Controllers\ProductRedirectionController::class,
+		'webRedirect',
+	])->whereNumber('id');
+} else {
+	Route::get('/nfc/{data}', [RedirectionController::class, 'legacyRedirect']);
+	Route::get('/product/{id}/redirect/{password}', [RedirectionController::class, 'v2Redirect']);
+}
+
 Route::get('/v2/product/{id}/redirect/{password}', [
     \Src\Products\Infrastructure\Http\Controllers\ProductRedirectionController::class,
     'webRedirect',

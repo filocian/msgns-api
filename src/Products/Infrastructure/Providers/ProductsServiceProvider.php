@@ -160,7 +160,11 @@ final class ProductsServiceProvider extends ServiceProvider
 
         $this->app->when(ResolveProductRedirectionHandler::class)
             ->needs('$frontUrl')
-            ->give(static fn () => (string) config('services.product.front_url'));
+            ->give(static fn () => (string) (
+                config('app.v2_enabled')
+                    ? config('services.products.v2_front_url')
+                    : config('services.products.front_url')
+            ));
     }
 
     public function boot(): void

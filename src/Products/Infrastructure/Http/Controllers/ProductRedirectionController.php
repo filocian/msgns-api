@@ -21,6 +21,67 @@ final class ProductRedirectionController extends Controller
         private readonly QueryBus $queryBus,
     ) {}
 
+    public function nfcRedirect(Request $request, string $data): RedirectResponse
+    {
+        $parsed = $this->parseNfcData($request, $data);
+
+        if ($parsed === null) {
+            abort(404);
+        }
+
+        /** @var RedirectionTarget $target */
+        $target = $this->queryBus->dispatch(new ResolveProductRedirectionQuery(
+            productId: $parsed['id'],
+            password: $parsed['password'],
+            browserLocales: $request->header('Accept-Language', ''),
+        ));
+
+        return match ($target->type) {
+            RedirectionType::EXTERNAL_URL => redirect()->away($target->url),
+            RedirectionType::FRONTEND_ROUTE => redirect($target->url),
+        };
+    }
+
+    /**
+     * Parse NFC URL data into product ID and password.
+     *
+     * Supports two formats:
+     * - Query param: /nfc/{id}?psw={password}
+     * - Encoded segment: /nfc/{id}&psw={password}
+     *
+     * @return array{id: int, password: string}|null
+     */
+    private function parseNfcData(Request $request, string $data): ?array
+    {
+        // Format 1: ?psw= query parameter
+        if ($request->input('psw') !== null) {
+            return [
+                'id' => (int) $data,
+                'password' => (string) $request->input('psw'),
+            ];
+        }
+
+        // Format 2: encoded in path segment — {id}&psw={password}
+        $segments = explode('&', $data);
+        if (count($segments) < 2) {
+            return null;
+        }
+
+        $productId = (int) $segments[0];
+        $queryParts = explode('=', $segments[1]);
+        $paramName = $queryParts[0];
+        $paramValue = $queryParts[1] ?? '';
+
+        if ($paramName !== 'psw') {
+            return null;
+        }
+
+        return [
+            'id' => $productId,
+            'password' => $paramValue,
+        ];
+    }
+
     public function webRedirect(Request $request, int $id, string $password): RedirectResponse
     {
         /** @var RedirectionTarget $target */

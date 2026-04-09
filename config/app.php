@@ -121,4 +121,17 @@ return [
 		'store' => env('APP_MAINTENANCE_STORE', 'database'),
 	],
 
+	/*
+	|--------------------------------------------------------------------------
+	| V2 Architecture Toggle
+	|--------------------------------------------------------------------------
+	|
+	| When enabled, public product routes (/nfc/{data}, /product/{id}/redirect/{password})
+	| are handled by V2 vertical-slice controllers instead of legacy.
+	| Changing this value requires: php artisan config:clear && php artisan config:cache
+	|
+	*/
+
+	'v2_enabled' => (bool) env('APP_V2_ENABLED', false),
+
 ];

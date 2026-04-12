@@ -37,6 +37,7 @@ final class DomainPermissions
     public const string EDIT_USER = 'edit_user';
     public const string EXPORT_DATA = 'export_data';
     public const string MANAGE_ROLES_AND_PERMISSIONS = 'manage_roles_and_permissions';
+    public const string MANAGE_SUBSCRIPTION_TYPES = 'manage_subscription_types';
 
     /**
      * Human-readable English descriptions for every permission.
@@ -73,6 +74,7 @@ final class DomainPermissions
             self::EDIT_USER                          => 'Edit user profiles',
             self::EXPORT_DATA                        => 'Export data from the system',
             self::MANAGE_ROLES_AND_PERMISSIONS       => 'Manage roles and permissions (admin RBAC panel access)',
+            self::MANAGE_SUBSCRIPTION_TYPES          => 'Manage subscription type catalog (admin CRUD)',
         ];
     }
 
@@ -104,6 +106,7 @@ final class DomainPermissions
             self::EDIT_USER,
             self::EXPORT_DATA,
             self::MANAGE_ROLES_AND_PERMISSIONS,
+            self::MANAGE_SUBSCRIPTION_TYPES,
         ];
     }
 }

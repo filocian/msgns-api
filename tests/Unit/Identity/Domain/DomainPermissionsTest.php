@@ -11,11 +11,11 @@ describe('DomainPermissions', function () {
         expect(DomainPermissions::MANAGE_ROLES_AND_PERMISSIONS)->toBe('manage_roles_and_permissions');
     });
 
-    it('REQ-01-B: all() contains manage_roles_and_permissions and has exactly 24 elements', function () {
+    it('REQ-01-B: all() contains manage_roles_and_permissions and has exactly 25 elements', function () {
         $all = DomainPermissions::all();
 
         expect($all)->toContain('manage_roles_and_permissions');
-        expect($all)->toHaveCount(24);
+        expect($all)->toHaveCount(25);
     });
 
     it('REQ-02-A: devRolePermissions contains manage_roles_and_permissions', function () {

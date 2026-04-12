@@ -57,6 +57,7 @@ final class StaticPermissions
 	public const string EDIT_USER = DomainPermissions::EDIT_USER;
 	public const string EXPORT_DATA = DomainPermissions::EXPORT_DATA;
 	public const string MANAGE_ROLES_AND_PERMISSIONS = DomainPermissions::MANAGE_ROLES_AND_PERMISSIONS;
+	public const string MANAGE_SUBSCRIPTION_TYPES = DomainPermissions::MANAGE_SUBSCRIPTION_TYPES;
 
 	/**
 	 * Delegates to DomainPermissions::all().

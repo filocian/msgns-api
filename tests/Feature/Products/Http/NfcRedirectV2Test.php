@@ -26,7 +26,8 @@ function setupNfcV2TestEnv(): void
 }
 
 beforeEach(function () {
-    putenv('APP_V2_ENABLED=true');
+    $_ENV['APP_V2_ENABLED'] = 'true';
+    $_SERVER['APP_V2_ENABLED'] = 'true';
     $this->refreshApplication();
     Artisan::call('migrate');
     Artisan::call('db:seed', ['--class' => ProductConfigurationStatusSeeder::class]);
@@ -36,7 +37,8 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    putenv('APP_V2_ENABLED=false');
+    $_ENV['APP_V2_ENABLED'] = 'false';
+    $_SERVER['APP_V2_ENABLED'] = 'false';
 });
 
 describe('V2 NFC redirect — parsing', function () {

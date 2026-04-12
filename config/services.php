@@ -51,6 +51,14 @@ return [
 		'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
 	],
 
+	'gemini' => [
+		'api_key'                   => env('GEMINI_API_KEY'),
+		'model'                     => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+		'timeout_seconds'           => (int) env('GEMINI_TIMEOUT_SECONDS', 30),
+		'rate_limit_per_minute'     => (int) env('AI_RATE_LIMIT_PER_MINUTE', 2),
+		'rate_limit_window_seconds' => (int) env('AI_RATE_LIMIT_WINDOW_SECONDS', 60),
+	],
+
 	'products' => [
 		'front_url' => env('FRONT_URL', 'https://app.msgns.local'),
 		'v2_front_url' => env('FRONT_V2_URL', 'https://app.msgns.local'),

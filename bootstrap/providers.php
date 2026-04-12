@@ -10,4 +10,5 @@ return [
 	Src\Identity\Infrastructure\Providers\IdentityServiceProvider::class,
 	Src\Places\Infrastructure\Providers\PlacesServiceProvider::class,
 	Src\Products\Infrastructure\Providers\ProductsServiceProvider::class,
+	Src\Ai\Infrastructure\Providers\AiServiceProvider::class,
 ];

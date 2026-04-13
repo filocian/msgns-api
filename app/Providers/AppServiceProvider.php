@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Infrastructure\Repositories\DynamoDb\DynamoDbRepository;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use L5Swagger\L5SwaggerServiceProvider;
 
@@ -29,6 +30,6 @@ final class AppServiceProvider extends ServiceProvider
 	 */
 	public function boot(): void
 	{
-		//
+		DB::prohibitDestructiveCommands($this->app->isProduction());
 	}
 }

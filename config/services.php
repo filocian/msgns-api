@@ -54,6 +54,12 @@ return [
 		'business_redirect_uri' => env('GOOGLE_BUSINESS_REDIRECT_URI'),  // new — BE-11a
 	],
 
+	'meta' => [
+		'app_id'       => env('META_APP_ID'),
+		'app_secret'   => env('META_APP_SECRET'),
+		'redirect_uri' => env('INSTAGRAM_REDIRECT_URI'),
+	],
+
 	'gemini' => [
 		'api_key'                   => env('GEMINI_API_KEY'),
 		'model'                     => env('GEMINI_MODEL', 'gemini-2.0-flash'),

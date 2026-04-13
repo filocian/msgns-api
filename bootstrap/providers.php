@@ -14,4 +14,5 @@ return [
 	Src\Ai\Infrastructure\Providers\AiServiceProvider::class,
 	Src\Billing\Infrastructure\Providers\BillingServiceProvider::class,
 	Src\GoogleBusiness\Infrastructure\Providers\GoogleBusinessServiceProvider::class,
+	Src\Instagram\Infrastructure\Providers\InstagramServiceProvider::class,
 ];

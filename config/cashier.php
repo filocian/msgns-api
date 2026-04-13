@@ -9,6 +9,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Billable Model
+    |--------------------------------------------------------------------------
+    |
+    | This is the model that Cashier uses for all billing operations. Pinned
+    | explicitly to App\Models\User so that a future AUTH_MODEL override
+    | (e.g. Src\Identity\Infrastructure\Models\EloquentUser) does not
+    | silently break Cashier's internal stripe_id lookups.
+    |
+    */
+
+    'model' => App\Models\User::class,
+
+    /*
+    |--------------------------------------------------------------------------
     | Stripe Keys
     |--------------------------------------------------------------------------
     |

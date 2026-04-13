@@ -15,11 +15,11 @@ final class AiRateLimitMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
-        $userId        = $request->user()?->getAuthIdentifier();
-        $limit         = (int) config('services.gemini.rate_limit_per_minute', 2);
+        $userId = $request->user()?->getAuthIdentifier();
+        $limit = (int) config('services.gemini.rate_limit_per_minute', 2);
         $windowSeconds = (int) config('services.gemini.rate_limit_window_seconds', 60);
-        $windowStart   = (int) (floor(time() / $windowSeconds) * $windowSeconds);
-        $cacheKey      = "ai:rate:{$userId}:{$windowStart}";
+        $windowStart = (int) (floor(time() / $windowSeconds) * $windowSeconds);
+        $cacheKey = "ai:rate:{$userId}:{$windowStart}";
 
         $count = (int) $this->cache->get($cacheKey, 0);
 

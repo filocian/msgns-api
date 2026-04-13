@@ -18,14 +18,14 @@ final class GeminiApiAdapter implements GeminiPort
     public function generate(AiRequest $request): AiResponse
     {
         $apiKey = (string) config('services.gemini.api_key', '');
-        $model   = (string) config('services.gemini.model', 'gemini-2.0-flash');
+        $model = (string) config('services.gemini.model', 'gemini-2.0-flash');
         $timeout = (int) config('services.gemini.timeout_seconds', 30);
 
         if ($apiKey === '') {
             throw GeminiUnavailable::because('gemini_api_key_missing');
         }
 
-        $url = self::BASE_URL . "/{$model}:generateContent";
+        $url = self::BASE_URL."/{$model}:generateContent";
 
         $parts = [['text' => $request->prompt]];
 
@@ -33,18 +33,18 @@ final class GeminiApiAdapter implements GeminiPort
             $parts[] = [
                 'inline_data' => [
                     'mime_type' => $request->imageMimeType ?? 'image/jpeg',
-                    'data'      => $request->imageBase64,
+                    'data' => $request->imageBase64,
                 ],
             ];
         }
 
         $body = [
             'system_instruction' => ['parts' => [['text' => $request->systemInstruction]]],
-            'contents'           => [['role' => 'user', 'parts' => $parts]],
+            'contents' => [['role' => 'user', 'parts' => $parts]],
         ];
 
         try {
-            $response = Http::timeout($timeout)->post($url . '?key=' . $apiKey, $body);
+            $response = Http::timeout($timeout)->post($url.'?key='.$apiKey, $body);
         } catch (ConnectionException) {
             throw GeminiUnavailable::because('gemini_connection_failed');
         }
@@ -55,19 +55,19 @@ final class GeminiApiAdapter implements GeminiPort
 
         $payload = $response->json();
 
-        if (!is_array($payload)) {
+        if (! is_array($payload)) {
             throw GeminiUnavailable::because('gemini_invalid_payload');
         }
 
         /** @var array<string, mixed> $payload */
         $content = (string) ($payload['candidates'][0]['content']['parts'][0]['text'] ?? '');
-        $usage   = $payload['usageMetadata'] ?? [];
+        $usage = $payload['usageMetadata'] ?? [];
 
         return new AiResponse(
-            content:          $content,
-            promptTokens:     (int) ($usage['promptTokenCount'] ?? 0),
+            content: $content,
+            promptTokens: (int) ($usage['promptTokenCount'] ?? 0),
             completionTokens: (int) ($usage['candidatesTokenCount'] ?? 0),
-            totalTokens:      (int) ($usage['totalTokenCount'] ?? 0),
+            totalTokens: (int) ($usage['totalTokenCount'] ?? 0),
         );
     }
 }

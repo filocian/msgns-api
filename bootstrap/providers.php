@@ -12,4 +12,5 @@ return [
 	Src\Products\Infrastructure\Providers\ProductsServiceProvider::class,
 	Src\Subscriptions\Infrastructure\Providers\SubscriptionsServiceProvider::class,
 	Src\Ai\Infrastructure\Providers\AiServiceProvider::class,
+	Src\Billing\Infrastructure\Providers\BillingServiceProvider::class,
 ];

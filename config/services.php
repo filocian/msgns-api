@@ -48,7 +48,10 @@ return [
 	],
 
 	'google' => [
-		'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+		'places_api_key'        => env('GOOGLE_PLACES_API_KEY'),
+		'client_id'             => env('GOOGLE_CLIENT_ID'),              // also used by GoogleOAuthAdapter (Identity)
+		'client_secret'         => env('GOOGLE_CLIENT_SECRET'),          // new — BE-11a
+		'business_redirect_uri' => env('GOOGLE_BUSINESS_REDIRECT_URI'),  // new — BE-11a
 	],
 
 	'gemini' => [

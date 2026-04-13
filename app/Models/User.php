@@ -211,4 +211,9 @@ final class User extends Authenticatable implements MustVerifyEmail
 	{
 		return $this->hasOne(GHLContact::class, 'user_id', 'id');
 	}
+
+	public function googleBusinessConnection(): \Illuminate\Database\Eloquent\Relations\HasOne
+	{
+		return $this->hasOne(\Src\GoogleBusiness\Domain\Models\UserGoogleBusinessConnection::class, 'user_id', 'id');
+	}
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Src\Ai\Infrastructure\Http\Controllers\AiResponseController;
 use Src\Ai\Infrastructure\Http\Controllers\ClassicSubscriptionController;
 use Src\Ai\Infrastructure\Http\Controllers\SubscriptionTypeCatalogController;
 use Src\Ai\Infrastructure\Http\Controllers\UserAiSystemPromptController;
@@ -23,4 +24,13 @@ Route::middleware(['auth:stateful-api'])->group(function (): void {
     Route::post('/subscriptions/classic', [ClassicSubscriptionController::class, 'subscribe']);
     Route::delete('/subscriptions/classic', [ClassicSubscriptionController::class, 'cancel']);
     Route::get('/subscriptions/classic', [ClassicSubscriptionController::class, 'show']);
+
+    // BE-10: AI Response Lifecycle (Human-in-the-Loop)
+    Route::prefix('responses')->group(function (): void {
+        Route::get('/', [AiResponseController::class, 'index']);
+        Route::patch('/{id}/approve', [AiResponseController::class, 'approve'])->whereUuid('id');
+        Route::patch('/{id}/edit', [AiResponseController::class, 'edit'])->whereUuid('id');
+        Route::patch('/{id}/reject', [AiResponseController::class, 'reject'])->whereUuid('id');
+        Route::post('/{id}/apply', [AiResponseController::class, 'apply'])->whereUuid('id');
+    });
 });

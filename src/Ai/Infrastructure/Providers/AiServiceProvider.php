@@ -19,6 +19,14 @@ use Src\Ai\Domain\Ports\GeminiPort;
 use Src\Ai\Domain\Ports\UserAiSystemPromptRepository;
 use Src\Ai\Infrastructure\Adapters\CashierSubscriptionAdapter;
 use Src\Ai\Infrastructure\Adapters\GeminiApiAdapter;
+use Src\Ai\Application\Commands\ApplyAiResponse\ApplyAiResponseHandler;
+use Src\Ai\Application\Commands\ApproveAiResponse\ApproveAiResponseHandler;
+use Src\Ai\Application\Commands\EditAiResponse\EditAiResponseHandler;
+use Src\Ai\Application\Commands\RejectAiResponse\RejectAiResponseHandler;
+use Src\Ai\Application\Queries\ListAiResponses\ListAiResponsesHandler;
+use Src\Ai\Domain\Ports\AiResponseApplierPort;
+use Src\Ai\Domain\Services\CompositeAiResponseApplier;
+use Src\Ai\Infrastructure\Console\Commands\ResetExpiredAiResponsesCommand;
 use Src\Ai\Infrastructure\Console\Commands\ResetFreeAiUsageCommand;
 use Src\Ai\Infrastructure\Http\Middleware\AiRateLimitMiddleware;
 use Src\Ai\Infrastructure\Listeners\AssignFreeAiPermissionListener;
@@ -34,6 +42,12 @@ final class AiServiceProvider extends ServiceProvider
         $this->app->bind(GeminiPort::class, GeminiApiAdapter::class);
         $this->app->bind(UserAiSystemPromptRepository::class, EloquentUserAiSystemPromptRepository::class);
         $this->app->bind(ClassicSubscriptionBrokerPort::class, CashierSubscriptionAdapter::class);
+
+        $this->app->bind(AiResponseApplierPort::class, function (): CompositeAiResponseApplier {
+            return new CompositeAiResponseApplier([
+                // BE-12 and BE-13 will add implementations here
+            ]);
+        });
     }
 
     public function boot(): void
@@ -42,10 +56,15 @@ final class AiServiceProvider extends ServiceProvider
 
         $this->app->make(QueryBus::class)->register('ai.get_user_system_prompts', GetUserSystemPromptsHandler::class);
         $this->app->make(QueryBus::class)->register('ai.get_active_classic_subscription', GetActiveClassicSubscriptionHandler::class);
+        $this->app->make(QueryBus::class)->register('ai.list_ai_responses', ListAiResponsesHandler::class);
         $this->app->make(CommandBus::class)->register('ai.upsert_user_system_prompt', UpsertUserSystemPromptHandler::class);
         $this->app->make(CommandBus::class)->register('ai.delete_user_system_prompt', DeleteUserSystemPromptHandler::class);
         $this->app->make(CommandBus::class)->register('ai.subscribe_to_classic_plan', SubscribeToClassicPlanHandler::class);
         $this->app->make(CommandBus::class)->register('ai.cancel_classic_subscription', CancelClassicSubscriptionHandler::class);
+        $this->app->make(CommandBus::class)->register('ai.approve_ai_response', ApproveAiResponseHandler::class);
+        $this->app->make(CommandBus::class)->register('ai.edit_ai_response', EditAiResponseHandler::class);
+        $this->app->make(CommandBus::class)->register('ai.reject_ai_response', RejectAiResponseHandler::class);
+        $this->app->make(CommandBus::class)->register('ai.apply_ai_response', ApplyAiResponseHandler::class);
 
         Route::prefix('api/v2/ai')
             ->middleware('api')
@@ -53,6 +72,6 @@ final class AiServiceProvider extends ServiceProvider
 
         Event::listen(UserActivated::class, AssignFreeAiPermissionListener::class);
 
-        $this->commands([ResetFreeAiUsageCommand::class]);
+        $this->commands([ResetFreeAiUsageCommand::class, ResetExpiredAiResponsesCommand::class]);
     }
 }

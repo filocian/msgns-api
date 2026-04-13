@@ -73,4 +73,8 @@ return [
 		'v2_front_url' => env('FRONT_V2_URL', 'https://app.msgns.local'),
 		'default_password_length' => (int) env('DEFAULT_PRODUCT_PASSWORD_LENGTH', 12),
 	],
+
+	'ai' => [
+		'free_requests_per_month' => (int) env('AI_FREE_REQUESTS_PER_MONTH', 10),
+	],
 ];

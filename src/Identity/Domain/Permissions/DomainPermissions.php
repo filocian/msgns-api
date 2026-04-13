@@ -38,6 +38,7 @@ final class DomainPermissions
     public const string EXPORT_DATA = 'export_data';
     public const string MANAGE_ROLES_AND_PERMISSIONS = 'manage_roles_and_permissions';
     public const string MANAGE_SUBSCRIPTION_TYPES = 'manage_subscription_types';
+    public const string AI_FREE_PREVIEW = 'ai.free-preview';
 
     /**
      * Human-readable English descriptions for every permission.
@@ -75,6 +76,7 @@ final class DomainPermissions
             self::EXPORT_DATA                        => 'Export data from the system',
             self::MANAGE_ROLES_AND_PERMISSIONS       => 'Manage roles and permissions (admin RBAC panel access)',
             self::MANAGE_SUBSCRIPTION_TYPES          => 'Manage subscription type catalog (admin CRUD)',
+            self::AI_FREE_PREVIEW                    => 'Access AI features under the free monthly preview quota',
         ];
     }
 
@@ -107,6 +109,7 @@ final class DomainPermissions
             self::EXPORT_DATA,
             self::MANAGE_ROLES_AND_PERMISSIONS,
             self::MANAGE_SUBSCRIPTION_TYPES,
+            self::AI_FREE_PREVIEW,
         ];
     }
 }

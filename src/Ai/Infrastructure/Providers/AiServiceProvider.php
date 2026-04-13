@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Src\Ai\Infrastructure\Providers;
 
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Src\Ai\Application\Commands\DeleteUserSystemPrompt\DeleteUserSystemPromptHandler;
@@ -13,8 +14,11 @@ use Src\Ai\Application\Queries\GetUserSystemPrompts\GetUserSystemPromptsHandler;
 use Src\Ai\Domain\Ports\GeminiPort;
 use Src\Ai\Domain\Ports\UserAiSystemPromptRepository;
 use Src\Ai\Infrastructure\Adapters\GeminiApiAdapter;
+use Src\Ai\Infrastructure\Console\Commands\ResetFreeAiUsageCommand;
 use Src\Ai\Infrastructure\Http\Middleware\AiRateLimitMiddleware;
+use Src\Ai\Infrastructure\Listeners\AssignFreeAiPermissionListener;
 use Src\Ai\Infrastructure\Persistence\EloquentUserAiSystemPromptRepository;
+use Src\Identity\Domain\Events\UserActivated;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Core\Bus\QueryBus;
 
@@ -37,5 +41,9 @@ final class AiServiceProvider extends ServiceProvider
         Route::prefix('api/v2/ai')
             ->middleware('api')
             ->group(base_path('routes/api/ai.php'));
+
+        Event::listen(UserActivated::class, AssignFreeAiPermissionListener::class);
+
+        $this->commands([ResetFreeAiUsageCommand::class]);
     }
 }

@@ -15,7 +15,7 @@ use Src\Identity\Domain\Permissions\DomainRoles;
  * and their mappings. It delegates to domain-owned permission classes under
  * Src\Identity\Domain\Permissions\.
  *
- * All 5 roles and 23 permissions are code-defined (not user-editable in Phase 1).
+ * All 5 roles and 26 permissions are code-defined (not user-editable in Phase 1).
  * Core roles receive additional protection via CoreRolePolicy.
  */
 final class RbacCatalog

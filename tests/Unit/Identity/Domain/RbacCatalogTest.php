@@ -23,8 +23,8 @@ describe('RbacCatalog', function () {
             ->and($names)->toContain('user');
     });
 
-    it('exposes exactly 26 permissions', function () {
-        expect(RbacCatalog::allPermissions())->toHaveCount(26);
+    it('exposes exactly 30 permissions', function () {
+        expect(RbacCatalog::allPermissions())->toHaveCount(30);
     });
 
     it('marks developer, backoffice, and user as core roles', function () {
@@ -42,16 +42,16 @@ describe('RbacCatalog', function () {
             ->and($entries['marketing']->isCore)->toBeFalse();
     });
 
-    it('assigns all 26 permissions to developer role', function () {
+    it('assigns all 30 permissions to developer role', function () {
         $entries = collect(RbacCatalog::entries())->keyBy('name');
 
-        expect($entries['developer']->permissions)->toHaveCount(26);
+        expect($entries['developer']->permissions)->toHaveCount(30);
     });
 
-    it('assigns all 26 permissions to backoffice role', function () {
+    it('assigns all 30 permissions to backoffice role', function () {
         $entries = collect(RbacCatalog::entries())->keyBy('name');
 
-        expect($entries['backoffice']->permissions)->toHaveCount(26);
+        expect($entries['backoffice']->permissions)->toHaveCount(30);
     });
 
     it('assigns only export_data to designer role', function () {
@@ -130,6 +130,10 @@ describe('RbacCatalog', function () {
             'manage_roles_and_permissions',
             'manage_subscription_types',
             'ai.free-preview',
+            'ai.basic_monthly',
+            'ai.basic_yearly',
+            'ai.standard_monthly',
+            'ai.standard_yearly',
         ];
 
         expect($allPerms)->toEqual($expectedPermissions);

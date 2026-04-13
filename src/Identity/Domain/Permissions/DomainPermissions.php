@@ -39,6 +39,10 @@ final class DomainPermissions
     public const string MANAGE_ROLES_AND_PERMISSIONS = 'manage_roles_and_permissions';
     public const string MANAGE_SUBSCRIPTION_TYPES = 'manage_subscription_types';
     public const string AI_FREE_PREVIEW = 'ai.free-preview';
+    public const string AI_BASIC_MONTHLY = 'ai.basic_monthly';
+    public const string AI_BASIC_YEARLY = 'ai.basic_yearly';
+    public const string AI_STANDARD_MONTHLY = 'ai.standard_monthly';
+    public const string AI_STANDARD_YEARLY = 'ai.standard_yearly';
 
     /**
      * Human-readable English descriptions for every permission.
@@ -77,6 +81,10 @@ final class DomainPermissions
             self::MANAGE_ROLES_AND_PERMISSIONS       => 'Manage roles and permissions (admin RBAC panel access)',
             self::MANAGE_SUBSCRIPTION_TYPES          => 'Manage subscription type catalog (admin CRUD)',
             self::AI_FREE_PREVIEW                    => 'Access AI features under the free monthly preview quota',
+            self::AI_BASIC_MONTHLY                   => 'Access AI features with Basic Monthly subscription',
+            self::AI_BASIC_YEARLY                    => 'Access AI features with Basic Yearly subscription',
+            self::AI_STANDARD_MONTHLY                => 'Access AI features with Standard Monthly subscription',
+            self::AI_STANDARD_YEARLY                 => 'Access AI features with Standard Yearly subscription',
         ];
     }
 
@@ -110,6 +118,10 @@ final class DomainPermissions
             self::MANAGE_ROLES_AND_PERMISSIONS,
             self::MANAGE_SUBSCRIPTION_TYPES,
             self::AI_FREE_PREVIEW,
+            self::AI_BASIC_MONTHLY,
+            self::AI_BASIC_YEARLY,
+            self::AI_STANDARD_MONTHLY,
+            self::AI_STANDARD_YEARLY,
         ];
     }
 }

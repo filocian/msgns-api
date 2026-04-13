@@ -11,11 +11,11 @@ describe('DomainPermissions', function () {
         expect(DomainPermissions::MANAGE_ROLES_AND_PERMISSIONS)->toBe('manage_roles_and_permissions');
     });
 
-    it('REQ-01-B: all() contains manage_roles_and_permissions and has exactly 26 elements', function () {
+    it('REQ-01-B: all() contains manage_roles_and_permissions and has exactly 30 elements', function () {
         $all = DomainPermissions::all();
 
         expect($all)->toContain('manage_roles_and_permissions');
-        expect($all)->toHaveCount(26);
+        expect($all)->toHaveCount(30);
     });
 
     it('AI_FREE_PREVIEW constant has the correct value', function () {
@@ -24,6 +24,22 @@ describe('DomainPermissions', function () {
 
     it('all() contains ai.free-preview', function () {
         expect(DomainPermissions::all())->toContain('ai.free-preview');
+    });
+
+    it('BE-5: all 4 AI tier permissions are present in all()', function () {
+        $all = DomainPermissions::all();
+
+        expect($all)->toContain(DomainPermissions::AI_BASIC_MONTHLY)
+            ->and($all)->toContain(DomainPermissions::AI_BASIC_YEARLY)
+            ->and($all)->toContain(DomainPermissions::AI_STANDARD_MONTHLY)
+            ->and($all)->toContain(DomainPermissions::AI_STANDARD_YEARLY);
+    });
+
+    it('BE-5: AI tier permission constants have correct values', function () {
+        expect(DomainPermissions::AI_BASIC_MONTHLY)->toBe('ai.basic_monthly')
+            ->and(DomainPermissions::AI_BASIC_YEARLY)->toBe('ai.basic_yearly')
+            ->and(DomainPermissions::AI_STANDARD_MONTHLY)->toBe('ai.standard_monthly')
+            ->and(DomainPermissions::AI_STANDARD_YEARLY)->toBe('ai.standard_yearly');
     });
 
     it('REQ-02-A: devRolePermissions contains manage_roles_and_permissions', function () {

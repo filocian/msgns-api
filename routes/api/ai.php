@@ -5,11 +5,17 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Src\Ai\Infrastructure\Http\Controllers\AiResponseController;
 use Src\Ai\Infrastructure\Http\Controllers\ClassicSubscriptionController;
+use Src\Ai\Infrastructure\Http\Controllers\GetPrepaidBalancesController;
+use Src\Ai\Infrastructure\Http\Controllers\GetPrepaidPackagesController;
+use Src\Ai\Infrastructure\Http\Controllers\PurchasePrepaidPackageController;
 use Src\Ai\Infrastructure\Http\Controllers\SubscriptionTypeCatalogController;
 use Src\Ai\Infrastructure\Http\Controllers\UserAiSystemPromptController;
 
 // Public — no auth required
 Route::get('/subscription-types', [SubscriptionTypeCatalogController::class, 'index']);
+
+// BE-6: Prepaid packages catalog (public)
+Route::get('/prepaid-packages', GetPrepaidPackagesController::class);
 
 Route::middleware(['auth:stateful-api', 'ai.rate-limit'])->group(function (): void {
     // AI routes — extended by BE-3, BE-8, BE-10, BE-12, BE-13
@@ -24,6 +30,10 @@ Route::middleware(['auth:stateful-api'])->group(function (): void {
     Route::post('/subscriptions/classic', [ClassicSubscriptionController::class, 'subscribe']);
     Route::delete('/subscriptions/classic', [ClassicSubscriptionController::class, 'cancel']);
     Route::get('/subscriptions/classic', [ClassicSubscriptionController::class, 'show']);
+
+    // BE-6: Prepaid package purchase and balance query
+    Route::post('/packages/purchase', PurchasePrepaidPackageController::class);
+    Route::get('/packages/balances', GetPrepaidBalancesController::class);
 
     // BE-10: AI Response Lifecycle (Human-in-the-Loop)
     Route::prefix('responses')->group(function (): void {

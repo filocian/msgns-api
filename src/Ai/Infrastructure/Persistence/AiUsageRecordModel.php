@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property string $source
  * @property int|null $user_subscription_id
+ * @property int|null $user_prepaid_balance_id
  * @property \Illuminate\Support\Carbon $used_at
  * @property int|null $tokens_used
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -27,6 +28,7 @@ final class AiUsageRecordModel extends Model
         'user_id',
         'source',
         'user_subscription_id',
+        'user_prepaid_balance_id',
         'used_at',
         'tokens_used',
     ];
@@ -46,5 +48,11 @@ final class AiUsageRecordModel extends Model
     public function userSubscription(): BelongsTo
     {
         return $this->belongsTo(UserSubscriptionModel::class, 'user_subscription_id');
+    }
+
+    /** @return BelongsTo<UserPrepaidBalanceModel, self> */
+    public function userPrepaidBalance(): BelongsTo
+    {
+        return $this->belongsTo(UserPrepaidBalanceModel::class, 'user_prepaid_balance_id');
     }
 }

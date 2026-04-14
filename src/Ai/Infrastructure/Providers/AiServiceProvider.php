@@ -10,13 +10,18 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Src\Ai\Application\Commands\CancelClassicSubscription\CancelClassicSubscriptionHandler;
 use Src\Ai\Application\Commands\DeleteUserSystemPrompt\DeleteUserSystemPromptHandler;
+use Src\Ai\Application\Commands\PurchasePrepaidPackage\PurchasePrepaidPackageHandler;
 use Src\Ai\Application\Commands\SubscribeToClassicPlan\SubscribeToClassicPlanHandler;
 use Src\Ai\Application\Commands\UpsertUserSystemPrompt\UpsertUserSystemPromptHandler;
 use Src\Ai\Application\Queries\GetActiveClassicSubscription\GetActiveClassicSubscriptionHandler;
+use Src\Ai\Application\Queries\GetPrepaidBalances\GetPrepaidBalancesHandler;
+use Src\Ai\Application\Queries\GetPrepaidPackages\GetPrepaidPackagesHandler;
 use Src\Ai\Application\Queries\GetUserSystemPrompts\GetUserSystemPromptsHandler;
 use Src\Ai\Domain\Ports\ClassicSubscriptionBrokerPort;
 use Src\Ai\Domain\Ports\GeminiPort;
+use Src\Ai\Domain\Ports\PrepaidChargePort;
 use Src\Ai\Domain\Ports\UserAiSystemPromptRepository;
+use Src\Ai\Infrastructure\Adapters\CashierPrepaidChargeAdapter;
 use Src\Ai\Infrastructure\Adapters\CashierSubscriptionAdapter;
 use Src\Ai\Infrastructure\Adapters\GeminiApiAdapter;
 use Src\Ai\Application\Commands\ApplyAiResponse\ApplyAiResponseHandler;
@@ -42,6 +47,7 @@ final class AiServiceProvider extends ServiceProvider
         $this->app->bind(GeminiPort::class, GeminiApiAdapter::class);
         $this->app->bind(UserAiSystemPromptRepository::class, EloquentUserAiSystemPromptRepository::class);
         $this->app->bind(ClassicSubscriptionBrokerPort::class, CashierSubscriptionAdapter::class);
+        $this->app->bind(PrepaidChargePort::class, CashierPrepaidChargeAdapter::class);
 
         $this->app->bind(AiResponseApplierPort::class, function (): CompositeAiResponseApplier {
             return new CompositeAiResponseApplier([
@@ -65,6 +71,9 @@ final class AiServiceProvider extends ServiceProvider
         $this->app->make(CommandBus::class)->register('ai.edit_ai_response', EditAiResponseHandler::class);
         $this->app->make(CommandBus::class)->register('ai.reject_ai_response', RejectAiResponseHandler::class);
         $this->app->make(CommandBus::class)->register('ai.apply_ai_response', ApplyAiResponseHandler::class);
+        $this->app->make(CommandBus::class)->register('ai.purchase_prepaid_package', PurchasePrepaidPackageHandler::class);
+        $this->app->make(QueryBus::class)->register('ai.get_prepaid_balances', GetPrepaidBalancesHandler::class);
+        $this->app->make(QueryBus::class)->register('ai.get_prepaid_packages', GetPrepaidPackagesHandler::class);
 
         Route::prefix('api/v2/ai')
             ->middleware('api')

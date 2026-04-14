@@ -11,11 +11,11 @@ describe('DomainPermissions', function () {
         expect(DomainPermissions::MANAGE_ROLES_AND_PERMISSIONS)->toBe('manage_roles_and_permissions');
     });
 
-    it('REQ-01-B: all() contains manage_roles_and_permissions and has exactly 30 elements', function () {
+    it('REQ-01-B: all() contains manage_roles_and_permissions and has exactly 33 elements', function () {
         $all = DomainPermissions::all();
 
         expect($all)->toContain('manage_roles_and_permissions');
-        expect($all)->toHaveCount(30);
+        expect($all)->toHaveCount(33);
     });
 
     it('AI_FREE_PREVIEW constant has the correct value', function () {
@@ -24,6 +24,20 @@ describe('DomainPermissions', function () {
 
     it('all() contains ai.free-preview', function () {
         expect(DomainPermissions::all())->toContain('ai.free-preview');
+    });
+
+    it('BE-6: all 3 AI prepaid permissions are present in all()', function () {
+        $all = DomainPermissions::all();
+
+        expect($all)->toContain(DomainPermissions::AI_PREPAID_STARTER)
+            ->and($all)->toContain(DomainPermissions::AI_PREPAID_GROWTH)
+            ->and($all)->toContain(DomainPermissions::AI_PREPAID_PRO);
+    });
+
+    it('BE-6: AI prepaid permission constants have correct values', function () {
+        expect(DomainPermissions::AI_PREPAID_STARTER)->toBe('ai.prepaid_starter')
+            ->and(DomainPermissions::AI_PREPAID_GROWTH)->toBe('ai.prepaid_growth')
+            ->and(DomainPermissions::AI_PREPAID_PRO)->toBe('ai.prepaid_pro');
     });
 
     it('BE-5: all 4 AI tier permissions are present in all()', function () {

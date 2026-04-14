@@ -32,7 +32,7 @@ describe('artisan rbac:reconcile', function () {
         }
     });
 
-    it('seeds all 30 permissions into Spatie tables with stateful-api guard', function () {
+    it('seeds all 33 permissions into Spatie tables with stateful-api guard', function () {
         $this->artisan('rbac:reconcile')->assertExitCode(0);
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
@@ -46,24 +46,24 @@ describe('artisan rbac:reconcile', function () {
         }
     });
 
-    it('assigns all 30 permissions to developer role', function () {
+    it('assigns all 33 permissions to developer role', function () {
         $this->artisan('rbac:reconcile')->assertExitCode(0);
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $role = Role::where('name', 'developer')->where('guard_name', 'stateful-api')->first();
 
-        expect($role->permissions)->toHaveCount(30);
+        expect($role->permissions)->toHaveCount(33);
     });
 
-    it('assigns all 30 permissions to backoffice role', function () {
+    it('assigns all 33 permissions to backoffice role', function () {
         $this->artisan('rbac:reconcile')->assertExitCode(0);
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $role = Role::where('name', 'backoffice')->where('guard_name', 'stateful-api')->first();
 
-        expect($role->permissions)->toHaveCount(30);
+        expect($role->permissions)->toHaveCount(33);
     });
 
     it('assigns only export_data to designer role', function () {
@@ -108,9 +108,9 @@ describe('artisan rbac:reconcile', function () {
         $roleCount = Role::where('guard_name', 'stateful-api')->count();
         expect($roleCount)->toBe(5);
 
-        // Permissions count should be exactly 30 (no duplicates)
+        // Permissions count should be exactly 33 (no duplicates)
         $permCount = Permission::where('guard_name', 'stateful-api')->count();
-        expect($permCount)->toBe(30);
+        expect($permCount)->toBe(33);
     });
 
     it('exits with success code', function () {

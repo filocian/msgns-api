@@ -42,7 +42,10 @@ final class DomainPermissions
     public const string AI_BASIC_MONTHLY = 'ai.basic_monthly';
     public const string AI_BASIC_YEARLY = 'ai.basic_yearly';
     public const string AI_STANDARD_MONTHLY = 'ai.standard_monthly';
-    public const string AI_STANDARD_YEARLY = 'ai.standard_yearly';
+    public const string AI_STANDARD_YEARLY  = 'ai.standard_yearly';
+    public const string AI_PREPAID_STARTER  = 'ai.prepaid_starter';
+    public const string AI_PREPAID_GROWTH   = 'ai.prepaid_growth';
+    public const string AI_PREPAID_PRO      = 'ai.prepaid_pro';
 
     /**
      * Human-readable English descriptions for every permission.
@@ -85,6 +88,9 @@ final class DomainPermissions
             self::AI_BASIC_YEARLY                    => 'Access AI features with Basic Yearly subscription',
             self::AI_STANDARD_MONTHLY                => 'Access AI features with Standard Monthly subscription',
             self::AI_STANDARD_YEARLY                 => 'Access AI features with Standard Yearly subscription',
+            self::AI_PREPAID_STARTER                 => 'Access to AI Starter prepaid package',
+            self::AI_PREPAID_GROWTH                  => 'Access to AI Growth prepaid package',
+            self::AI_PREPAID_PRO                     => 'Access to AI Pro prepaid package',
         ];
     }
 
@@ -122,6 +128,9 @@ final class DomainPermissions
             self::AI_BASIC_YEARLY,
             self::AI_STANDARD_MONTHLY,
             self::AI_STANDARD_YEARLY,
+            self::AI_PREPAID_STARTER,
+            self::AI_PREPAID_GROWTH,
+            self::AI_PREPAID_PRO,
         ];
     }
 }

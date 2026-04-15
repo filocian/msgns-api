@@ -15,13 +15,14 @@ function makePrepaidPackage(array $overrides = []): PrepaidPackageModel
 {
     /** @var PrepaidPackageModel */
     return PrepaidPackageModel::query()->create(array_merge([
-        'name'              => 'Starter',
-        'slug'              => 'starter-' . uniqid(),
-        'stripe_price_id'   => 'price_starter_test',
-        'permission_name'   => 'ai.prepaid_starter',
-        'requests_included' => 100,
-        'price_cents'       => 1000,
-        'active'            => true,
+        'name'                    => 'Starter',
+        'slug'                    => 'starter-' . uniqid(),
+        'stripe_price_id'         => 'price_starter_test',
+        'permission_name'         => 'ai.prepaid_starter',
+        'google_review_limit'     => 50,
+        'instagram_content_limit' => 50,
+        'price_cents'             => 1000,
+        'active'                  => true,
     ], $overrides));
 }
 
@@ -66,33 +67,36 @@ describe('POST /api/v2/ai/packages/purchase', function (): void {
             ->assertJsonStructure(['data' => ['status', 'balance']]);
 
         $this->assertDatabaseHas('user_prepaid_balances', [
-            'user_id'            => $user->id,
-            'prepaid_package_id' => $package->id,
-            'requests_remaining' => 100,
+            'user_id'                          => $user->id,
+            'prepaid_package_id'               => $package->id,
+            'google_review_requests_remaining' => 50,
+            'instagram_requests_remaining'     => 50,
         ]);
 
         $user->refresh();
         expect($user->hasPermissionTo('ai.prepaid_starter'))->toBeTrue();
     });
 
-    it('returns only balances with requests_remaining > 0', function (): void {
+    it('returns only balances with at least one feature quota remaining', function (): void {
         $user    = $this->create_user(['email' => 'prepaid-balance-list@test.com']);
         $package = makePrepaidPackage(['slug' => 'starter-balance-list']);
 
         UserPrepaidBalanceModel::query()->create([
-            'user_id'                  => $user->id,
-            'prepaid_package_id'       => $package->id,
-            'requests_remaining'       => 50,
-            'purchased_at'             => now(),
-            'stripe_payment_intent_id' => 'pi_active_001',
+            'user_id'                          => $user->id,
+            'prepaid_package_id'               => $package->id,
+            'google_review_requests_remaining' => 50,
+            'instagram_requests_remaining'     => 0,
+            'purchased_at'                     => now(),
+            'stripe_payment_intent_id'         => 'pi_active_001',
         ]);
 
         UserPrepaidBalanceModel::query()->create([
-            'user_id'                  => $user->id,
-            'prepaid_package_id'       => $package->id,
-            'requests_remaining'       => 0,
-            'purchased_at'             => now()->subDay(),
-            'stripe_payment_intent_id' => 'pi_depleted_001',
+            'user_id'                          => $user->id,
+            'prepaid_package_id'               => $package->id,
+            'google_review_requests_remaining' => 0,
+            'instagram_requests_remaining'     => 0,
+            'purchased_at'                     => now()->subDay(),
+            'stripe_payment_intent_id'         => 'pi_depleted_001',
         ]);
 
         $response = $this->actingAs($user, 'stateful-api')
@@ -101,7 +105,7 @@ describe('POST /api/v2/ai/packages/purchase', function (): void {
 
         $data = $response->json('data');
         expect($data)->toHaveCount(1);
-        expect($data[0]['requests_remaining'])->toBe(50);
+        expect($data[0]['google_review_requests_remaining'])->toBe(50);
     });
 
     it('returns 422 with status failed when PaymentFailure is thrown', function (): void {

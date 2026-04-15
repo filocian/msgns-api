@@ -60,11 +60,12 @@ final class PurchasePrepaidPackageHandler implements CommandHandler
         $balance = $this->transaction->run(function () use ($command, $package, $payment): UserPrepaidBalanceModel {
             /** @var UserPrepaidBalanceModel $balance */
             $balance = UserPrepaidBalanceModel::query()->create([
-                'user_id'                  => $command->userId,
-                'prepaid_package_id'       => $package->id,
-                'requests_remaining'       => $package->requests_included,
-                'purchased_at'             => now(),
-                'stripe_payment_intent_id' => $payment->id,
+                'user_id'                          => $command->userId,
+                'prepaid_package_id'               => $package->id,
+                'google_review_requests_remaining' => $package->google_review_limit,
+                'instagram_requests_remaining'     => $package->instagram_content_limit,
+                'purchased_at'                     => now(),
+                'stripe_payment_intent_id'         => $payment->id,
             ]);
 
             /** @var User $user */

@@ -18,7 +18,15 @@ Route::get('/subscription-types', [SubscriptionTypeCatalogController::class, 'in
 Route::get('/prepaid-packages', GetPrepaidPackagesController::class);
 
 Route::middleware(['auth:stateful-api', 'ai.rate-limit'])->group(function (): void {
-    // AI routes — extended by BE-3, BE-8, BE-10, BE-12, BE-13
+    // BE-12: Google Reviews AI generation routes (add here with ai.enforce-usage:google_reviews)
+    Route::middleware(['ai.enforce-usage:google_reviews'])->group(function (): void {
+        // placeholder — routes added by BE-12
+    });
+
+    // BE-13: Instagram AI generation routes (add here with ai.enforce-usage:instagram)
+    Route::middleware(['ai.enforce-usage:instagram'])->group(function (): void {
+        // placeholder — routes added by BE-13
+    });
 });
 
 Route::middleware(['auth:stateful-api'])->group(function (): void {

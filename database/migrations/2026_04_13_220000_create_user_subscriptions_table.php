@@ -15,7 +15,7 @@ return new class () extends Migration {
             $table->foreignId('subscription_type_id')->constrained('subscription_types');
             $table->string('billing_period')->comment('monthly or annual');
             $table->string('stripe_subscription_id');
-            $table->enum('status', ['active', 'cancelled', 'expired'])->default('active');
+            $table->enum('status', ['active', 'past_due', 'cancelled', 'expired'])->default('active');
             $table->timestamp('current_period_start');
             $table->timestamp('current_period_end');
             $table->timestamp('cancelled_at')->nullable();

@@ -34,6 +34,7 @@ use Src\Ai\Domain\Services\CompositeAiResponseApplier;
 use Src\Ai\Infrastructure\Console\Commands\ResetExpiredAiResponsesCommand;
 use Src\Ai\Infrastructure\Console\Commands\ResetFreeAiUsageCommand;
 use Src\Ai\Infrastructure\Http\Middleware\AiRateLimitMiddleware;
+use Src\Ai\Infrastructure\Http\Middleware\AiUsageEnforcementMiddleware;
 use Src\Ai\Infrastructure\Listeners\AssignFreeAiPermissionListener;
 use Src\Ai\Infrastructure\Persistence\EloquentUserAiSystemPromptRepository;
 use Src\Identity\Domain\Events\UserActivated;
@@ -59,6 +60,7 @@ final class AiServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->make(Router::class)->aliasMiddleware('ai.rate-limit', AiRateLimitMiddleware::class);
+        $this->app->make(Router::class)->aliasMiddleware('ai.enforce-usage', AiUsageEnforcementMiddleware::class);
 
         $this->app->make(QueryBus::class)->register('ai.get_user_system_prompts', GetUserSystemPromptsHandler::class);
         $this->app->make(QueryBus::class)->register('ai.get_active_classic_subscription', GetActiveClassicSubscriptionHandler::class);

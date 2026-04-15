@@ -79,7 +79,7 @@ describe('GET /google-business/callback', function (): void {
         expect(UserGoogleBusinessConnection::where('user_id', $user->id)->count())->toBe(1);
     });
 
-    it('redirects to v2_front_url with connected=true on success', function (): void {
+    it('redirects to v2_front_url/ai/connections with google_connected=true on success', function (): void {
         $user = $this->create_user(['email' => 'callback-success@test.com']);
 
         Http::fake([
@@ -100,7 +100,8 @@ describe('GET /google-business/callback', function (): void {
         $response->assertRedirect();
         $location = $response->headers->get('Location');
         expect($location)->toContain('app-v2.msgns.test')
-            ->and($location)->toContain('connected=true');
+            ->and($location)->toContain('/ai/connections')
+            ->and($location)->toContain('google_connected=true');
     });
 
     it('rejects callback with mismatched state — redirects with error', function (): void {

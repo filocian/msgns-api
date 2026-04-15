@@ -13,7 +13,7 @@ describe('GET /google-business/callback', function (): void {
     beforeEach(function (): void {
         Config::set('services.google.client_id', 'test-client-id');
         Config::set('services.google.client_secret', 'test-client-secret');
-        Config::set('services.google.business_redirect_uri', 'http://localhost/google-business/callback');
+        Config::set('services.google.business_redirect_uri', 'http://localhost:8000/google-business/callback');
         Config::set('services.products.v2_front_url', 'https://app-v2.msgns.test');
     });
 

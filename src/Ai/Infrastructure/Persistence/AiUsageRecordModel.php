@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $user_id
  * @property string $source
+ * @property string $product_type
  * @property int|null $user_subscription_id
  * @property int|null $user_prepaid_balance_id
  * @property \Illuminate\Support\Carbon $used_at
@@ -27,6 +28,7 @@ final class AiUsageRecordModel extends Model
     protected $fillable = [
         'user_id',
         'source',
+        'product_type',
         'user_subscription_id',
         'user_prepaid_balance_id',
         'used_at',

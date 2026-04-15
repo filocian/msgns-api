@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $slug
  * @property string|null $stripe_price_id
  * @property string $permission_name
- * @property int $requests_included
+ * @property int $google_review_limit
+ * @property int $instagram_content_limit
  * @property int $price_cents
  * @property bool $active
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -33,16 +34,18 @@ final class PrepaidPackageModel extends Model
         'slug',
         'stripe_price_id',
         'permission_name',
-        'requests_included',
+        'google_review_limit',
+        'instagram_content_limit',
         'price_cents',
         'active',
     ];
 
     /** @var array<string, string> */
     protected $casts = [
-        'active'             => 'boolean',
-        'requests_included'  => 'integer',
-        'price_cents'        => 'integer',
+        'active'                  => 'boolean',
+        'google_review_limit'     => 'integer',
+        'instagram_content_limit' => 'integer',
+        'price_cents'             => 'integer',
     ];
 
     /** @return HasMany<UserPrepaidBalanceModel> */

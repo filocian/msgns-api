@@ -19,7 +19,10 @@ final class GetPrepaidBalancesHandler implements QueryHandler
         /** @var Collection<int, UserPrepaidBalanceModel> */
         return UserPrepaidBalanceModel::query()
             ->where('user_id', $query->userId)
-            ->withAvailableRequests()
+            ->where(function (\Illuminate\Database\Eloquent\Builder $q): void {
+                $q->where('google_review_requests_remaining', '>', 0)
+                  ->orWhere('instagram_requests_remaining', '>', 0);
+            })
             ->with('package')
             ->orderBy('purchased_at', 'asc')
             ->get();

@@ -10,12 +10,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * CONSUMPTION ORDER: BE-8 deducts from balance rows in FIFO order by purchased_at (oldest first).
+ * CONSUMPTION ORDER: BE-12/BE-13 deduct from balance rows in FIFO order by purchased_at (oldest first), per feature.
  *
  * @property int $id
  * @property int $user_id
  * @property int $prepaid_package_id
- * @property int $requests_remaining
+ * @property int $google_review_requests_remaining
+ * @property int $instagram_requests_remaining
  * @property \Illuminate\Support\Carbon $purchased_at
  * @property \Illuminate\Support\Carbon|null $expires_at
  * @property string $stripe_payment_intent_id
@@ -24,7 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read User $user
  * @property-read PrepaidPackageModel $package
  *
- * @method static Builder<static> withAvailableRequests()
+ * @method static Builder<static> withAvailableGoogleReviewRequests()
+ * @method static Builder<static> withAvailableInstagramRequests()
  */
 final class UserPrepaidBalanceModel extends Model
 {
@@ -34,7 +36,8 @@ final class UserPrepaidBalanceModel extends Model
     protected $fillable = [
         'user_id',
         'prepaid_package_id',
-        'requests_remaining',
+        'google_review_requests_remaining',
+        'instagram_requests_remaining',
         'purchased_at',
         'expires_at',
         'stripe_payment_intent_id',
@@ -42,9 +45,10 @@ final class UserPrepaidBalanceModel extends Model
 
     /** @var array<string, string> */
     protected $casts = [
-        'purchased_at'      => 'datetime',
-        'expires_at'        => 'datetime',
-        'requests_remaining' => 'integer',
+        'purchased_at'                     => 'datetime',
+        'expires_at'                       => 'datetime',
+        'google_review_requests_remaining' => 'integer',
+        'instagram_requests_remaining'     => 'integer',
     ];
 
     /** @return BelongsTo<User, self> */
@@ -60,8 +64,14 @@ final class UserPrepaidBalanceModel extends Model
     }
 
     /** @param Builder<static> $query */
-    public function scopeWithAvailableRequests(Builder $query): Builder
+    public function scopeWithAvailableGoogleReviewRequests(Builder $query): Builder
     {
-        return $query->where('requests_remaining', '>', 0);
+        return $query->where('google_review_requests_remaining', '>', 0);
+    }
+
+    /** @param Builder<static> $query */
+    public function scopeWithAvailableInstagramRequests(Builder $query): Builder
+    {
+        return $query->where('instagram_requests_remaining', '>', 0);
     }
 }

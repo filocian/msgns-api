@@ -61,20 +61,18 @@ return [
 	],
 
 	'gemini' => [
-		'api_key'                   => env('GEMINI_API_KEY'),
-		'model'                     => env('GEMINI_MODEL', 'gemini-2.0-flash'),
-		'timeout_seconds'           => (int) env('GEMINI_TIMEOUT_SECONDS', 30),
-		'rate_limit_per_minute'     => (int) env('AI_RATE_LIMIT_PER_MINUTE', 2),
-		'rate_limit_window_seconds' => (int) env('AI_RATE_LIMIT_WINDOW_SECONDS', 60),
+		'api_key'                                  => env('GEMINI_API_KEY'),
+		'model'                                    => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+		'timeout_seconds'                          => (int) env('GEMINI_TIMEOUT_SECONDS', 30),
+		'rate_limit_per_minute'                    => (int) env('AI_RATE_LIMIT_PER_MINUTE', 2),
+		'rate_limit_window_seconds'                => (int) env('AI_RATE_LIMIT_WINDOW_SECONDS', 60),
+		'ai_free_google_review_requests_per_month' => (int) env('AI_FREE_GOOGLE_REVIEW_REQUESTS_PER_MONTH', 5),
+		'ai_free_instagram_requests_per_month'     => (int) env('AI_FREE_INSTAGRAM_REQUESTS_PER_MONTH', 5),
 	],
 
 	'products' => [
 		'front_url' => env('FRONT_URL', 'https://app.msgns.local'),
 		'v2_front_url' => env('FRONT_V2_URL', 'https://app.msgns.local'),
 		'default_password_length' => (int) env('DEFAULT_PRODUCT_PASSWORD_LENGTH', 12),
-	],
-
-	'ai' => [
-		'free_requests_per_month' => (int) env('AI_FREE_REQUESTS_PER_MONTH', 10),
 	],
 ];

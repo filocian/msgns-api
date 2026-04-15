@@ -26,9 +26,9 @@
         <env name="APP_KEY" value="base64:dGVzdGluZy1vbmx5LWtleS1mb3ItY2ktcGhwdW5pdCE=" force="true"/>
         <env name="APP_LOCALE" value="en" force="true"/>
         <env name="APP_FALLBACK_LOCALE" value="en" force="true"/>
-        <env name="APP_URL" value="http://localhost"/>
+        <env name="APP_URL" value="http://localhost:8000"/>
         <env name="AUTH_MODEL" value="App\Models\User"/>
-        <env name="HTTP_REFERER" value="http://localhost:3000"/>
+        <env name="HTTP_REFERER" value="http://localhost:5173"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array" force="true"/>

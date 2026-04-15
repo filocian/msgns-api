@@ -10,7 +10,7 @@ use Src\GoogleBusiness\Infrastructure\Services\GoogleBusinessTokenService;
 beforeEach(function (): void {
     config()->set('services.google.client_id', 'test-client-id');
     config()->set('services.google.client_secret', 'test-client-secret');
-    config()->set('services.google.business_redirect_uri', 'http://localhost/google-business/callback');
+    config()->set('services.google.business_redirect_uri', 'http://localhost:8000/google-business/callback');
 });
 
 describe('GoogleBusinessTokenService', function (): void {

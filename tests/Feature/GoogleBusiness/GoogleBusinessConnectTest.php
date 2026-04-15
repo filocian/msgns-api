@@ -11,7 +11,7 @@ describe('GET /google-business/connect', function (): void {
     beforeEach(function (): void {
         Config::set('services.google.client_id', 'test-client-id');
         Config::set('services.google.client_secret', 'test-client-secret');
-        Config::set('services.google.business_redirect_uri', 'http://localhost/google-business/callback');
+        Config::set('services.google.business_redirect_uri', 'http://localhost:8000/google-business/callback');
     });
 
     it('redirects authenticated user to google oauth url with correct params', function (): void {
@@ -25,7 +25,7 @@ describe('GET /google-business/connect', function (): void {
         $location = $response->headers->get('Location');
         expect($location)->toContain('accounts.google.com/o/oauth2/v2/auth')
             ->and($location)->toContain('client_id=test-client-id')
-            ->and($location)->toContain(urlencode('http://localhost/google-business/callback'));
+            ->and($location)->toContain(urlencode('http://localhost:8000/google-business/callback'));
     });
 
     it('includes scope business.manage in oauth url', function (): void {

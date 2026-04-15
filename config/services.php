@@ -51,13 +51,13 @@ return [
 		'places_api_key'        => env('GOOGLE_PLACES_API_KEY'),
 		'client_id'             => env('GOOGLE_CLIENT_ID'),              // also used by GoogleOAuthAdapter (Identity)
 		'client_secret'         => env('GOOGLE_CLIENT_SECRET'),          // new — BE-11a
-		'business_redirect_uri' => env('GOOGLE_BUSINESS_REDIRECT_URI'),  // new — BE-11a
+		'business_redirect_uri' => env('GOOGLE_BUSINESS_REDIRECT_URI', 'http://localhost:8000/google-business/callback'),  // new — BE-11a
 	],
 
 	'meta' => [
 		'app_id'       => env('META_APP_ID'),
 		'app_secret'   => env('META_APP_SECRET'),
-		'redirect_uri' => env('INSTAGRAM_REDIRECT_URI'),
+		'redirect_uri' => env('INSTAGRAM_REDIRECT_URI', 'http://localhost:8000/instagram/callback'),
 	],
 
 	'gemini' => [
@@ -71,8 +71,8 @@ return [
 	],
 
 	'products' => [
-		'front_url' => env('FRONT_URL', 'https://app.msgns.local'),
-		'v2_front_url' => env('FRONT_V2_URL', 'https://app.msgns.local'),
+		'front_url' => env('FRONT_URL', 'http://localhost:5173'),
+		'v2_front_url' => env('FRONT_V2_URL', 'http://localhost:5173'),
 		'default_password_length' => (int) env('DEFAULT_PRODUCT_PASSWORD_LENGTH', 12),
 	],
 ];

@@ -13,7 +13,7 @@ describe('GET /instagram/connect', function (): void {
     beforeEach(function (): void {
         Config::set('services.meta.app_id', 'test-app-id');
         Config::set('services.meta.app_secret', 'test-app-secret');
-        Config::set('services.meta.redirect_uri', 'http://localhost/instagram/callback');
+        Config::set('services.meta.redirect_uri', 'http://localhost:8000/instagram/callback');
     });
 
     it('redirects to meta oauth dialog with correct params', function (): void {
@@ -27,7 +27,7 @@ describe('GET /instagram/connect', function (): void {
         $location = $response->headers->get('Location');
         expect($location)->toContain('facebook.com')
             ->and($location)->toContain('client_id=test-app-id')
-            ->and($location)->toContain(urlencode('http://localhost/instagram/callback'))
+            ->and($location)->toContain(urlencode('http://localhost:8000/instagram/callback'))
             ->and($location)->toContain('instagram_basic')
             ->and($location)->toContain('state=');
     });
@@ -55,7 +55,7 @@ describe('GET /instagram/callback', function (): void {
     beforeEach(function (): void {
         Config::set('services.meta.app_id', 'test-app-id');
         Config::set('services.meta.app_secret', 'test-app-secret');
-        Config::set('services.meta.redirect_uri', 'http://localhost/instagram/callback');
+        Config::set('services.meta.redirect_uri', 'http://localhost:8000/instagram/callback');
         Config::set('services.products.v2_front_url', 'https://app-v2.msgns.test');
     });
 

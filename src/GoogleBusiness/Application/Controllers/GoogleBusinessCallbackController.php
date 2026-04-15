@@ -20,7 +20,7 @@ final class GoogleBusinessCallbackController extends Controller
 
     public function __invoke(Request $request): RedirectResponse
     {
-        $frontendBaseUrl = config('services.products.v2_front_url') . '/settings/integrations/google-business';
+        $frontendBaseUrl = config('services.products.v2_front_url') . '/ai/connections';
 
         try {
             // Identify user from session (web guard is disabled — must specify stateful-api guard).
@@ -55,7 +55,7 @@ final class GoogleBusinessCallbackController extends Controller
                 expiresIn: $tokens['expires_in'],
             ));
 
-            return redirect($frontendBaseUrl . '?connected=true');
+            return redirect($frontendBaseUrl . '?google_connected=true');
         } catch (\Throwable $e) {
             report($e);
             return redirect($frontendBaseUrl . '?error=oauth_failed');

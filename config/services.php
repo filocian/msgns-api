@@ -49,7 +49,8 @@ return [
 
 	'google' => [
 		'places_api_key'        => env('GOOGLE_PLACES_API_KEY'),
-		'client_id'             => env('GOOGLE_CLIENT_ID'),              // also used by GoogleOAuthAdapter (Identity)
+		'client_id'             => env('GOOGLE_CLIENT_ID'),              // Google Business OAuth only (BE-11a)
+		'sign_in_client_id'     => env('GOOGLE_SIGN_IN_CLIENT_ID'),     // Social login — used by GoogleOAuthAdapter for aud verification
 		'client_secret'         => env('GOOGLE_CLIENT_SECRET'),          // new — BE-11a
 		'business_redirect_uri' => env('GOOGLE_BUSINESS_REDIRECT_URI', 'http://localhost:8000/google-business/callback'),  // new — BE-11a
 	],

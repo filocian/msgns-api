@@ -43,6 +43,12 @@ final class PurchasePrepaidPackageHandler implements CommandHandler
                 $command->userId,
                 $package->price_cents,
                 $command->paymentMethodId,
+                [
+                    'metadata' => [
+                        'prepaid_package_id' => (string) $package->id,
+                        'user_id'            => (string) $command->userId,
+                    ],
+                ],
             );
         } catch (IncompletePayment $e) {
             // 3DS / payment action required

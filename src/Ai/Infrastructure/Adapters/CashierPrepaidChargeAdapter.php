@@ -10,11 +10,11 @@ use Src\Ai\Domain\Ports\PrepaidChargePort;
 
 final class CashierPrepaidChargeAdapter implements PrepaidChargePort
 {
-    public function charge(int $userId, int $amountCents, string $paymentMethodId): Payment
+    public function charge(int $userId, int $amountCents, string $paymentMethodId, array $options = []): Payment
     {
         /** @var User $user */
         $user = User::findOrFail($userId);
 
-        return $user->charge($amountCents, $paymentMethodId);
+        return $user->charge($amountCents, $paymentMethodId, $options);
     }
 }

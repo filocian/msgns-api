@@ -19,5 +19,5 @@ interface PrepaidChargePort
      * @throws \Stripe\Exception\CardException when the card is declined
      * @throws \Stripe\Exception\ApiErrorException on any other Stripe API error
      */
-    public function charge(int $userId, int $amountCents, string $paymentMethodId): Payment;
+    public function charge(int $userId, int $amountCents, string $paymentMethodId, array $options = []): Payment;
 }

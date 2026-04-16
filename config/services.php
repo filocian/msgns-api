@@ -76,4 +76,10 @@ return [
 		'v2_front_url' => env('FRONT_V2_URL', 'http://localhost:5173'),
 		'default_password_length' => (int) env('DEFAULT_PRODUCT_PASSWORD_LENGTH', 12),
 	],
+
+	'stripe' => [
+		'key'            => env('STRIPE_KEY'),
+		'secret'         => env('STRIPE_SECRET'),
+		'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+	],
 ];

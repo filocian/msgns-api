@@ -35,7 +35,7 @@ it('excludes soft-deleted subscription types', function () {
         ->and($response->json('data.0.id'))->toBe($active->id);
 });
 
-it('response does not contain permissionName, stripeProductId, stripePriceIds fields', function () {
+it('response does not contain permissionName, stripeProductId, stripePriceIds, currency fields', function () {
     SubscriptionTypeModel::factory()->create(['is_active' => true]);
 
     $response = $this->getJson('/api/v2/subscriptions/subscription-types')
@@ -46,7 +46,19 @@ it('response does not contain permissionName, stripeProductId, stripePriceIds fi
     expect($item)->not->toHaveKey('permissionName')
         ->and($item)->not->toHaveKey('stripeProductId')
         ->and($item)->not->toHaveKey('stripePriceIds')
+        ->and($item)->not->toHaveKey('currency')
         ->and($item)->not->toHaveKey('isActive')
         ->and($item)->not->toHaveKey('createdAt')
         ->and($item)->not->toHaveKey('updatedAt');
+});
+
+it('public resource includes basePriceCents as integer EUR minor units', function () {
+    SubscriptionTypeModel::factory()->create(['is_active' => true, 'base_price_cents' => 1234]);
+
+    $response = $this->getJson('/api/v2/subscriptions/subscription-types')
+        ->assertStatus(200);
+
+    $item = $response->json('data.0');
+
+    expect($item['basePriceCents'])->toBe(1234)->toBeInt();
 });

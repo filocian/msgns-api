@@ -12,8 +12,6 @@ use Src\Shared\Core\Bus\CommandHandler;
 use Src\Subscriptions\Application\Resources\SubscriptionTypeResource;
 use Src\Subscriptions\Domain\Errors\SubscriptionTypeNotFound;
 use Src\Subscriptions\Domain\Ports\SubscriptionTypeRepositoryPort;
-use Src\Subscriptions\Domain\ValueObjects\BillingPeriod;
-use Src\Subscriptions\Domain\ValueObjects\SubscriptionMode;
 
 final class UpdateSubscriptionTypeHandler implements CommandHandler
 {
@@ -31,17 +29,10 @@ final class UpdateSubscriptionTypeHandler implements CommandHandler
             throw SubscriptionTypeNotFound::withId($command->id);
         }
 
-        $billingPeriods = $command->billingPeriods !== null
-            ? array_map(static fn (string $v): BillingPeriod => BillingPeriod::from($v), $command->billingPeriods)
-            : null;
-
         $subscriptionType->applyUpdate(
             name: $command->name,
             slug: Str::slug($command->name),
             description: $command->description,
-            mode: SubscriptionMode::from($command->mode),
-            billingPeriods: $billingPeriods,
-            basePriceCents: $command->basePriceCents,
             permissionName: $command->permissionName,
             googleReviewLimit: $command->googleReviewLimit,
             instagramContentLimit: $command->instagramContentLimit,

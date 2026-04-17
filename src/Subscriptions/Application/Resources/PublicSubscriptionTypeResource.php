@@ -17,7 +17,7 @@ use Src\Subscriptions\Domain\Entities\SubscriptionType;
         new OA\Property(property: 'description', type: 'string', nullable: true, example: 'Basic plan for Google Reviews'),
         new OA\Property(property: 'mode', type: 'string', enum: ['classic', 'prepaid'], example: 'classic'),
         new OA\Property(property: 'billingPeriods', type: 'array', nullable: true, items: new OA\Items(type: 'string', enum: ['monthly', 'annual'])),
-        new OA\Property(property: 'basePriceCents', type: 'integer', example: 200),
+        new OA\Property(property: 'basePriceCents', type: 'integer', description: 'Price in EUR minor units (cents)', example: 2000),
         new OA\Property(property: 'googleReviewLimit', type: 'integer', example: 50),
         new OA\Property(property: 'instagramContentLimit', type: 'integer', example: 0),
     ]

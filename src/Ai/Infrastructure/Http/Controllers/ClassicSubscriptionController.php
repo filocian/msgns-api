@@ -33,19 +33,6 @@ use Src\Subscriptions\Infrastructure\Persistence\SubscriptionTypeModel;
     ],
     required: ['id', 'billing_period', 'status', 'current_period_start', 'current_period_end', 'cancelled_at'],
 )]
-#[OA\Schema(
-    schema: 'SubscriptionTypeResource',
-    type: 'object',
-    properties: [
-        new OA\Property(property: 'id', type: 'integer'),
-        new OA\Property(property: 'name', type: 'string'),
-        new OA\Property(property: 'slug', type: 'string'),
-        new OA\Property(property: 'permission_name', type: 'string'),
-        new OA\Property(property: 'google_review_limit', type: 'integer'),
-        new OA\Property(property: 'instagram_content_limit', type: 'integer'),
-    ],
-    required: ['id', 'name', 'slug', 'permission_name', 'google_review_limit', 'instagram_content_limit'],
-)]
 final class ClassicSubscriptionController extends Controller
 {
     public function __construct(

@@ -14,16 +14,29 @@ use Src\Billing\Application\Commands\HandlePrepaidPaymentSucceeded\HandlePrepaid
 use Src\Billing\Application\Commands\SetDefaultPaymentMethod\SetDefaultPaymentMethodHandler;
 use Src\Billing\Application\Commands\SyncSubscriptionStatusFromStripe\SyncSubscriptionStatusFromStripeHandler;
 use Src\Billing\Application\Queries\ListPaymentMethods\ListPaymentMethodsHandler;
+use Src\Billing\Application\Queries\ListStripeProductPrices\ListStripeProductPricesHandler;
+use Src\Billing\Application\Queries\ListStripeProducts\ListStripeProductsHandler;
 use Src\Billing\Domain\Ports\BillingPort;
+use Src\Billing\Domain\Ports\StripeCatalogPort;
+use Src\Billing\Infrastructure\Services\StripeCatalogService;
 use Src\Billing\Infrastructure\Services\StripeCustomerService;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Core\Bus\QueryBus;
+use Stripe\StripeClient;
 
 final class BillingServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->app->bind(BillingPort::class, StripeCustomerService::class);
+        $this->app->bind(StripeCatalogPort::class, StripeCatalogService::class);
+
+        $this->app->singleton(StripeClient::class, static function ($app): StripeClient {
+            /** @var string $secret */
+            $secret = (string) $app['config']->get('services.stripe.secret', '');
+
+            return new StripeClient($secret);
+        });
     }
 
     public function boot(): void
@@ -39,6 +52,8 @@ final class BillingServiceProvider extends ServiceProvider
 
         $queryBus = $this->app->make(QueryBus::class);
         $queryBus->register('billing.list_payment_methods', ListPaymentMethodsHandler::class);
+        $queryBus->register('billing.stripe_products.list', ListStripeProductsHandler::class);
+        $queryBus->register('billing.stripe_product_prices.list', ListStripeProductPricesHandler::class);
 
         Route::prefix('api/v2/billing')
             ->middleware('api')

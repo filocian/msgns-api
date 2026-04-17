@@ -36,4 +36,13 @@ interface SubscriptionTypeRepositoryPort
     public function hasActiveSubscriptions(int $subscriptionTypeId): bool;
 
     public function softDelete(int $id): void;
+
+    /**
+     * Returns true if any existing subscription type is bound to the given Stripe product id.
+     *
+     * Used by the CreateSubscriptionTypeHandler as an application-level guard
+     * against duplicates before the DB unique index would surface a constraint
+     * violation. See REQ-007.
+     */
+    public function existsByStripeProductId(string $stripeProductId): bool;
 }

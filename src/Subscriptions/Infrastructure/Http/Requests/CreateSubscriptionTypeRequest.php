@@ -19,37 +19,13 @@ final class CreateSubscriptionTypeRequest extends FormRequest
         return [
             'name'                    => 'required|string|max:100|unique:subscription_types,name',
             'description'             => 'nullable|string',
-            'mode'                    => 'required|string|in:classic,prepaid',
-            'billing_periods'         => 'nullable|array',
-            'billing_periods.*'       => 'string|in:monthly,annual',
-            'base_price_cents'        => 'required|integer|min:0',
             'permission_name'         => 'required|string|max:100|unique:subscription_types,permission_name',
             'google_review_limit'     => 'required|integer|min:0',
             'instagram_content_limit' => 'required|integer|min:0',
+            'stripe_product_id'       => ['required', 'string', 'regex:/^prod_[A-Za-z0-9]+$/'],
+            'mode'                    => ['prohibited'],
+            'base_price_cents'        => ['prohibited'],
+            'billing_periods'         => ['prohibited'],
         ];
-    }
-
-    /** @return array<string, string> */
-    public function messages(): array
-    {
-        return [
-            'billing_periods.required_if' => 'The billing periods field is required when mode is classic.',
-        ];
-    }
-
-    public function withValidator(\Illuminate\Validation\Validator $validator): void
-    {
-        $validator->after(function (\Illuminate\Validation\Validator $v): void {
-            $mode            = $this->input('mode');
-            $billingPeriods  = $this->input('billing_periods');
-
-            if ($mode === 'classic' && (empty($billingPeriods) || !is_array($billingPeriods))) {
-                $v->errors()->add('billing_periods', 'The billing periods field is required when mode is classic.');
-            }
-
-            if ($mode === 'prepaid' && !empty($billingPeriods)) {
-                $v->errors()->add('billing_periods', 'Billing periods must be null or absent when mode is prepaid.');
-            }
-        });
     }
 }

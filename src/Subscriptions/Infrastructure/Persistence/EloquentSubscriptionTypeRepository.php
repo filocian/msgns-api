@@ -115,4 +115,11 @@ final class EloquentSubscriptionTypeRepository implements SubscriptionTypeReposi
     {
         SubscriptionTypeModel::findOrFail($id)->delete();
     }
+
+    public function existsByStripeProductId(string $stripeProductId): bool
+    {
+        return SubscriptionTypeModel::query()
+            ->where('stripe_product_id', $stripeProductId)
+            ->exists();
+    }
 }

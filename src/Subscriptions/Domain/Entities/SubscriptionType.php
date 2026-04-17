@@ -11,7 +11,7 @@ use Src\Subscriptions\Domain\ValueObjects\SubscriptionMode;
 final class SubscriptionType
 {
     /**
-     * @param list<BillingPeriod>|null $billingPeriods
+     * @param list<BillingPeriod>|null   $billingPeriods
      * @param array<string, string>|null $stripePriceIds
      */
     private function __construct(
@@ -32,17 +32,29 @@ final class SubscriptionType
         public DateTimeImmutable $updatedAt,
     ) {}
 
-    /** @param list<BillingPeriod>|null $billingPeriods */
+    /**
+     * Creates a new SubscriptionType bound to a Stripe product and its derived prices.
+     *
+     * All Stripe-derived values (mode, billingPeriods, basePriceCents, stripePriceIds)
+     * MUST be supplied by the Application handler which is responsible for fetching
+     * and validating them against the Stripe catalog. The entity itself performs no
+     * external I/O.
+     *
+     * @param list<BillingPeriod>   $billingPeriods
+     * @param array<string, string> $stripePriceIds
+     */
     public static function create(
         string $name,
         string $slug,
         ?string $description,
         SubscriptionMode $mode,
-        ?array $billingPeriods,
+        array $billingPeriods,
         int $basePriceCents,
         string $permissionName,
         int $googleReviewLimit,
         int $instagramContentLimit,
+        string $stripeProductId,
+        array $stripePriceIds,
     ): self {
         $now = new DateTimeImmutable();
 
@@ -57,8 +69,8 @@ final class SubscriptionType
             permissionName: $permissionName,
             googleReviewLimit: $googleReviewLimit,
             instagramContentLimit: $instagramContentLimit,
-            stripeProductId: null,
-            stripePriceIds: null,
+            stripeProductId: $stripeProductId,
+            stripePriceIds: $stripePriceIds,
             isActive: true,
             createdAt: $now,
             updatedAt: $now,
@@ -66,7 +78,7 @@ final class SubscriptionType
     }
 
     /**
-     * @param list<BillingPeriod>|null $billingPeriods
+     * @param list<BillingPeriod>|null   $billingPeriods
      * @param array<string, string>|null $stripePriceIds
      */
     public static function fromPersistence(
@@ -105,14 +117,18 @@ final class SubscriptionType
         );
     }
 
-    /** @param list<BillingPeriod>|null $billingPeriods */
+    /**
+     * Updates mutable business fields only.
+     *
+     * Stripe-binding and pricing fields (mode, billingPeriods, basePriceCents,
+     * stripeProductId, stripePriceIds) are immutable post-create and intentionally
+     * not exposed through this signature. Any attempt to pass them is rejected
+     * by the PHP type system at compile time.
+     */
     public function applyUpdate(
         ?string $name,
         ?string $slug,
         ?string $description,
-        ?SubscriptionMode $mode,
-        ?array $billingPeriods,
-        ?int $basePriceCents,
         ?string $permissionName,
         ?int $googleReviewLimit,
         ?int $instagramContentLimit,
@@ -125,14 +141,6 @@ final class SubscriptionType
         }
         if ($description !== null) {
             $this->description = $description;
-        }
-        if ($mode !== null) {
-            $this->mode = $mode;
-        }
-        // billingPeriods: always assigned unconditionally — caller (handler) is responsible.
-        $this->billingPeriods = $billingPeriods;
-        if ($basePriceCents !== null) {
-            $this->basePriceCents = $basePriceCents;
         }
         if ($permissionName !== null) {
             $this->permissionName = $permissionName;

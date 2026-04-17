@@ -8,4 +8,5 @@ enum BillingPeriod: string
 {
     case Monthly = 'monthly';
     case Annual  = 'annual';
+    case OneTime = 'one_time';
 }

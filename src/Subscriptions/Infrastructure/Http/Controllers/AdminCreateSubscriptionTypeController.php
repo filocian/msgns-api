@@ -19,24 +19,22 @@ final class AdminCreateSubscriptionTypeController
 
     #[OA\Post(
         path: '/subscriptions/admin/subscription-types',
-        summary: 'Create a subscription type',
-        description: 'Creates a new subscription type. Slug is auto-generated from name. Spatie permission is auto-created.',
+        summary: 'Create a subscription type bound to a Stripe product',
+        description: 'Creates a new subscription type from a Stripe product. Mode, billing periods, base price and stripe_price_ids are derived server-side from the Stripe catalog. EUR-only.',
         operationId: 'createSubscriptionType',
         tags: ['Subscriptions'],
         security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['name', 'mode', 'base_price_cents', 'permission_name', 'google_review_limit', 'instagram_content_limit'],
+                required: ['name', 'permission_name', 'google_review_limit', 'instagram_content_limit', 'stripe_product_id'],
                 properties: [
                     new OA\Property(property: 'name', type: 'string', example: 'Google Review Basic'),
                     new OA\Property(property: 'description', type: 'string', nullable: true, example: 'Basic plan for Google Reviews'),
-                    new OA\Property(property: 'mode', type: 'string', enum: ['classic', 'prepaid'], example: 'classic'),
-                    new OA\Property(property: 'billing_periods', type: 'array', nullable: true, items: new OA\Items(type: 'string', enum: ['monthly', 'annual'])),
-                    new OA\Property(property: 'base_price_cents', type: 'integer', example: 200),
                     new OA\Property(property: 'permission_name', type: 'string', example: 'ai.google-review-basic'),
                     new OA\Property(property: 'google_review_limit', type: 'integer', example: 50),
                     new OA\Property(property: 'instagram_content_limit', type: 'integer', example: 0),
+                    new OA\Property(property: 'stripe_product_id', type: 'string', pattern: '^prod_[A-Za-z0-9]+$', example: 'prod_abc123'),
                 ],
             ),
         ),
@@ -45,6 +43,7 @@ final class AdminCreateSubscriptionTypeController
             new OA\Response(response: 400, description: 'Validation error'),
             new OA\Response(response: 401, description: 'Unauthenticated'),
             new OA\Response(response: 403, description: 'Forbidden'),
+            new OA\Response(response: 422, description: 'Domain error (Stripe product not found, mixed prices, invalid currency, duplicate binding, etc.)'),
         ],
     )]
     public function __invoke(CreateSubscriptionTypeRequest $request): JsonResponse
@@ -52,12 +51,10 @@ final class AdminCreateSubscriptionTypeController
         $result = $this->commandBus->dispatch(new CreateSubscriptionTypeCommand(
             name: (string) $request->validated('name'),
             description: $request->validated('description'),
-            mode: (string) $request->validated('mode'),
-            billingPeriods: $request->validated('billing_periods'),
-            basePriceCents: (int) $request->validated('base_price_cents'),
             permissionName: (string) $request->validated('permission_name'),
             googleReviewLimit: (int) $request->validated('google_review_limit'),
             instagramContentLimit: (int) $request->validated('instagram_content_limit'),
+            stripeProductId: (string) $request->validated('stripe_product_id'),
         ));
 
         return ApiResponseFactory::created($result);

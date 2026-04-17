@@ -13,12 +13,12 @@ final class GoogleBusinessApiAdapter implements GoogleBusinessApiPort
     private const string REVIEWS_BASE_URL = 'https://mybusiness.googleapis.com/v4';
     private const string TOKEN_URL        = 'https://oauth2.googleapis.com/token';
 
-    public function fetchPendingReviews(string $accessToken, string $locationId): array
+    public function fetchPendingReviews(string $accessToken, string $accountId, string $locationId): array
     {
         try {
             $response = Http::withToken($accessToken)
                 ->timeout(30)
-                ->get(self::REVIEWS_BASE_URL . "/locations/{$locationId}/reviews", [
+                ->get(self::REVIEWS_BASE_URL . "/accounts/{$accountId}/locations/{$locationId}/reviews", [
                     'filter' => 'has_reply=false',
                 ]);
         } catch (\Throwable $e) {
@@ -33,15 +33,18 @@ final class GoogleBusinessApiAdapter implements GoogleBusinessApiPort
             throw GoogleBusinessUnavailable::because('google_api_error');
         }
 
-        return $response->json()['reviews'] ?? [];
+        /** @var array<int, array<string, mixed>> $reviews */
+        $reviews = $response->json()['reviews'] ?? [];
+
+        return $reviews;
     }
 
-    public function postReviewReply(string $accessToken, string $locationId, string $reviewId, string $replyText): void
+    public function postReviewReply(string $accessToken, string $accountId, string $locationId, string $reviewId, string $replyText): void
     {
         try {
             $response = Http::withToken($accessToken)
                 ->timeout(30)
-                ->put(self::REVIEWS_BASE_URL . "/locations/{$locationId}/reviews/{$reviewId}/reply", [
+                ->put(self::REVIEWS_BASE_URL . "/accounts/{$accountId}/locations/{$locationId}/reviews/{$reviewId}/reply", [
                     'comment' => $replyText,
                 ]);
         } catch (\Throwable $e) {

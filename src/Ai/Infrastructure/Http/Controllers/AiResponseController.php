@@ -16,7 +16,7 @@ use Src\Ai\Application\Commands\RejectAiResponse\RejectAiResponseCommand;
 use Src\Ai\Application\Queries\ListAiResponses\ListAiResponsesQuery;
 use Src\Ai\Infrastructure\Http\Requests\EditAiResponseRequest;
 use Src\Ai\Infrastructure\Http\Requests\ListAiResponsesRequest;
-use Src\Ai\Infrastructure\Persistence\AiResponseRecord;
+use Src\Ai\Infrastructure\Persistence\AiResponseRecordModel;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Core\Bus\PaginatedResult;
 use Src\Shared\Core\Bus\QueryBus;
@@ -92,7 +92,7 @@ final class AiResponseController extends Controller
         ));
 
         return ApiResponseFactory::ok([
-            'data' => array_map(fn (AiResponseRecord $r) => $this->formatRecord($r), $result->items),
+            'data' => array_map(fn (AiResponseRecordModel $r) => $this->formatRecord($r), $result->items),
             'meta' => [
                 'currentPage' => $result->currentPage,
                 'lastPage'    => $result->lastPage,
@@ -221,7 +221,7 @@ final class AiResponseController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function formatRecord(AiResponseRecord $record): array
+    private function formatRecord(AiResponseRecordModel $record): array
     {
         return [
             'id'             => $record->id,

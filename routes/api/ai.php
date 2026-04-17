@@ -10,6 +10,7 @@ use Src\Ai\Infrastructure\Http\Controllers\GetPrepaidPackagesController;
 use Src\Ai\Infrastructure\Http\Controllers\PurchasePrepaidPackageController;
 use Src\Ai\Infrastructure\Http\Controllers\SubscriptionTypeCatalogController;
 use Src\Ai\Infrastructure\Http\Controllers\UserAiSystemPromptController;
+use Src\GoogleBusiness\Infrastructure\Http\Controllers\GoogleReviewsController;
 
 // Public — no auth required
 Route::get('/subscription-types', [SubscriptionTypeCatalogController::class, 'index']);
@@ -20,7 +21,8 @@ Route::get('/prepaid-packages', GetPrepaidPackagesController::class);
 Route::middleware(['auth:stateful-api', 'ai.rate-limit'])->group(function (): void {
     // BE-12: Google Reviews AI generation routes (add here with ai.enforce-usage:google_reviews)
     Route::middleware(['ai.enforce-usage:google_reviews'])->group(function (): void {
-        // placeholder — routes added by BE-12
+        Route::get('/google/reviews', [GoogleReviewsController::class, 'index']);
+        Route::post('/google/reviews/{reviewId}/generate', [GoogleReviewsController::class, 'generate']);
     });
 
     // BE-13: Instagram AI generation routes (add here with ai.enforce-usage:instagram)

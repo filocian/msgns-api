@@ -5,14 +5,14 @@ declare(strict_types=1);
 use App\Models\User;
 use Src\Ai\Domain\Ports\AiResponseApplierPort;
 use Src\Ai\Domain\ValueObjects\AiResponseStatus;
-use Src\Ai\Infrastructure\Persistence\AiResponseRecord;
+use Src\Ai\Infrastructure\Persistence\AiResponseRecordModel;
 use Src\Shared\Core\Errors\NotFound;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function makeResponse(int $userId, string $status = 'pending', ?string $expiresAt = null): AiResponseRecord
+function makeResponse(int $userId, string $status = 'pending', ?string $expiresAt = null): AiResponseRecordModel
 {
-    return AiResponseRecord::create([
+    return AiResponseRecordModel::create([
         'user_id'               => $userId,
         'product_type'          => 'google_review',
         'product_id'            => 1,
@@ -75,7 +75,7 @@ describe('GET /api/v2/ai/responses', function (): void {
         $user = User::factory()->create();
         makeResponse($user->id);
 
-        AiResponseRecord::create([
+        AiResponseRecordModel::create([
             'user_id'               => $user->id,
             'product_type'          => 'instagram_content',
             'product_id'            => 2,

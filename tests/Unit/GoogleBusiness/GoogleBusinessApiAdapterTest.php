@@ -16,7 +16,7 @@ describe('GoogleBusinessApiAdapter', function (): void {
 
     it('fetches pending reviews with correct authorization header', function (): void {
         Http::fake([
-            'https://mybusiness.googleapis.com/v4/locations/loc-123/reviews*' => Http::response([
+            'https://mybusiness.googleapis.com/v4/accounts/acc-777/locations/loc-123/reviews*' => Http::response([
                 'reviews' => [
                     ['reviewId' => 'rev-1', 'comment' => 'Great place!'],
                 ],
@@ -24,24 +24,24 @@ describe('GoogleBusinessApiAdapter', function (): void {
         ]);
 
         $adapter = new GoogleBusinessApiAdapter();
-        $reviews = $adapter->fetchPendingReviews('my-access-token', 'loc-123');
+        $reviews = $adapter->fetchPendingReviews('my-access-token', 'acc-777', 'loc-123');
 
         expect($reviews)->toHaveCount(1)
             ->and($reviews[0]['reviewId'])->toBe('rev-1');
 
-        Http::assertSent(fn ($request) => str_contains($request->url(), 'loc-123/reviews')
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'accounts/acc-777/locations/loc-123/reviews')
             && $request->hasHeader('Authorization', 'Bearer my-access-token'));
     });
 
     it('posts review reply with correct payload', function (): void {
         Http::fake([
-            'https://mybusiness.googleapis.com/v4/locations/loc-123/reviews/rev-456/reply' => Http::response([], 200),
+            'https://mybusiness.googleapis.com/v4/accounts/acc-777/locations/loc-123/reviews/rev-456/reply' => Http::response([], 200),
         ]);
 
         $adapter = new GoogleBusinessApiAdapter();
-        $adapter->postReviewReply('my-access-token', 'loc-123', 'rev-456', 'Thank you for your feedback!');
+        $adapter->postReviewReply('my-access-token', 'acc-777', 'loc-123', 'rev-456', 'Thank you for your feedback!');
 
-        Http::assertSent(fn ($request) => str_contains($request->url(), 'rev-456/reply')
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'accounts/acc-777/locations/loc-123/reviews/rev-456/reply')
             && $request->data()['comment'] === 'Thank you for your feedback!');
     });
 
@@ -67,7 +67,7 @@ describe('GoogleBusinessApiAdapter', function (): void {
 
         $adapter = new GoogleBusinessApiAdapter();
 
-        expect(fn () => $adapter->fetchPendingReviews('token', 'loc-123'))
+        expect(fn () => $adapter->fetchPendingReviews('token', 'acc-1', 'loc-123'))
             ->toThrow(GoogleBusinessUnavailable::class);
     });
 
@@ -80,7 +80,7 @@ describe('GoogleBusinessApiAdapter', function (): void {
 
         $adapter = new GoogleBusinessApiAdapter();
 
-        expect(fn () => $adapter->fetchPendingReviews('token', 'loc-123'))
+        expect(fn () => $adapter->fetchPendingReviews('token', 'acc-1', 'loc-123'))
             ->toThrow(GoogleBusinessUnavailable::class);
     });
 
@@ -91,7 +91,7 @@ describe('GoogleBusinessApiAdapter', function (): void {
 
         $adapter = new GoogleBusinessApiAdapter();
 
-        expect(fn () => $adapter->fetchPendingReviews('token', 'loc-123'))
+        expect(fn () => $adapter->fetchPendingReviews('token', 'acc-1', 'loc-123'))
             ->toThrow(GoogleBusinessUnavailable::class);
     });
 });

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Src\Ai\Domain\ValueObjects\AiResponseStatus;
-use Src\Ai\Infrastructure\Persistence\AiResponseRecord;
+use Src\Ai\Infrastructure\Persistence\AiResponseRecordModel;
 
 describe('ResetExpiredAiResponsesCommand (ai:expire-responses)', function (): void {
 
-    function createAiResponse(int $userId, string $status, bool $expired = false): AiResponseRecord
+    function createAiResponse(int $userId, string $status, bool $expired = false): AiResponseRecordModel
     {
-        return AiResponseRecord::create([
+        return AiResponseRecordModel::create([
             'user_id'               => $userId,
             'product_type'          => 'google_review',
             'product_id'            => 1,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Src\Ai\Application\Queries\ListAiResponses;
 
-use Src\Ai\Infrastructure\Persistence\AiResponseRecord;
+use Src\Ai\Infrastructure\Persistence\AiResponseRecordModel;
 use Src\Shared\Core\Bus\PaginatedResult;
 use Src\Shared\Core\Bus\Query;
 use Src\Shared\Core\Bus\QueryHandler;
@@ -15,7 +15,7 @@ final class ListAiResponsesHandler implements QueryHandler
     {
         assert($query instanceof ListAiResponsesQuery);
 
-        $builder = AiResponseRecord::query()
+        $builder = AiResponseRecordModel::query()
             ->where('user_id', $query->userId)
             ->orderBy('created_at', 'desc');
 

@@ -7,18 +7,22 @@ use App\Models\ProductType;
 use App\Models\User;
 use Database\Seeders\ProductConfigurationStatusSeeder;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\UnableToWriteFile;
 use Spatie\Permission\Models\Permission;
 use Src\Ai\Domain\DataTransferObjects\AiResponse;
+use Src\Ai\Domain\Ports\AiResponseApplierPort;
 use Src\Ai\Domain\Ports\GeminiPort;
 use Src\Ai\Domain\ValueObjects\AiProductType;
 use Src\Ai\Domain\ValueObjects\AiResponseStatus;
 use Src\Ai\Infrastructure\Persistence\AiResponseRecordModel;
 use Src\Ai\Infrastructure\Persistence\AiUsageRecordModel;
 use Src\Identity\Domain\Permissions\DomainPermissions;
+use Src\Instagram\Application\Jobs\PublishInstagramContentJob;
 use Src\Instagram\Domain\Models\UserInstagramConnection;
 use Src\Shared\Core\Errors\MediaUploadFailed;
+use Src\Shared\Core\Ports\LogPort;
 use Src\Shared\Core\Ports\MediaUploadPort;
 
 function igGiveAiPermission(User $user): void
@@ -252,8 +256,9 @@ describe('End-to-end generate -> approve -> apply', function () use ($SMALL_B64)
 
     beforeEach(fn () => $this->seed(ProductConfigurationStatusSeeder::class));
 
-    it('publishes to Instagram via Graph API after approve + apply', function () use ($SMALL_B64): void {
+    it('enqueues publishing on apply and transitions to APPLIED when the job runs', function () use ($SMALL_B64): void {
         Storage::fake('s3');
+        Queue::fake();
 
         $user    = User::factory()->create(['email' => 'ig-apply-happy@test.com']);
         igGiveAiPermission($user);
@@ -286,13 +291,30 @@ describe('End-to-end generate -> approve -> apply', function () use ($SMALL_B64)
             ->patchJson('/api/v2/ai/responses/' . $recordId . '/approve')
             ->assertStatus(204);
 
-        // 3. Apply
+        // 3. Apply — response is immediate (204); job is queued, not yet run
         $this->actingAs($user, 'stateful-api')
             ->postJson('/api/v2/ai/responses/' . $recordId . '/apply')
             ->assertStatus(204);
 
-        // Verify terminal state
+        // After /apply returns, status is APPLYING and the job is queued.
         $record = AiResponseRecordModel::findOrFail($recordId);
-        expect($record->status)->toBe(AiResponseStatus::APPLIED);
+        expect($record->status)->toBe(AiResponseStatus::APPLYING)
+            ->and($record->applied_at)->toBeNull();
+
+        Queue::assertPushed(
+            PublishInstagramContentJob::class,
+            fn (PublishInstagramContentJob $job): bool => $job->recordId === $recordId,
+        );
+
+        // 4. Run the job inline (simulates the worker picking it up)
+        (new PublishInstagramContentJob($recordId))->handle(
+            app(AiResponseApplierPort::class),
+            app(LogPort::class),
+        );
+
+        // Verify terminal state after job execution
+        $record->refresh();
+        expect($record->status)->toBe(AiResponseStatus::APPLIED)
+            ->and($record->applied_at)->not()->toBeNull();
     });
 });

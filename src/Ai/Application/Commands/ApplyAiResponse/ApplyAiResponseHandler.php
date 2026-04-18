@@ -66,8 +66,12 @@ final class ApplyAiResponseHandler implements CommandHandler
 
     /**
      * Asynchronous path — used by high-latency appliers (Instagram Graph API publishing).
-     * Transitions APPROVED → APPLYING and hands off to PublishInstagramContentJob so the
-     * blocking Graph API polling (~30s) does not occupy the PHP-FPM request thread.
+     * Transitions APPROVED → APPLYING, commits, then hands off to PublishInstagramContentJob
+     * so the blocking Graph API polling (~30s) does not occupy the PHP-FPM request thread.
+     *
+     * Dispatch happens AFTER the transaction commits so the job always observes the committed
+     * APPLYING state — this matters in sync queue tests (same connection, would otherwise read
+     * uncommitted state) and in real queue workers (different connection, cannot read anyway).
      */
     private function dispatchAsyncPublish(AiResponseRecordModel $record): void
     {
@@ -77,10 +81,10 @@ final class ApplyAiResponseHandler implements CommandHandler
 
             $record->status = $newStatus->value;
             $record->save();
-
-            $this->queue->dispatch('instagram.publish', [
-                'recordId' => $record->id,
-            ]);
         });
+
+        $this->queue->dispatch('instagram.publish', [
+            'recordId' => $record->id,
+        ]);
     }
 }

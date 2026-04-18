@@ -39,6 +39,8 @@ use Src\Ai\Infrastructure\Http\Middleware\AiUsageEnforcementMiddleware;
 use Src\Ai\Infrastructure\Listeners\AssignFreeAiPermissionListener;
 use Src\Ai\Infrastructure\Persistence\EloquentUserAiSystemPromptRepository;
 use Src\Identity\Domain\Events\UserActivated;
+use Src\Instagram\Application\Commands\GenerateInstagramCaption\GenerateInstagramCaptionHandler;
+use Src\Instagram\Infrastructure\Appliers\InstagramContentAiApplier;
 use Src\Shared\Core\Bus\CommandBus;
 use Src\Shared\Core\Bus\QueryBus;
 
@@ -54,7 +56,7 @@ final class AiServiceProvider extends ServiceProvider
         $this->app->bind(AiResponseApplierPort::class, function ($app): CompositeAiResponseApplier {
             return new CompositeAiResponseApplier([
                 $app->make(GoogleReviewsAiApplier::class),
-                // BE-13 will add the Instagram applier here
+                $app->make(InstagramContentAiApplier::class),
             ]);
         });
     }
@@ -75,6 +77,7 @@ final class AiServiceProvider extends ServiceProvider
         $this->app->make(CommandBus::class)->register('ai.edit_ai_response', EditAiResponseHandler::class);
         $this->app->make(CommandBus::class)->register('ai.reject_ai_response', RejectAiResponseHandler::class);
         $this->app->make(CommandBus::class)->register('ai.apply_ai_response', ApplyAiResponseHandler::class);
+        $this->app->make(CommandBus::class)->register('ai.generate_instagram_caption', GenerateInstagramCaptionHandler::class);
         $this->app->make(CommandBus::class)->register('ai.purchase_prepaid_package', PurchasePrepaidPackageHandler::class);
         $this->app->make(QueryBus::class)->register('ai.get_prepaid_balances', GetPrepaidBalancesHandler::class);
         $this->app->make(QueryBus::class)->register('ai.get_prepaid_packages', GetPrepaidPackagesHandler::class);

@@ -10,6 +10,7 @@ use App\Jobs\MixPanel\MixpanelProductAssignedJob;
 use App\Jobs\MixPanel\MixpanelProductAssignmentErrorJob;
 use App\Jobs\Product\UpdateProductStatsJob;
 use App\Jobs\Product\UpdateProductUsageJob;
+use Src\Instagram\Application\Jobs\PublishInstagramContentJob;
 
 return [
 	'queue' => [
@@ -62,6 +63,11 @@ return [
 				'class' => UpdateProductStatsJob::class,
 				'connection' => \env('SHARED_QUEUE_CONNECTION'),
 				'queue' => \env('SHARED_QUEUE_PRODUCT_QUEUE', \env('SHARED_QUEUE_DEFAULT_QUEUE')),
+			],
+			'instagram.publish' => [
+				'class' => PublishInstagramContentJob::class,
+				'connection' => \env('SHARED_QUEUE_CONNECTION'),
+				'queue' => \env('SHARED_QUEUE_INSTAGRAM_QUEUE', \env('SHARED_QUEUE_DEFAULT_QUEUE')),
 			],
 		],
 	],

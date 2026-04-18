@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use OpenApi\Attributes as OA;
 use Src\Instagram\Domain\Errors\InstagramConnectionNotFound;
-use Src\Instagram\Domain\Models\UserInstagramConnection;
+use Src\Instagram\Infrastructure\Persistence\UserInstagramConnectionModel;
 use Src\Shared\Infrastructure\Http\ApiResponseFactory;
 
 #[OA\Tag(name: 'Instagram', description: 'Instagram OAuth and connection management')]
@@ -53,8 +53,8 @@ final class InstagramConnectionController extends Controller
     )]
     public function show(Request $request): JsonResponse
     {
-        /** @var UserInstagramConnection|null $connection */
-        $connection = UserInstagramConnection::where('user_id', (int) $request->user()->id)->first();
+        /** @var UserInstagramConnectionModel|null $connection */
+        $connection = UserInstagramConnectionModel::where('user_id', (int) $request->user()->id)->first();
 
         if ($connection === null) {
             return ApiResponseFactory::ok([
@@ -92,7 +92,7 @@ final class InstagramConnectionController extends Controller
     )]
     public function destroy(Request $request): Response
     {
-        $connection = UserInstagramConnection::where('user_id', (int) $request->user()->id)->first();
+        $connection = UserInstagramConnectionModel::where('user_id', (int) $request->user()->id)->first();
 
         if ($connection === null) {
             throw InstagramConnectionNotFound::forUser((int) $request->user()->id);

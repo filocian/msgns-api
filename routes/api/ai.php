@@ -11,6 +11,7 @@ use Src\Ai\Infrastructure\Http\Controllers\PurchasePrepaidPackageController;
 use Src\Ai\Infrastructure\Http\Controllers\SubscriptionTypeCatalogController;
 use Src\Ai\Infrastructure\Http\Controllers\UserAiSystemPromptController;
 use Src\GoogleBusiness\Infrastructure\Http\Controllers\GoogleReviewsController;
+use Src\Instagram\Infrastructure\Http\Controllers\GenerateInstagramCaptionController;
 
 // Public — no auth required
 Route::get('/subscription-types', [SubscriptionTypeCatalogController::class, 'index']);
@@ -27,7 +28,7 @@ Route::middleware(['auth:stateful-api', 'ai.rate-limit'])->group(function (): vo
 
     // BE-13: Instagram AI generation routes (add here with ai.enforce-usage:instagram)
     Route::middleware(['ai.enforce-usage:instagram'])->group(function (): void {
-        // placeholder — routes added by BE-13
+        Route::post('/instagram/generate', GenerateInstagramCaptionController::class);
     });
 });
 

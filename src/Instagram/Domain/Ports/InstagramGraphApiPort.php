@@ -30,6 +30,14 @@ interface InstagramGraphApiPort
     public function createMediaContainer(string $igUserId, string $imageUrl, string $caption, string $accessToken): array;
 
     /**
+     * Poll the container status endpoint every 2 seconds, up to 15 attempts,
+     * returning once the status_code is FINISHED.
+     *
+     * @throws \Src\Instagram\Domain\Errors\InstagramApiUnavailable on ERROR status, timeout, HTTP failure, or connection failure
+     */
+    public function waitForContainerReady(string $igUserId, string $creationId, string $accessToken): void;
+
+    /**
      * Publish a previously created media container.
      * Step 2 of the 2-step publish flow.
      *

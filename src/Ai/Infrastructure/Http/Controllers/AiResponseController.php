@@ -31,7 +31,7 @@ use Src\Shared\Infrastructure\Http\ApiResponseFactory;
         new OA\Property(property: 'product_id', type: 'integer'),
         new OA\Property(property: 'ai_content', type: 'string'),
         new OA\Property(property: 'edited_content', type: 'string', nullable: true),
-        new OA\Property(property: 'status', type: 'string', enum: ['pending', 'approved', 'edited', 'rejected', 'applied', 'expired']),
+        new OA\Property(property: 'status', type: 'string', enum: ['pending', 'approved', 'edited', 'rejected', 'applying', 'applied', 'expired']),
         new OA\Property(property: 'expires_at', type: 'string', format: 'date-time'),
         new OA\Property(property: 'applied_at', type: 'string', format: 'date-time', nullable: true),
         new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
@@ -54,7 +54,7 @@ final class AiResponseController extends Controller
         tags: ['AI Responses'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'approved', 'edited', 'rejected', 'applied', 'expired'])),
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'approved', 'edited', 'rejected', 'applying', 'applied', 'expired'])),
             new OA\Parameter(name: 'product_type', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1)),
             new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, maximum: 100)),
@@ -196,7 +196,7 @@ final class AiResponseController extends Controller
     #[OA\Post(
         path: '/api/v2/ai/responses/{id}/apply',
         summary: 'Apply an AI response to the target platform',
-        description: 'Transitions an approved response to applied and delegates publishing to the appropriate applier (Google Reviews, Instagram). Transactional — rolls back if publishing fails.',
+        description: 'Delegates publishing to the appropriate applier. Synchronous appliers (e.g. Google Reviews) transition directly to `applied` inside a transaction that rolls back on failure. Asynchronous appliers (e.g. Instagram) transition to `applying` and hand off to a queued job that will transition to `applied` when the remote publish completes; on retry exhaustion the record is reset to `approved` so the client can retry.',
         operationId: 'applyAiResponse',
         tags: ['AI Responses'],
         security: [['bearerAuth' => []]],
@@ -204,7 +204,7 @@ final class AiResponseController extends Controller
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'Response applied to platform'),
+            new OA\Response(response: 204, description: 'Response accepted. Poll GET /api/v2/ai/responses/{id} to observe status transitions (applied / applying / back to approved on failure).'),
             new OA\Response(response: 401, description: 'Unauthenticated'),
             new OA\Response(response: 404, description: 'AI response not found or no applier for product type', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
             new OA\Response(response: 422, description: 'Invalid status transition', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),

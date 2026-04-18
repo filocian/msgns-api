@@ -2,13 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Src\Instagram\Domain\Models;
+namespace Src\Instagram\Infrastructure\Persistence;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-final class UserInstagramConnection extends Model
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $instagram_user_id
+ * @property string $instagram_username
+ * @property string $page_id
+ * @property string $access_token
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ */
+final class UserInstagramConnectionModel extends Model
 {
     protected $table = 'user_instagram_connections';
 

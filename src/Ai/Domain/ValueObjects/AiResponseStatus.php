@@ -12,6 +12,7 @@ final class AiResponseStatus
     public const string APPROVED = 'approved';
     public const string EDITED   = 'edited';
     public const string REJECTED = 'rejected';
+    public const string APPLYING = 'applying';
     public const string APPLIED  = 'applied';
     public const string EXPIRED  = 'expired';
 
@@ -20,15 +21,21 @@ final class AiResponseStatus
         self::APPROVED,
         self::EDITED,
         self::REJECTED,
+        self::APPLYING,
         self::APPLIED,
         self::EXPIRED,
     ];
 
     // Non-linear state graph — unlike ConfigurationStatus which is linear (TRANSITION_ORDER)
+    // APPLYING is an intermediate state used when publishing is handed off to a queued job
+    // (Instagram); synchronous appliers (Google Reviews) skip it and go APPROVED → APPLIED directly.
+    // On job failure the worker resets the record to APPROVED via direct write (system rollback
+    // bypasses the state machine); APPLYING itself has only one forward transition: APPLIED.
     private const array ALLOWED_TRANSITIONS = [
         self::PENDING  => [self::APPROVED, self::EDITED, self::REJECTED],
-        self::APPROVED => [self::APPLIED, self::EXPIRED],
+        self::APPROVED => [self::APPLIED, self::APPLYING, self::EXPIRED],
         self::EDITED   => [self::APPROVED, self::REJECTED],
+        self::APPLYING => [self::APPLIED],
         self::REJECTED => [],  // terminal
         self::APPLIED  => [],  // terminal
         self::EXPIRED  => [],  // terminal

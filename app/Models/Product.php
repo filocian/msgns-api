@@ -25,6 +25,7 @@ final class Product extends Model
 		'model',
 		'linked_to_product_id',
 		'target_url',
+		'instagram_account_id',
 		'password',
 		'name',
 		'description',

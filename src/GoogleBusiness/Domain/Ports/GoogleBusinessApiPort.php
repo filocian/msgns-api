@@ -11,18 +11,18 @@ interface GoogleBusinessApiPort
     /**
      * Fetch reviews that have no owner reply yet.
      *
-     * @return array Raw Google API response payload (reviews array)
+     * @return array<int, array<string, mixed>> Raw Google API response payload (reviews array)
      *
      * @throws GoogleBusinessUnavailable On HTTP failure, timeout, or 429
      */
-    public function fetchPendingReviews(string $accessToken, string $locationId): array;
+    public function fetchPendingReviews(string $accessToken, string $accountId, string $locationId): array;
 
     /**
      * Post a reply to a specific review.
      *
      * @throws GoogleBusinessUnavailable On HTTP failure, timeout, or 429
      */
-    public function postReviewReply(string $accessToken, string $locationId, string $reviewId, string $replyText): void;
+    public function postReviewReply(string $accessToken, string $accountId, string $locationId, string $reviewId, string $replyText): void;
 
     /**
      * Exchange a refresh token for a new access token.

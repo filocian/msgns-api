@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Src\Ai\Domain\Ports;
 
-use Src\Ai\Infrastructure\Persistence\AiResponseRecord;
+use Src\Ai\Domain\DataTransferObjects\AiResponseRecord;
 
 interface AiResponseApplierPort
 {

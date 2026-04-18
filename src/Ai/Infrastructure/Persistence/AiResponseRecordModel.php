@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Src\Ai\Infrastructure\Persistence;
 
 use App\Models\User;
+use DateTimeImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Src\Ai\Domain\DataTransferObjects\AiResponseRecord as AiResponseRecordDto;
 use Src\Shared\Core\Helpers\UuidGenerator;
 
 /**
@@ -18,13 +20,14 @@ use Src\Shared\Core\Helpers\UuidGenerator;
  * @property string|null $edited_content
  * @property string $status
  * @property string $system_prompt_snapshot
+ * @property array<string, mixed>|null $metadata
  * @property \Illuminate\Support\Carbon $expires_at
  * @property \Illuminate\Support\Carbon|null $applied_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read User $user
  */
-final class AiResponseRecord extends Model
+final class AiResponseRecordModel extends Model
 {
     protected $table = 'ai_responses';
 
@@ -41,6 +44,7 @@ final class AiResponseRecord extends Model
         'edited_content',
         'status',
         'system_prompt_snapshot',
+        'metadata',
         'expires_at',
         'applied_at',
     ];
@@ -49,6 +53,7 @@ final class AiResponseRecord extends Model
     protected $casts = [
         'expires_at' => 'datetime',
         'applied_at' => 'datetime',
+        'metadata'   => 'array',
     ];
 
     protected static function booted(): void
@@ -63,5 +68,23 @@ final class AiResponseRecord extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function toDto(): AiResponseRecordDto
+    {
+        /** @var array<string, mixed>|null $metadata */
+        $metadata = $this->metadata;
+
+        return new AiResponseRecordDto(
+            id: (string) $this->id,
+            userId: (int) $this->user_id,
+            productType: (string) $this->product_type,
+            productId: (int) $this->product_id,
+            aiContent: (string) $this->ai_content,
+            editedContent: $this->edited_content,
+            status: (string) $this->status,
+            metadata: $metadata ?? [],
+            createdAt: $this->created_at?->toDateTimeImmutable() ?? new DateTimeImmutable(),
+        );
     }
 }

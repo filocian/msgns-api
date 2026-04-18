@@ -28,4 +28,17 @@ final class GoogleBusinessConnectionRepository implements GoogleBusinessConnecti
     {
         UserGoogleBusinessConnection::where('user_id', $userId)->delete();
     }
+
+    public function updateTokens(int $userId, string $accessToken, int $expiresInSeconds): void
+    {
+        $connection = UserGoogleBusinessConnection::where('user_id', $userId)->first();
+
+        if ($connection === null) {
+            return;
+        }
+
+        $connection->access_token     = $accessToken;
+        $connection->token_expires_at = now()->addSeconds($expiresInSeconds);
+        $connection->save();
+    }
 }

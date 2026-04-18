@@ -31,6 +31,7 @@ use Src\Ai\Application\Commands\RejectAiResponse\RejectAiResponseHandler;
 use Src\Ai\Application\Queries\ListAiResponses\ListAiResponsesHandler;
 use Src\Ai\Domain\Ports\AiResponseApplierPort;
 use Src\Ai\Domain\Services\CompositeAiResponseApplier;
+use Src\Ai\Infrastructure\Appliers\GoogleReviewsAiApplier;
 use Src\Ai\Infrastructure\Console\Commands\ResetExpiredAiResponsesCommand;
 use Src\Ai\Infrastructure\Console\Commands\ResetFreeAiUsageCommand;
 use Src\Ai\Infrastructure\Http\Middleware\AiRateLimitMiddleware;
@@ -50,9 +51,10 @@ final class AiServiceProvider extends ServiceProvider
         $this->app->bind(ClassicSubscriptionBrokerPort::class, CashierSubscriptionAdapter::class);
         $this->app->bind(PrepaidChargePort::class, CashierPrepaidChargeAdapter::class);
 
-        $this->app->bind(AiResponseApplierPort::class, function (): CompositeAiResponseApplier {
+        $this->app->bind(AiResponseApplierPort::class, function ($app): CompositeAiResponseApplier {
             return new CompositeAiResponseApplier([
-                // BE-12 and BE-13 will add implementations here
+                $app->make(GoogleReviewsAiApplier::class),
+                // BE-13 will add the Instagram applier here
             ]);
         });
     }

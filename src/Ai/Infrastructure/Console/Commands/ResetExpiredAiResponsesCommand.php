@@ -6,7 +6,7 @@ namespace Src\Ai\Infrastructure\Console\Commands;
 
 use Illuminate\Console\Command;
 use Src\Ai\Domain\ValueObjects\AiResponseStatus;
-use Src\Ai\Infrastructure\Persistence\AiResponseRecord;
+use Src\Ai\Infrastructure\Persistence\AiResponseRecordModel;
 
 final class ResetExpiredAiResponsesCommand extends Command
 {
@@ -16,7 +16,7 @@ final class ResetExpiredAiResponsesCommand extends Command
 
     public function handle(): int
     {
-        $count = AiResponseRecord::query()
+        $count = AiResponseRecordModel::query()
             ->whereIn('status', [
                 AiResponseStatus::PENDING,
                 AiResponseStatus::APPROVED,

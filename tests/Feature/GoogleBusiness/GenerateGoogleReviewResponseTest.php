@@ -12,6 +12,7 @@ use Src\Ai\Domain\ValueObjects\AiProductType;
 use Src\Ai\Domain\ValueObjects\AiResponseStatus;
 use Database\Seeders\ProductConfigurationStatusSeeder;
 use Src\Ai\Infrastructure\Persistence\AiResponseRecordModel;
+use Src\Ai\Infrastructure\Persistence\AiUsageRecordModel;
 use Src\Identity\Domain\Permissions\DomainPermissions;
 
 function giveGenerateAiPermission(User $user): void
@@ -85,6 +86,12 @@ describe('POST /api/v2/ai/google/reviews/{reviewId}/generate', function (): void
 
         $persisted = AiResponseRecordModel::where('user_id', $user->id)->firstOrFail();
         expect($persisted->metadata)->toMatchArray(['review_id' => 'rev-happy']);
+
+        // BE-13 retrofit: AiUsageRecord is written after a successful Gemini call.
+        $usage = AiUsageRecordModel::where('user_id', $user->id)->firstOrFail();
+        expect($usage->product_type)->toBe('google_reviews')
+            ->and($usage->source)->toBe('free')
+            ->and($usage->tokens_used)->toBe(3);
     });
 
     it('returns 403 when the product does not belong to the authenticated user', function (): void {

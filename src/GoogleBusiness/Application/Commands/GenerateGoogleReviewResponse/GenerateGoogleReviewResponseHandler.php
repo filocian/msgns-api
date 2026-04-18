@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Src\GoogleBusiness\Application\Commands\GenerateGoogleReviewResponse;
 
+use Src\Ai\Application\Services\AiUsageRecorder;
 use Src\Ai\Domain\DataTransferObjects\AiRequest;
 use Src\Ai\Domain\Errors\AiResponseForbidden;
 use Src\Ai\Domain\Ports\GeminiPort;
@@ -24,6 +25,7 @@ final class GenerateGoogleReviewResponseHandler implements CommandHandler
         private readonly ProductRepositoryPort $productRepository,
         private readonly UserAiSystemPromptRepository $systemPromptRepository,
         private readonly GeminiPort $gemini,
+        private readonly AiUsageRecorder $usageRecorder,
     ) {}
 
     public function handle(Command $command): mixed
@@ -64,7 +66,7 @@ final class GenerateGoogleReviewResponseHandler implements CommandHandler
             systemInstruction: $systemInstructionText,
         ));
 
-        return AiResponseRecordModel::create([
+        $record = AiResponseRecordModel::create([
             'user_id'                => $command->userId,
             'product_type'           => AiProductType::GOOGLE_REVIEW->value,
             'product_id'             => $command->productId,
@@ -73,6 +75,10 @@ final class GenerateGoogleReviewResponseHandler implements CommandHandler
             'system_prompt_snapshot' => $systemInstructionText,
             'metadata'               => ['review_id' => $command->reviewId],
         ]);
+
+        $this->usageRecorder->record($command->userId, 'google_reviews', $aiResponse->totalTokens);
+
+        return $record;
     }
 
     private function composePrompt(string $reviewText, int $starRating, string $productName): string

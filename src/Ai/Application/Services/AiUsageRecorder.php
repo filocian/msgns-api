@@ -21,8 +21,12 @@ use Src\Identity\Domain\Permissions\DomainPermissions;
  *
  * Lives in Application\Services because it queries Eloquent models directly —
  * same precedent as AiUsageLimitsService (see filocian/msgns-api#81).
+ *
+ * NOTE: This class is intentionally NOT marked `final` so handler unit tests
+ * can substitute Mockery doubles. Treat it as final in production — all
+ * consumers inject it by type, no subclass exists.
  */
-final class AiUsageRecorder
+class AiUsageRecorder
 {
     /** @param 'google_reviews'|'instagram' $productType */
     public function record(int $userId, string $productType, ?int $tokensUsed): void

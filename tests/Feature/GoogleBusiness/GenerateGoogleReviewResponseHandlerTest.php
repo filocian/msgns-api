@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Src\Ai\Application\Services\AiUsageRecorder;
 use Src\Ai\Domain\DataTransferObjects\AiRequest;
 use Src\Ai\Domain\DataTransferObjects\AiResponse;
 use Src\Ai\Domain\Entities\UserAiSystemPrompt;
@@ -70,7 +71,12 @@ describe('GenerateGoogleReviewResponseHandler', function (): void {
             })
             ->andReturn(new AiResponse('Thank you for your kind review!', 10, 20, 30));
 
-        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini);
+        $usageRecorder = Mockery::mock(AiUsageRecorder::class);
+        $usageRecorder->shouldReceive('record')
+            ->once()
+            ->with($userId, 'google_reviews', 30);
+
+        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini, $usageRecorder);
 
         $command = new GenerateGoogleReviewResponseCommand(
             userId: $userId,
@@ -106,7 +112,10 @@ describe('GenerateGoogleReviewResponseHandler', function (): void {
         $gemini     = Mockery::mock(GeminiPort::class);
         $gemini->shouldNotReceive('generate');
 
-        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini);
+        $usageRecorder = Mockery::mock(AiUsageRecorder::class);
+        $usageRecorder->shouldNotReceive('record');
+
+        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini, $usageRecorder);
 
         $command = new GenerateGoogleReviewResponseCommand(
             userId: $userId,
@@ -126,10 +135,12 @@ describe('GenerateGoogleReviewResponseHandler', function (): void {
         $productRepo = Mockery::mock(ProductRepositoryPort::class);
         $productRepo->shouldReceive('findById')->with(123)->andReturn(null);
 
-        $promptRepo = Mockery::mock(UserAiSystemPromptRepository::class);
-        $gemini     = Mockery::mock(GeminiPort::class);
+        $promptRepo    = Mockery::mock(UserAiSystemPromptRepository::class);
+        $gemini        = Mockery::mock(GeminiPort::class);
+        $usageRecorder = Mockery::mock(AiUsageRecorder::class);
+        $usageRecorder->shouldNotReceive('record');
 
-        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini);
+        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini, $usageRecorder);
 
         $command = new GenerateGoogleReviewResponseCommand(
             userId: $userId,
@@ -168,7 +179,10 @@ describe('GenerateGoogleReviewResponseHandler', function (): void {
         $gemini = Mockery::mock(GeminiPort::class);
         $gemini->shouldNotReceive('generate');
 
-        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini);
+        $usageRecorder = Mockery::mock(AiUsageRecorder::class);
+        $usageRecorder->shouldNotReceive('record');
+
+        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini, $usageRecorder);
 
         $command = new GenerateGoogleReviewResponseCommand(
             userId: $userId,
@@ -207,7 +221,10 @@ describe('GenerateGoogleReviewResponseHandler', function (): void {
         $gemini = Mockery::mock(GeminiPort::class);
         $gemini->shouldNotReceive('generate');
 
-        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini);
+        $usageRecorder = Mockery::mock(AiUsageRecorder::class);
+        $usageRecorder->shouldNotReceive('record');
+
+        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini, $usageRecorder);
 
         $command = new GenerateGoogleReviewResponseCommand(
             userId: $userId,
@@ -246,7 +263,12 @@ describe('GenerateGoogleReviewResponseHandler', function (): void {
         $gemini = Mockery::mock(GeminiPort::class);
         $gemini->shouldReceive('generate')->andReturn(new AiResponse('new reply', 5, 10, 15));
 
-        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini);
+        $usageRecorder = Mockery::mock(AiUsageRecorder::class);
+        $usageRecorder->shouldReceive('record')
+            ->once()
+            ->with($userId, 'google_reviews', 15);
+
+        $handler = new GenerateGoogleReviewResponseHandler($productRepo, $promptRepo, $gemini, $usageRecorder);
 
         $command = new GenerateGoogleReviewResponseCommand(
             userId: $userId,

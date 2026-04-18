@@ -9,11 +9,20 @@ use Illuminate\Support\Facades\Http;
 use Src\Instagram\Domain\Errors\InstagramApiUnavailable;
 use Src\Instagram\Domain\Ports\InstagramGraphApiPort;
 
-final class InstagramGraphApiAdapter implements InstagramGraphApiPort
+class InstagramGraphApiAdapter implements InstagramGraphApiPort
 {
-    private const string API_VERSION = 'v21.0';
-    private const string BASE_URL    = 'https://graph.facebook.com';
-    private const int    TIMEOUT     = 10;
+    private const string BASE_URL              = 'https://graph.facebook.com';
+    private const int    TIMEOUT               = 10;
+    private const int    POLL_INTERVAL_SECONDS = 2;
+    private const int    POLL_MAX_ATTEMPTS     = 15;
+
+    /**
+     * Resolve the Graph API version from config (defaults to v22.0).
+     */
+    private function apiVersion(): string
+    {
+        return (string) config('services.meta.graph_api_version', 'v22.0');
+    }
 
     /**
      * Exchange a short-lived token for a long-lived token (~60 days).
@@ -54,7 +63,7 @@ final class InstagramGraphApiAdapter implements InstagramGraphApiPort
         try {
             $response = Http::timeout(self::TIMEOUT)
                 ->withToken($accessToken)
-                ->get(self::BASE_URL . '/' . self::API_VERSION . '/' . $pageId, [
+                ->get(self::BASE_URL . '/' . $this->apiVersion() . '/' . $pageId, [
                     'fields' => 'instagram_business_account',
                 ]);
         } catch (ConnectionException) {
@@ -84,7 +93,7 @@ final class InstagramGraphApiAdapter implements InstagramGraphApiPort
         try {
             $response = Http::timeout(self::TIMEOUT)
                 ->withToken($accessToken)
-                ->post(self::BASE_URL . '/' . self::API_VERSION . '/' . $igUserId . '/media', [
+                ->post(self::BASE_URL . '/' . $this->apiVersion() . '/' . $igUserId . '/media', [
                     'image_url' => $imageUrl,
                     'caption'   => $caption,
                 ]);
@@ -100,6 +109,53 @@ final class InstagramGraphApiAdapter implements InstagramGraphApiPort
     }
 
     /**
+     * Poll `/{version}/{creationId}?fields=status_code` every 2 seconds, up to 15 attempts.
+     * Returns as soon as status_code is FINISHED.
+     *
+     * @throws InstagramApiUnavailable on ERROR status, HTTP failure, ConnectionException, or timeout after max attempts
+     */
+    public function waitForContainerReady(string $igUserId, string $creationId, string $accessToken): void
+    {
+        $url = self::BASE_URL . '/' . $this->apiVersion() . '/' . $creationId;
+
+        for ($attempt = 0; $attempt < self::POLL_MAX_ATTEMPTS; $attempt++) {
+            try {
+                $response = Http::timeout(self::TIMEOUT)
+                    ->withToken($accessToken)
+                    ->get($url, ['fields' => 'status_code']);
+            } catch (ConnectionException) {
+                throw InstagramApiUnavailable::because('connection_failed');
+            }
+
+            if ($response->failed()) {
+                throw InstagramApiUnavailable::because('container_status_error', [
+                    'status_code' => 'http_' . $response->status(),
+                ]);
+            }
+
+            $status = (string) $response->json('status_code');
+
+            if ($status === 'FINISHED' || $status === 'PUBLISHED') {
+                return;
+            }
+
+            if ($status === 'ERROR' || $status === 'EXPIRED') {
+                throw InstagramApiUnavailable::because('container_status_error', [
+                    'status_code' => $status,
+                ]);
+            }
+
+            // Any other status (IN_PROGRESS, unknown) → keep polling.
+            // Only sleep between polls, NOT after the final attempt.
+            if ($attempt < self::POLL_MAX_ATTEMPTS - 1) {
+                $this->sleep(self::POLL_INTERVAL_SECONDS);
+            }
+        }
+
+        throw InstagramApiUnavailable::because('container_timeout');
+    }
+
+    /**
      * Publish a previously created media container.
      *
      * @return array{id: string}
@@ -109,7 +165,7 @@ final class InstagramGraphApiAdapter implements InstagramGraphApiPort
         try {
             $response = Http::timeout(self::TIMEOUT)
                 ->withToken($accessToken)
-                ->post(self::BASE_URL . '/' . self::API_VERSION . '/' . $igUserId . '/media_publish', [
+                ->post(self::BASE_URL . '/' . $this->apiVersion() . '/' . $igUserId . '/media_publish', [
                     'creation_id' => $creationId,
                 ]);
         } catch (ConnectionException) {
@@ -121,5 +177,13 @@ final class InstagramGraphApiAdapter implements InstagramGraphApiPort
         }
 
         return ['id' => (string) $response->json('id')];
+    }
+
+    /**
+     * Sleep helper — extracted so tests can override without real delays.
+     */
+    protected function sleep(int $seconds): void
+    {
+        sleep($seconds);
     }
 }

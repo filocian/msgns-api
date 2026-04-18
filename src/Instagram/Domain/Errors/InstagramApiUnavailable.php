@@ -9,8 +9,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class InstagramApiUnavailable extends DomainException
 {
-    public static function because(string $reason): self
+    /**
+     * @param array<string, mixed> $context
+     */
+    public static function because(string $reason, array $context = []): self
     {
-        return new self('instagram_api_unavailable', Response::HTTP_BAD_GATEWAY, ['reason' => $reason]);
+        return new self(
+            'instagram_api_unavailable',
+            Response::HTTP_BAD_GATEWAY,
+            ['reason' => $reason] + $context,
+        );
     }
 }

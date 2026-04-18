@@ -17,7 +17,8 @@ final class EloquentInstagramProductConfiguration implements InstagramProductCon
             return null;
         }
 
-        $value = $product->instagram_account_id;
+        /** @var string|null $value */
+        $value = $product->getAttribute('instagram_account_id');
 
         return $value === null ? null : (string) $value;
     }

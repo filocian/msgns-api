@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Src\Instagram\Infrastructure\Adapters;
 
+use Illuminate\Support\Carbon;
 use Src\Instagram\Domain\DataTransferObjects\InstagramConnection;
 use Src\Instagram\Domain\Models\UserInstagramConnection;
 use Src\Instagram\Domain\Ports\InstagramConnectionRepositoryPort;
@@ -21,16 +22,20 @@ final class EloquentInstagramConnectionRepository implements InstagramConnection
             return null;
         }
 
-        $expiresAt = $model->expires_at !== null
-            ? new \DateTimeImmutable($model->expires_at->toDateTimeString())
-            : null;
+        /** @var Carbon|string|null $rawExpiresAt */
+        $rawExpiresAt = $model->getAttribute('expires_at');
+        if ($rawExpiresAt instanceof Carbon) {
+            $expiresAt = new \DateTimeImmutable($rawExpiresAt->toDateTimeString());
+        } else {
+            $expiresAt = null;
+        }
 
         return new InstagramConnection(
-            userId:            (int) $model->user_id,
-            accessToken:       (string) $model->access_token,
-            instagramUserId:   (string) $model->instagram_user_id,
-            instagramUsername: (string) $model->instagram_username,
-            pageId:            (string) $model->page_id,
+            userId:            (int) $model->getAttribute('user_id'),
+            accessToken:       (string) $model->getAttribute('access_token'),
+            instagramUserId:   (string) $model->getAttribute('instagram_user_id'),
+            instagramUsername: (string) $model->getAttribute('instagram_username'),
+            pageId:            (string) $model->getAttribute('page_id'),
             expiresAt:         $expiresAt,
         );
     }

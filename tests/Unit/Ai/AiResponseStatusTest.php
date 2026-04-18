@@ -76,10 +76,22 @@ describe('AiResponseStatus', function (): void {
         expect($result->value)->toBe('applied');
     });
 
+    it('allows approved → applying', function (): void {
+        $status = AiResponseStatus::from('approved');
+        $result = $status->transitionTo(AiResponseStatus::from('applying'));
+        expect($result->value)->toBe('applying');
+    });
+
     it('allows approved → expired', function (): void {
         $status = AiResponseStatus::from('approved');
         $result = $status->transitionTo(AiResponseStatus::from('expired'));
         expect($result->value)->toBe('expired');
+    });
+
+    it('allows applying → applied', function (): void {
+        $status = AiResponseStatus::from('applying');
+        $result = $status->transitionTo(AiResponseStatus::from('applied'));
+        expect($result->value)->toBe('applied');
     });
 
     // ─── Disallowed transitions ───────────────────────────────────────────────
@@ -114,11 +126,20 @@ describe('AiResponseStatus', function (): void {
             ->toThrow(ValidationFailed::class);
     });
 
+    it('throws ValidationFailed for applying → anything except applied', function (): void {
+        $status  = AiResponseStatus::from('applying');
+        $targets = ['pending', 'approved', 'edited', 'rejected', 'expired'];
+        foreach ($targets as $target) {
+            expect(fn () => $status->transitionTo(AiResponseStatus::from($target)))
+                ->toThrow(ValidationFailed::class);
+        }
+    });
+
     // ─── Terminal states have zero valid transitions ───────────────────────────
 
     it('rejected has zero valid transitions', function (): void {
         $status = AiResponseStatus::from('rejected');
-        $targets = ['pending', 'approved', 'edited', 'applied', 'expired'];
+        $targets = ['pending', 'approved', 'edited', 'applied', 'applying', 'expired'];
         foreach ($targets as $target) {
             expect($status->canTransitionTo(AiResponseStatus::from($target)))->toBeFalse();
         }
@@ -126,7 +147,7 @@ describe('AiResponseStatus', function (): void {
 
     it('applied has zero valid transitions', function (): void {
         $status = AiResponseStatus::from('applied');
-        $targets = ['pending', 'approved', 'edited', 'rejected', 'expired'];
+        $targets = ['pending', 'approved', 'edited', 'rejected', 'applying', 'expired'];
         foreach ($targets as $target) {
             expect($status->canTransitionTo(AiResponseStatus::from($target)))->toBeFalse();
         }
@@ -134,7 +155,7 @@ describe('AiResponseStatus', function (): void {
 
     it('expired has zero valid transitions', function (): void {
         $status = AiResponseStatus::from('expired');
-        $targets = ['pending', 'approved', 'edited', 'rejected', 'applied'];
+        $targets = ['pending', 'approved', 'edited', 'rejected', 'applied', 'applying'];
         foreach ($targets as $target) {
             expect($status->canTransitionTo(AiResponseStatus::from($target)))->toBeFalse();
         }

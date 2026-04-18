@@ -175,7 +175,9 @@ describe('POST /api/v2/ai/instagram/generate', function () use ($SMALL_B64): voi
 
         $record = AiResponseRecordModel::where('user_id', $user->id)->firstOrFail();
         expect($record->product_type)->toBe(AiProductType::INSTAGRAM_CONTENT->value)
-            ->and($record->metadata['s3_image_url'] ?? 'missing')->toBeNull();
+            ->and($record->metadata)->toBeArray()
+            ->and(array_key_exists('s3_image_url', $record->metadata))->toBeTrue()
+            ->and($record->metadata['s3_image_url'])->toBeNull();
 
         $usage = AiUsageRecordModel::where('user_id', $user->id)->firstOrFail();
         expect($usage->product_type)->toBe('instagram')

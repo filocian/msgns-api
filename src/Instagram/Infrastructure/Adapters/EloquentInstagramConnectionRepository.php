@@ -6,15 +6,15 @@ namespace Src\Instagram\Infrastructure\Adapters;
 
 use Illuminate\Support\Carbon;
 use Src\Instagram\Domain\DataTransferObjects\InstagramConnection;
-use Src\Instagram\Domain\Models\UserInstagramConnection;
 use Src\Instagram\Domain\Ports\InstagramConnectionRepositoryPort;
+use Src\Instagram\Infrastructure\Persistence\UserInstagramConnectionModel;
 
 final class EloquentInstagramConnectionRepository implements InstagramConnectionRepositoryPort
 {
     public function findByUserId(int $userId): ?InstagramConnection
     {
-        /** @var UserInstagramConnection|null $model */
-        $model = UserInstagramConnection::query()
+        /** @var UserInstagramConnectionModel|null $model */
+        $model = UserInstagramConnectionModel::query()
             ->where('user_id', $userId)
             ->first();
 

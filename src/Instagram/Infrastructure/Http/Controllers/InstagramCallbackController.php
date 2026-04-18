@@ -10,7 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Src\Instagram\Domain\Models\UserInstagramConnection;
+use Src\Instagram\Infrastructure\Persistence\UserInstagramConnectionModel;
 
 final class InstagramCallbackController extends Controller
 {
@@ -140,7 +140,7 @@ final class InstagramCallbackController extends Controller
             }
 
             // Step 6: Store connection.
-            UserInstagramConnection::updateOrCreate(
+            UserInstagramConnectionModel::updateOrCreate(
                 ['user_id' => (int) $user->id],
                 [
                     'instagram_user_id'   => $igUserId,

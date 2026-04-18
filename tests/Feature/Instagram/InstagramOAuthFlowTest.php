@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
-use Src\Instagram\Domain\Models\UserInstagramConnection;
+use Src\Instagram\Infrastructure\Persistence\UserInstagramConnectionModel;
 
 // ─── GET /instagram/connect ───────────────────────────────────────────────────
 
@@ -89,7 +89,7 @@ describe('GET /instagram/callback', function (): void {
             ->get('/instagram/callback?code=auth-code&state=valid-state')
             ->assertRedirect();
 
-        $connection = UserInstagramConnection::where('user_id', $user->id)->first();
+        $connection = UserInstagramConnectionModel::where('user_id', $user->id)->first();
         expect($connection)->not->toBeNull()
             ->and($connection->instagram_user_id)->toBe('ig-user-456');
     });
@@ -121,7 +121,7 @@ describe('GET /instagram/callback', function (): void {
     it('updates existing connection on reconnect', function (): void {
         $user = $this->create_user(['email' => 'ig-callback-reconnect@test.com']);
 
-        UserInstagramConnection::create([
+        UserInstagramConnectionModel::create([
             'user_id'           => $user->id,
             'instagram_user_id' => 'ig-user-456',
             'access_token'      => 'old-token',
@@ -152,7 +152,7 @@ describe('GET /instagram/callback', function (): void {
             ->withSession(['instagram_oauth_state' => 'state-2'])
             ->get('/instagram/callback?code=code-2&state=state-2');
 
-        expect(UserInstagramConnection::where('user_id', $user->id)->count())->toBe(1);
+        expect(UserInstagramConnectionModel::where('user_id', $user->id)->count())->toBe(1);
     });
 
     it('redirects to v2 frontend after successful callback', function (): void {

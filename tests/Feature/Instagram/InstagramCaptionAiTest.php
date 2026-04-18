@@ -20,7 +20,7 @@ use Src\Ai\Infrastructure\Persistence\AiResponseRecordModel;
 use Src\Ai\Infrastructure\Persistence\AiUsageRecordModel;
 use Src\Identity\Domain\Permissions\DomainPermissions;
 use Src\Instagram\Application\Jobs\PublishInstagramContentJob;
-use Src\Instagram\Domain\Models\UserInstagramConnection;
+use Src\Instagram\Infrastructure\Persistence\UserInstagramConnectionModel;
 use Src\Shared\Core\Errors\MediaUploadFailed;
 use Src\Shared\Core\Ports\LogPort;
 use Src\Shared\Core\Ports\MediaUploadPort;
@@ -66,9 +66,9 @@ function igMakeProductForUser(int $userId, ?string $instagramAccountId = null): 
     ]);
 }
 
-function igMakeConnection(int $userId, string $accessToken = 'ig-token'): UserInstagramConnection
+function igMakeConnection(int $userId, string $accessToken = 'ig-token'): UserInstagramConnectionModel
 {
-    return UserInstagramConnection::create([
+    return UserInstagramConnectionModel::create([
         'user_id'            => $userId,
         'instagram_user_id'  => 'ig-user-999',
         'instagram_username' => 'testaccount',

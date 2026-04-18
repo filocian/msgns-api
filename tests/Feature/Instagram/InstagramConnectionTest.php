@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Src\Instagram\Domain\Models\UserInstagramConnection;
+use Src\Instagram\Infrastructure\Persistence\UserInstagramConnectionModel;
 
 // ─── GET /api/v2/instagram/connection ─────────────────────────────────────────
 
@@ -11,7 +11,7 @@ describe('GET /api/v2/instagram/connection', function (): void {
     it('returns connected status when connection exists', function (): void {
         $user = $this->create_user(['email' => 'ig-conn-exists@test.com']);
 
-        UserInstagramConnection::create([
+        UserInstagramConnectionModel::create([
             'user_id'            => $user->id,
             'instagram_user_id'  => 'ig-user-123',
             'instagram_username' => 'mybusiness',
@@ -31,7 +31,7 @@ describe('GET /api/v2/instagram/connection', function (): void {
     it('returns expiring_soon true when token expires within 7 days', function (): void {
         $user = $this->create_user(['email' => 'ig-conn-expiring@test.com']);
 
-        UserInstagramConnection::create([
+        UserInstagramConnectionModel::create([
             'user_id'           => $user->id,
             'instagram_user_id' => 'ig-user-123',
             'access_token'      => 'some-access-token',
@@ -69,7 +69,7 @@ describe('DELETE /api/v2/instagram/connection', function (): void {
     it('disconnects and returns 204', function (): void {
         $user = $this->create_user(['email' => 'ig-disconnect@test.com']);
 
-        UserInstagramConnection::create([
+        UserInstagramConnectionModel::create([
             'user_id'           => $user->id,
             'instagram_user_id' => 'ig-user-123',
             'access_token'      => 'some-access-token',
@@ -80,7 +80,7 @@ describe('DELETE /api/v2/instagram/connection', function (): void {
             ->deleteJson('/api/v2/instagram/connection')
             ->assertStatus(204);
 
-        expect(UserInstagramConnection::where('user_id', $user->id)->exists())->toBeFalse();
+        expect(UserInstagramConnectionModel::where('user_id', $user->id)->exists())->toBeFalse();
     });
 
     it('returns 404 when no connection to disconnect', function (): void {

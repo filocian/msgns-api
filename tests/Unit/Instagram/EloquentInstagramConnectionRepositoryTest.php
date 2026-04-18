@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Src\Instagram\Domain\DataTransferObjects\InstagramConnection;
-use Src\Instagram\Domain\Models\UserInstagramConnection;
+use Src\Instagram\Infrastructure\Persistence\UserInstagramConnectionModel;
 use Src\Instagram\Infrastructure\Adapters\EloquentInstagramConnectionRepository;
 
 uses(RefreshDatabase::class);
@@ -17,7 +17,7 @@ describe('EloquentInstagramConnectionRepository', function (): void {
 
         $expiresAt = now()->addDays(30);
 
-        UserInstagramConnection::create([
+        UserInstagramConnectionModel::create([
             'user_id'            => $user->id,
             'instagram_user_id'  => '17841400000000001',
             'instagram_username' => 'filocian_test',
@@ -54,7 +54,7 @@ describe('EloquentInstagramConnectionRepository', function (): void {
 
         $pastExpiry = now()->subDays(1);
 
-        UserInstagramConnection::create([
+        UserInstagramConnectionModel::create([
             'user_id'            => $user->id,
             'instagram_user_id'  => '17841400000000002',
             'instagram_username' => 'expired_user',
@@ -74,7 +74,7 @@ describe('EloquentInstagramConnectionRepository', function (): void {
     it('maps a null expires_at to a null DTO field and treats it as non-expiring', function (): void {
         $user = User::factory()->create();
 
-        UserInstagramConnection::create([
+        UserInstagramConnectionModel::create([
             'user_id'            => $user->id,
             'instagram_user_id'  => '17841400000000003',
             'instagram_username' => 'forever_user',

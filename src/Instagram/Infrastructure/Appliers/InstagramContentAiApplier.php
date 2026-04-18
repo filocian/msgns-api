@@ -27,6 +27,13 @@ use Src\Shared\Core\Ports\LogPort;
  */
 final class InstagramContentAiApplier implements AiResponseApplierPort
 {
+    /**
+     * Instagram enforces a 2200-character cap on captions (including hashtags).
+     * Anything beyond is silently truncated server-side; we truncate here first
+     * so the request is deterministic and the original length is observable via logs.
+     */
+    private const int MAX_CAPTION_LENGTH = 2200;
+
     public function __construct(
         private readonly InstagramConnectionRepositoryPort $connections,
         private readonly InstagramProductConfigurationPort $productConfig,
@@ -69,7 +76,18 @@ final class InstagramContentAiApplier implements AiResponseApplierPort
             ]);
         }
 
-        $caption = $record->editedContent ?? $record->aiContent;
+        $caption         = $record->editedContent ?? $record->aiContent;
+        $originalLength  = mb_strlen($caption);
+
+        if ($originalLength > self::MAX_CAPTION_LENGTH) {
+            $caption = mb_substr($caption, 0, self::MAX_CAPTION_LENGTH);
+
+            $this->log->warning('instagram.caption_truncated', [
+                'ai_response_id'  => $record->id,
+                'original_length' => $originalLength,
+                'truncated_to'    => self::MAX_CAPTION_LENGTH,
+            ]);
+        }
 
         try {
             $creation = $this->graphApi->createMediaContainer(

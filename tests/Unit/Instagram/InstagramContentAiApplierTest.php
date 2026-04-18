@@ -160,6 +160,67 @@ describe('InstagramContentAiApplier::apply — happy path', function (): void {
 
         $applier->apply($record);
     });
+
+    it('truncates captions longer than 2200 chars and logs a warning', function (): void {
+        $original = str_repeat('x', 2300);
+        $record   = makeInstagramRecord(['aiContent' => $original]);
+
+        $connections = Mockery::mock(InstagramConnectionRepositoryPort::class);
+        $connections->shouldReceive('findByUserId')->andReturn(makeValidInstagramConnection());
+
+        $productConfig = Mockery::mock(InstagramProductConfigurationPort::class);
+        $productConfig->shouldReceive('getInstagramAccountIdForProduct')->andReturn('acct');
+
+        $graphApi = Mockery::mock(InstagramGraphApiPort::class);
+        $graphApi->shouldReceive('createMediaContainer')
+            ->once()
+            ->withArgs(fn ($a, $i, $caption, $t): bool => mb_strlen($caption) === 2200
+                && $caption === mb_substr(str_repeat('x', 2300), 0, 2200))
+            ->andReturn(['id' => 'cid']);
+        $graphApi->shouldReceive('waitForContainerReady')->once();
+        $graphApi->shouldReceive('publishMediaContainer')->once()->andReturn(['id' => 'mid']);
+
+        $log = Mockery::mock(LogPort::class);
+        $log->shouldReceive('warning')
+            ->once()
+            ->withArgs(function (string $message, array $context): bool {
+                return $message === 'instagram.caption_truncated'
+                    && ($context['original_length'] ?? null) === 2300
+                    && ($context['truncated_to'] ?? null) === 2200;
+            });
+        $log->shouldReceive('info')->zeroOrMoreTimes();
+
+        $applier = new InstagramContentAiApplier($connections, $productConfig, $graphApi, $log);
+
+        $applier->apply($record);
+    });
+
+    it('passes captions exactly at the 2200 char boundary through unchanged', function (): void {
+        $caption = str_repeat('y', 2200);
+        $record  = makeInstagramRecord(['aiContent' => $caption]);
+
+        $connections = Mockery::mock(InstagramConnectionRepositoryPort::class);
+        $connections->shouldReceive('findByUserId')->andReturn(makeValidInstagramConnection());
+
+        $productConfig = Mockery::mock(InstagramProductConfigurationPort::class);
+        $productConfig->shouldReceive('getInstagramAccountIdForProduct')->andReturn('acct');
+
+        $graphApi = Mockery::mock(InstagramGraphApiPort::class);
+        $graphApi->shouldReceive('createMediaContainer')
+            ->once()
+            ->withArgs(fn ($a, $i, $c, $t): bool => $c === $caption)
+            ->andReturn(['id' => 'cid']);
+        $graphApi->shouldReceive('waitForContainerReady')->once();
+        $graphApi->shouldReceive('publishMediaContainer')->once()->andReturn(['id' => 'mid']);
+
+        $log = Mockery::mock(LogPort::class);
+        $log->shouldNotReceive('warning');
+        $log->shouldReceive('info')->zeroOrMoreTimes();
+
+        $applier = new InstagramContentAiApplier($connections, $productConfig, $graphApi, $log);
+
+        $applier->apply($record);
+    });
 });
 
 describe('InstagramContentAiApplier::apply — configuration errors', function (): void {

@@ -56,9 +56,10 @@ return [
 	],
 
 	'meta' => [
-		'app_id'       => env('META_APP_ID'),
-		'app_secret'   => env('META_APP_SECRET'),
-		'redirect_uri' => env('INSTAGRAM_REDIRECT_URI', 'http://localhost:8000/instagram/callback'),
+		'app_id'            => env('META_APP_ID'),
+		'app_secret'        => env('META_APP_SECRET'),
+		'redirect_uri'      => env('INSTAGRAM_REDIRECT_URI', 'http://localhost:8000/instagram/callback'),
+		'graph_api_version' => env('META_GRAPH_API_VERSION', 'v22.0'),
 	],
 
 	'gemini' => [

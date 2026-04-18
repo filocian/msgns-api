@@ -39,8 +39,14 @@ final class S3MediaUploadAdapter implements MediaUploadPort
 			$extension,
 		);
 
+		$decoded = base64_decode($base64Content, strict: true);
+
+		if ($decoded === false) {
+			throw MediaUploadFailed::because('invalid_base64');
+		}
+
 		try {
-			Storage::disk(self::DISK)->put($path, base64_decode($base64Content), 'public');
+			Storage::disk(self::DISK)->put($path, $decoded, 'public');
 		} catch (UnableToWriteFile) {
 			throw MediaUploadFailed::because('s3_upload_failed', [
 				'path' => $path,

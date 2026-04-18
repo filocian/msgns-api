@@ -64,6 +64,19 @@ describe('S3MediaUploadAdapter::upload', function (): void {
 		}
 	});
 
+	it('throws MediaUploadFailed with reason invalid_base64 on malformed base64', function (): void {
+		$adapter = new S3MediaUploadAdapter();
+
+		try {
+			$adapter->upload('!!!not-valid-base64@@@', 'image/jpeg', 1);
+			expect(true)->toBeFalse('Expected MediaUploadFailed to be thrown');
+		} catch (MediaUploadFailed $e) {
+			expect($e->errorCode())->toBe('media_upload_failed')
+				->and($e->httpStatus())->toBe(502)
+				->and($e->context()['reason'])->toBe('invalid_base64');
+		}
+	});
+
 	it('throws MediaUploadFailed with reason s3_upload_failed when Flysystem rejects the write', function (): void {
 		// Reset facade to use a mock instead of fake — we need put() to throw.
 		\Mockery::close();

@@ -25,7 +25,7 @@ final class GenerateInstagramCaptionRequest extends FormRequest
             'product_id'      => ['required', 'integer', 'exists:products,id'],
             'image_base64'    => ['nullable', 'string', 'required_with:image_mime_type'],
             'image_mime_type' => ['nullable', 'required_with:image_base64', 'string', 'in:image/jpeg,image/png,image/webp'],
-            'context'         => ['nullable', 'string', 'max:2000'],
+            'context'         => ['nullable', 'string', 'max:1500'],
         ];
     }
 

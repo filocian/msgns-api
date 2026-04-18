@@ -117,16 +117,27 @@ describe('GenerateInstagramCaptionRequest rules', function (): void {
             ->and($validator->errors()->has('image_mime_type'))->toBeTrue();
     });
 
-    it('fails when context is longer than 2000 characters', function (): void {
+    it('fails when context is longer than 1500 characters', function (): void {
         $product = Product::factory()->create();
 
         $validator = validateInstagramCaption([
             'product_id' => $product->id,
-            'context'    => str_repeat('a', 2001),
+            'context'    => str_repeat('a', 1501),
         ]);
 
         expect($validator->fails())->toBeTrue()
             ->and($validator->errors()->has('context'))->toBeTrue();
+    });
+
+    it('accepts context exactly at the 1500 character limit', function (): void {
+        $product = Product::factory()->create();
+
+        $validator = validateInstagramCaption([
+            'product_id' => $product->id,
+            'context'    => str_repeat('a', 1500),
+        ]);
+
+        expect($validator->passes())->toBeTrue();
     });
 
     it('accepts each of the three allowed MIME types', function (string $mime): void {

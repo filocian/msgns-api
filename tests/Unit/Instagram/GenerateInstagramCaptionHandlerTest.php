@@ -428,7 +428,9 @@ describe('GenerateInstagramCaptionHandler', function (): void {
         $gemini = Mockery::mock(GeminiPort::class);
         $gemini->shouldReceive('generate')
             ->once()
-            ->withArgs(fn (AiRequest $req) => $req->systemInstruction !== '' && str_contains(strtolower($req->systemInstruction), 'instagram'))
+            ->withArgs(fn (AiRequest $req) => $req->systemInstruction !== ''
+                && str_contains(strtolower($req->systemInstruction), 'instagram')
+                && str_contains($req->systemInstruction, '2200'))
             ->andReturn(new AiResponse('ok', 1, 2, 3));
 
         $mediaUpload = Mockery::mock(MediaUploadPort::class);

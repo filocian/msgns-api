@@ -20,7 +20,7 @@ use Src\Shared\Core\Ports\TransactionPort;
 
 final class GenerateInstagramCaptionHandler implements CommandHandler
 {
-    private const string DEFAULT_SYSTEM_INSTRUCTION = 'You are a helpful assistant that writes engaging, concise Instagram captions for businesses. Write in a friendly, on-brand tone appropriate for the product and any context the user provides.';
+    private const string DEFAULT_SYSTEM_INSTRUCTION = 'You are a helpful assistant that writes engaging, concise Instagram captions for businesses. Write in a friendly, on-brand tone appropriate for the product and any context the user provides. Keep the caption to 2200 characters or fewer, including hashtags — Instagram truncates anything beyond that limit.';
 
     public function __construct(
         private readonly ProductRepositoryPort $productRepository,

@@ -21,7 +21,7 @@ describe('Product Activation/Deactivation', function () {
 		$this->actingAs($user);
 		$response = $this->postWithHeaders('/api/products/1/activate');
 
-		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
+		$response->assertStatus(Response::HTTP_FORBIDDEN);
 	});
 
 	it('User which is not the owner cannot activate a product', function () {
@@ -31,7 +31,7 @@ describe('Product Activation/Deactivation', function () {
 		$this->actingAs($user);
 		$response = $this->postWithHeaders('/api/products/1/activate');
 
-		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
+		$response->assertStatus(Response::HTTP_FORBIDDEN);
 	});
 
 	it('Non existent product cannot be activated', function () {
@@ -79,7 +79,7 @@ describe('Product Activation/Deactivation', function () {
 		$this->actingAs($user);
 		$response = $this->postWithHeaders('/api/products/1/deactivate');
 
-		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
+		$response->assertStatus(Response::HTTP_FORBIDDEN);
 	});
 
 	it('User which is not the owner cannot deactivate a product', function () {
@@ -89,7 +89,7 @@ describe('Product Activation/Deactivation', function () {
 		$this->actingAs($user);
 		$response = $this->postWithHeaders('/api/products/1/deactivate');
 
-		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
+		$response->assertStatus(Response::HTTP_FORBIDDEN);
 	});
 
 	it('Non existent product cannot be deactivated', function () {

@@ -38,7 +38,7 @@ it('returns 400 validation error with password too short', function () {
         'password' => 'short',
     ]);
     $response->assertStatus(400)
-             ->assertJsonPath('error.code', 'validation_error');
+             ->assertJsonPath('error.code', 'validation_failed');
 });
 
 it('returns 403 for non-admin user', function () {

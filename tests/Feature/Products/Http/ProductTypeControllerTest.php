@@ -190,7 +190,7 @@ describe('POST /api/v2/products/product-types', function () {
 
         // The project maps Laravel ValidationException → 400 (see bootstrap/app.php)
         $response->assertStatus(400)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 400 when name is missing (FormRequest validation)', function () {
@@ -200,7 +200,7 @@ describe('POST /api/v2/products/product-types', function () {
         ]);
 
         $response->assertStatus(400)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 400 when primary_model is missing (FormRequest validation)', function () {
@@ -210,7 +210,7 @@ describe('POST /api/v2/products/product-types', function () {
         ]);
 
         $response->assertStatus(400)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 400 when code exceeds 60 characters (FormRequest validation)', function () {
@@ -221,7 +221,7 @@ describe('POST /api/v2/products/product-types', function () {
         ]);
 
         $response->assertStatus(400)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 401 for an unauthenticated request', function () {
@@ -444,7 +444,7 @@ describe('PATCH /api/v2/products/product-types/{id}', function () {
 
         // FormRequest validation → 400 in this project
         $response->assertStatus(400)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     // ─── No delete (AC-008) ───────────────────────────────────────────────────

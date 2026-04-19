@@ -253,21 +253,21 @@ it('returns 403 for unauthorized users', function () {
 it('returns 400 for invalid role', function () {
     $response = $this->getJson(EXPORT_URL . '?role=nonexistent');
     $response->assertStatus(400)
-             ->assertJsonPath('error.code', 'validation_error')
+             ->assertJsonPath('error.code', 'validation_failed')
              ->assertJsonPath('error.context.errors.role.0', fn ($v) => str_contains($v, 'role'));
 });
 
 it('returns 400 for invalid date range', function () {
     $response = $this->getJson(EXPORT_URL . '?created_from=2026-03-20&created_to=2026-03-10');
     $response->assertStatus(400)
-             ->assertJsonPath('error.code', 'validation_error')
+             ->assertJsonPath('error.code', 'validation_failed')
              ->assertJsonPath('error.context.errors.created_to.0', fn ($v) => str_contains($v, 'created_to') || str_contains($v, 'created from'));
 });
 
 it('returns 400 for invalid date format', function () {
     $response = $this->getJson(EXPORT_URL . '?created_from=not-a-date');
     $response->assertStatus(400)
-             ->assertJsonPath('error.code', 'validation_error')
+             ->assertJsonPath('error.code', 'validation_failed')
              ->assertJsonPath('error.context.errors.created_from.0', fn ($v) => str_contains($v, 'created_from') || str_contains($v, 'created from'));
 });
 

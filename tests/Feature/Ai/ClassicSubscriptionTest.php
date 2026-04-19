@@ -145,7 +145,7 @@ describe('POST /api/v2/ai/subscriptions/classic', function (): void {
         $this->actingAs($user, 'stateful-api')
             ->postJson('/api/v2/ai/subscriptions/classic', [])
             ->assertStatus(400)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 400 when billing_period is invalid', function (): void {

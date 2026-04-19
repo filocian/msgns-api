@@ -124,7 +124,7 @@ final class PlaceSearchController extends Controller
 							property: 'error',
 							type: 'object',
 							properties: [
-								new OA\Property(property: 'code', type: 'string', example: 'validation_error'),
+								new OA\Property(property: 'code', type: 'string', example: 'validation_failed'),
 								new OA\Property(
 									property: 'context',
 									type: 'object',

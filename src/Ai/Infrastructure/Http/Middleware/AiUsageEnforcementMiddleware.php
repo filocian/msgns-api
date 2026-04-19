@@ -8,7 +8,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Src\Ai\Application\Services\AiUsageLimitsService;
 use Src\Identity\Domain\Permissions\DomainPermissions;
-use Symfony\Component\HttpFoundation\Response;
+use Src\Shared\Infrastructure\Http\ErrorResponseFactory;
 
 /**
  * Enforces per-feature AI quota before passing the request downstream.
@@ -45,17 +45,19 @@ final class AiUsageEnforcementMiddleware
     {
         $user = $request->user();
 
-        if ($user === null) {
-            return response()->json(['message' => 'Unauthenticated.'], Response::HTTP_UNAUTHORIZED);
-        }
+		if ($user === null) {
+			return ErrorResponseFactory::error('auth.unauthenticated', 401);
+		}
 
-        if (! $user->canAny(self::AI_PERMISSIONS)) {
-            return response()->json(['message' => 'Forbidden.'], Response::HTTP_FORBIDDEN);
-        }
+		if (! $user->canAny(self::AI_PERMISSIONS)) {
+			return ErrorResponseFactory::error('auth.forbidden', 403);
+		}
 
-        if (! $this->limitsService->hasQuota($user, $productType)) {
-            return response()->json(['message' => 'AI quota exhausted.'], Response::HTTP_TOO_MANY_REQUESTS);
-        }
+		if (! $this->limitsService->hasQuota($user, $productType)) {
+			return ErrorResponseFactory::error('ai.quota_exhausted', 429, [
+				'product_type' => $productType,
+			]);
+		}
 
         return $next($request);
     }

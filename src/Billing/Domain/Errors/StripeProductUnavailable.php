@@ -11,10 +11,10 @@ final class StripeProductUnavailable extends DomainException
 {
     public static function withProductId(string $productId): self
     {
-        return new self(
-            'billing.stripe_product.unavailable',
-            Response::HTTP_BAD_GATEWAY,
-            ['productId' => $productId],
-        );
-    }
+		return new self(
+			'billing.stripe_product.unavailable',
+			Response::HTTP_NOT_FOUND,
+			['productId' => $productId],
+		);
+	}
 }

@@ -87,7 +87,12 @@ describe('AiRateLimitMiddleware', function () {
         $response   = $middleware->handle($request, $next);
 
         expect($response->getStatusCode())->toBe(429)
-            ->and(json_decode((string) $response->getContent(), true))->toBe(['message' => 'Too Many Requests']);
+            ->and(json_decode((string) $response->getContent(), true))->toBe([
+                'error' => [
+                    'code' => 'ai.rate_limited',
+                    'context' => [],
+                ],
+            ]);
     });
 
     it('does not call set when the request is rejected', function () {

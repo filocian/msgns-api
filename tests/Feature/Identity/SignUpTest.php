@@ -118,7 +118,7 @@ it('returns 400 for missing required fields', function () {
     $response = $this->postWithHeaders('/api/v2/identity/sign-up', []);
 
     $response->assertStatus(400)
-        ->assertJsonPath('error.code', 'validation_error');
+        ->assertJsonPath('error.code', 'validation_failed');
     AuthContractAssertions::assertAuthErrorContract($response->json(), 'signup-validation-error.json');
 });
 
@@ -130,7 +130,7 @@ it('returns 400 for password mismatch', function () {
         'repeat_password' => 'Different123!',
     ]);
     $response->assertStatus(400)
-        ->assertJsonPath('error.code', 'validation_error');
+        ->assertJsonPath('error.code', 'validation_failed');
     AuthContractAssertions::assertAuthErrorContract($response->json(), 'signup-validation-error.json');
 });
 
@@ -146,7 +146,7 @@ it('returns 400 for malformed country, phone and language payload', function () 
     ]);
 
     $response->assertStatus(400)
-        ->assertJsonPath('error.code', 'validation_error');
+        ->assertJsonPath('error.code', 'validation_failed');
     AuthContractAssertions::assertAuthErrorContract($response->json(), 'signup-validation-error.json');
 });
 

@@ -7,7 +7,7 @@ namespace Src\Products\Infrastructure\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Symfony\Component\HttpFoundation\Response;
+use Src\Shared\Infrastructure\Http\ErrorResponseFactory;
 
 final class ChangeConfigStatusRequest extends FormRequest
 {
@@ -28,13 +28,6 @@ final class ChangeConfigStatusRequest extends FormRequest
 
     protected function failedValidation(Validator $validator): never
     {
-        throw new HttpResponseException(
-            response()->json([
-                'error' => [
-                    'code' => 'validation_error',
-                    'context' => ['errors' => $validator->errors()->toArray()],
-                ],
-            ], Response::HTTP_UNPROCESSABLE_ENTITY)
-        );
+        throw new HttpResponseException(ErrorResponseFactory::validationFailed($validator->errors()->toArray()));
     }
 }

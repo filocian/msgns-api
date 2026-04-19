@@ -7,6 +7,7 @@ namespace Src\Ai\Infrastructure\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Src\Shared\Core\Ports\CachePort;
+use Src\Shared\Infrastructure\Http\ErrorResponseFactory;
 use Symfony\Component\HttpFoundation\Response;
 
 final class AiRateLimitMiddleware
@@ -23,9 +24,9 @@ final class AiRateLimitMiddleware
 
         $count = (int) $this->cache->get($cacheKey, 0);
 
-        if ($count >= $limit) {
-            return response()->json(['message' => 'Too Many Requests'], 429);
-        }
+		if ($count >= $limit) {
+			return ErrorResponseFactory::error('ai.rate_limited', 429);
+		}
 
         $this->cache->set($cacheKey, $count + 1, $windowSeconds * 2);
 

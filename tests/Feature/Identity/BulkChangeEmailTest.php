@@ -90,7 +90,7 @@ it('returns 400 when duplicate user_ids in request', function () {
 
     // FormRequest validation rejects duplicate user_ids with 400
     $response->assertStatus(400)
-        ->assertJsonPath('error.code', 'validation_error');
+        ->assertJsonPath('error.code', 'validation_failed');
 
     // Verify no changes were persisted
     $user->refresh();

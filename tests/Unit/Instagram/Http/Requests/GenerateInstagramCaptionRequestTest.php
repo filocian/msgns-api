@@ -155,7 +155,7 @@ describe('GenerateInstagramCaptionRequest rules', function (): void {
 
 describe('GenerateInstagramCaptionRequest::failedValidation', function (): void {
 
-    it('throws HttpResponseException with the shared validation_error envelope', function (): void {
+    it('throws HttpResponseException with the shared validation_failed envelope', function (): void {
         $request = new GenerateInstagramCaptionRequest();
 
         $validator = Validator::make([], $request->rules());
@@ -183,7 +183,7 @@ describe('GenerateInstagramCaptionRequest::failedValidation', function (): void 
             $body = json_decode((string) $response->getContent(), true);
 
             expect($body)->toHaveKey('error')
-                ->and($body['error']['code'])->toBe('validation_error')
+                ->and($body['error']['code'])->toBe('validation_failed')
                 ->and($body['error']['context'])->toHaveKey('errors')
                 ->and($body['error']['context']['errors'])->toBeArray()
                 ->and($body['error']['context']['errors'])->toHaveKey('product_id');

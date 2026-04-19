@@ -24,7 +24,7 @@ final class ListStripeProductsController extends Controller
         operationId: 'listStripeProducts',
         tags: ['Billing'],
         security: [['stateful-api' => []]],
-        responses: [
+		responses: [
             new OA\Response(
                 response: 200,
                 description: 'List of Stripe products',
@@ -38,9 +38,11 @@ final class ListStripeProductsController extends Controller
                     ],
                 ),
             ),
-            new OA\Response(response: 401, description: 'Unauthenticated'),
-            new OA\Response(response: 403, description: 'Forbidden: missing manage_subscription_types permission'),
-        ],
+			new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
+			new OA\Response(response: 403, description: 'Forbidden: missing manage_subscription_types permission', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
+			new OA\Response(response: 500, description: 'Stripe catalog misconfigured', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
+			new OA\Response(response: 502, description: 'Stripe catalog upstream unavailable', content: new OA\JsonContent(ref: '#/components/schemas/DomainError')),
+		],
     )]
     public function __invoke(): JsonResponse
     {

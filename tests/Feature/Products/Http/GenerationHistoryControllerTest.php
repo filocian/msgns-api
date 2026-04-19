@@ -102,19 +102,22 @@ describe('GET /api/v2/products/generations', function () {
     it('returns 422 for invalid timezone string', function () {
         $this->getJson('/api/v2/products/generations?timezone=Invalid/Zone')
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['timezone']);
+            ->assertJsonPath('error.code', 'validation_failed')
+            ->assertJsonStructure(['error' => ['context' => ['errors' => ['timezone']]]]);
     });
 
     it('returns 422 for per_page exceeding 50', function () {
         $this->getJson('/api/v2/products/generations?per_page=100')
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['per_page']);
+            ->assertJsonPath('error.code', 'validation_failed')
+            ->assertJsonStructure(['error' => ['context' => ['errors' => ['per_page']]]]);
     });
 
     it('returns 422 for per_page=0', function () {
         $this->getJson('/api/v2/products/generations?per_page=0')
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['per_page']);
+            ->assertJsonPath('error.code', 'validation_failed')
+            ->assertJsonStructure(['error' => ['context' => ['errors' => ['per_page']]]]);
     });
 
     it('returns 200 with empty data array when no history records exist', function () {

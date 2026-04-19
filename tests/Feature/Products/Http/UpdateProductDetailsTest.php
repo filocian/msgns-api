@@ -166,7 +166,7 @@ describe('PATCH /api/v2/products/{id}/details', function () {
         $this->actingAs($this->owner, 'stateful-api')
             ->patchJson("/api/v2/products/{$productId}/details", [])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
 
         $this->assertDatabaseHas('products', [
             'id' => $productId,
@@ -188,7 +188,7 @@ describe('PATCH /api/v2/products/{id}/details', function () {
                 'description' => str_repeat('A', 501),
             ])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
 
         $this->assertDatabaseHas('products', [
             'id' => $productId,

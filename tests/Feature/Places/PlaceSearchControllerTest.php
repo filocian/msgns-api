@@ -93,7 +93,7 @@ describe('GET /api/v2/places/search', function () {
 
 		$this->getJson('/api/v2/places/search?query=MSGNS')
 			->assertStatus(422)
-			->assertJsonPath('error.code', 'validation_error');
+			->assertJsonPath('error.code', 'validation_failed');
 
 		Http::assertNothingSent();
 	});
@@ -106,7 +106,7 @@ describe('GET /api/v2/places/search', function () {
 
 		$this->getJson('/api/v2/places/search')
 			->assertStatus(422)
-			->assertJsonPath('error.code', 'validation_error')
+			->assertJsonPath('error.code', 'validation_failed')
 			->assertJsonPath('error.context.errors.name.0', 'The name field is required.');
 
 		Http::assertNothingSent();
@@ -120,7 +120,7 @@ describe('GET /api/v2/places/search', function () {
 
 		$this->getJson('/api/v2/places/search?name=A')
 			->assertStatus(422)
-			->assertJsonPath('error.code', 'validation_error')
+			->assertJsonPath('error.code', 'validation_failed')
 			->assertJsonPath('error.context.errors.name.0', 'The name field must be at least 2 characters.');
 
 		Http::assertNothingSent();
@@ -208,7 +208,7 @@ describe('GET /api/v2/places/search', function () {
 
 		$this->getJson('/api/v2/places/search?name=' . str_repeat('A', 256))
 			->assertStatus(422)
-			->assertJsonPath('error.code', 'validation_error');
+			->assertJsonPath('error.code', 'validation_failed');
 
 		Http::assertNothingSent();
 	});

@@ -104,7 +104,7 @@ describe('POST /api/v2/products/{id}/register', function () {
 
         $this->postJson("/api/v2/products/{$productId}/register", [])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 404 when product does not exist', function () {

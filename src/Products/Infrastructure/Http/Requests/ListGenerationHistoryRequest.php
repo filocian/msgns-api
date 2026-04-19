@@ -8,6 +8,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Src\Identity\Domain\Permissions\DomainPermissions;
+use Src\Shared\Infrastructure\Http\ErrorResponseFactory;
 
 final class ListGenerationHistoryRequest extends FormRequest
 {
@@ -30,9 +31,6 @@ final class ListGenerationHistoryRequest extends FormRequest
 
     protected function failedValidation(Validator $validator): void
     {
-        throw new HttpResponseException(response()->json([
-            'message' => 'The given data was invalid.',
-            'errors' => $validator->errors()->toArray(),
-        ], 422));
+        throw new HttpResponseException(ErrorResponseFactory::validationFailed($validator->errors()->toArray()));
     }
 }

@@ -35,7 +35,7 @@ describe('Product configuration', function () {
 			'target_url' => 'http://test.target.url',
 		]);
 
-		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
+		$response->assertStatus(Response::HTTP_FORBIDDEN);
 	});
 
 	it('Non existent product cannot be configured', function () {

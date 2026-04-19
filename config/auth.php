@@ -72,9 +72,7 @@ return [
 	'providers' => [
 		'users' => [
 			'driver' => 'eloquent',
-			'model' => class_exists((string) env('AUTH_MODEL', ''))
-				? env('AUTH_MODEL')
-				: App\Models\User::class,
+			'model' => env('AUTH_MODEL', App\Models\User::class),
 		],
 
 		// 'users' => [

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -18,7 +19,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 final class User extends Authenticatable implements MustVerifyEmail
 {
-	use HasRoles, HasApiTokens, HasFactory, Notifiable;
+	use Billable, HasRoles, HasApiTokens, HasFactory, Notifiable;
 
 	protected string $guard_name = 'stateful-api';
 
@@ -209,5 +210,15 @@ final class User extends Authenticatable implements MustVerifyEmail
 	public function ghlContact()
 	{
 		return $this->hasOne(GHLContact::class, 'user_id', 'id');
+	}
+
+	public function googleBusinessConnection(): \Illuminate\Database\Eloquent\Relations\HasOne
+	{
+		return $this->hasOne(\Src\GoogleBusiness\Domain\Models\UserGoogleBusinessConnection::class, 'user_id', 'id');
+	}
+
+	public function instagramConnection(): \Illuminate\Database\Eloquent\Relations\HasOne
+	{
+		return $this->hasOne(\Src\Instagram\Infrastructure\Persistence\UserInstagramConnectionModel::class, 'user_id', 'id');
 	}
 }

@@ -33,7 +33,7 @@ final class GoogleOAuthAdapter implements GoogleAuthPort
             throw ValidationFailed::because('invalid_google_token');
         }
 
-        $clientId = config('services.google.client_id');
+        $clientId = config('services.google.sign_in_client_id');
         if (!empty($clientId) && ($payload['aud'] ?? null) !== $clientId) {
             throw ValidationFailed::because('invalid_google_token');
         }

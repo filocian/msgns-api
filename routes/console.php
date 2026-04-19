@@ -12,3 +12,5 @@ Artisan::command('inspire', function () {
 
 Schedule::command('app:reset-stuck-on-assigned-products-command')->daily()->at('08:00');
 Schedule::command('app:reset-non-existent-owner-products')->sundays()->at('07:50');
+Schedule::command('ai:reset-free-usage')->monthlyOn(1, '00:00');
+Schedule::command('ai:expire-responses')->daily();

@@ -37,6 +37,15 @@ final class DomainPermissions
     public const string EDIT_USER = 'edit_user';
     public const string EXPORT_DATA = 'export_data';
     public const string MANAGE_ROLES_AND_PERMISSIONS = 'manage_roles_and_permissions';
+    public const string MANAGE_SUBSCRIPTION_TYPES = 'manage_subscription_types';
+    public const string AI_FREE_PREVIEW = 'ai.free-preview';
+    public const string AI_BASIC_MONTHLY = 'ai.basic_monthly';
+    public const string AI_BASIC_YEARLY = 'ai.basic_yearly';
+    public const string AI_STANDARD_MONTHLY = 'ai.standard_monthly';
+    public const string AI_STANDARD_YEARLY  = 'ai.standard_yearly';
+    public const string AI_PREPAID_STARTER  = 'ai.prepaid_starter';
+    public const string AI_PREPAID_GROWTH   = 'ai.prepaid_growth';
+    public const string AI_PREPAID_PRO      = 'ai.prepaid_pro';
 
     /**
      * Human-readable English descriptions for every permission.
@@ -73,6 +82,15 @@ final class DomainPermissions
             self::EDIT_USER                          => 'Edit user profiles',
             self::EXPORT_DATA                        => 'Export data from the system',
             self::MANAGE_ROLES_AND_PERMISSIONS       => 'Manage roles and permissions (admin RBAC panel access)',
+            self::MANAGE_SUBSCRIPTION_TYPES          => 'Manage subscription type catalog (admin CRUD)',
+            self::AI_FREE_PREVIEW                    => 'Access AI features under the free monthly preview quota',
+            self::AI_BASIC_MONTHLY                   => 'Access AI features with Basic Monthly subscription',
+            self::AI_BASIC_YEARLY                    => 'Access AI features with Basic Yearly subscription',
+            self::AI_STANDARD_MONTHLY                => 'Access AI features with Standard Monthly subscription',
+            self::AI_STANDARD_YEARLY                 => 'Access AI features with Standard Yearly subscription',
+            self::AI_PREPAID_STARTER                 => 'Access to AI Starter prepaid package',
+            self::AI_PREPAID_GROWTH                  => 'Access to AI Growth prepaid package',
+            self::AI_PREPAID_PRO                     => 'Access to AI Pro prepaid package',
         ];
     }
 
@@ -104,6 +122,15 @@ final class DomainPermissions
             self::EDIT_USER,
             self::EXPORT_DATA,
             self::MANAGE_ROLES_AND_PERMISSIONS,
+            self::MANAGE_SUBSCRIPTION_TYPES,
+            self::AI_FREE_PREVIEW,
+            self::AI_BASIC_MONTHLY,
+            self::AI_BASIC_YEARLY,
+            self::AI_STANDARD_MONTHLY,
+            self::AI_STANDARD_YEARLY,
+            self::AI_PREPAID_STARTER,
+            self::AI_PREPAID_GROWTH,
+            self::AI_PREPAID_PRO,
         ];
     }
 }

@@ -43,7 +43,8 @@ beforeEach(function () {
 
 describe('Route flag switching — /product/{id}/redirect/{password}', function () {
     it('routes to legacy controller when flag is false', function () {
-        putenv('APP_V2_ENABLED=false');
+        $_ENV['APP_V2_ENABLED'] = 'false';
+        $_SERVER['APP_V2_ENABLED'] = 'false';
         $this->refreshApplication();
         refreshDbAfterAppRefresh();
 
@@ -53,7 +54,8 @@ describe('Route flag switching — /product/{id}/redirect/{password}', function 
     });
 
     it('routes to V2 controller when flag is true', function () {
-        putenv('APP_V2_ENABLED=true');
+        $_ENV['APP_V2_ENABLED'] = 'true';
+        $_SERVER['APP_V2_ENABLED'] = 'true';
         $this->refreshApplication();
         refreshDbAfterAppRefresh();
 
@@ -66,7 +68,8 @@ describe('Route flag switching — /product/{id}/redirect/{password}', function 
 
 describe('Route flag switching — /nfc/{data}', function () {
     it('routes to legacy controller when flag is false', function () {
-        putenv('APP_V2_ENABLED=false');
+        $_ENV['APP_V2_ENABLED'] = 'false';
+        $_SERVER['APP_V2_ENABLED'] = 'false';
         $this->refreshApplication();
         refreshDbAfterAppRefresh();
 
@@ -76,7 +79,8 @@ describe('Route flag switching — /nfc/{data}', function () {
     });
 
     it('routes to V2 controller when flag is true', function () {
-        putenv('APP_V2_ENABLED=true');
+        $_ENV['APP_V2_ENABLED'] = 'true';
+        $_SERVER['APP_V2_ENABLED'] = 'true';
         $this->refreshApplication();
         refreshDbAfterAppRefresh();
 
@@ -89,7 +93,8 @@ describe('Route flag switching — /nfc/{data}', function () {
 
 describe('Permanent V2 route — always active regardless of flag', function () {
     it('/v2/product/{id}/redirect/{password} routes to V2 when flag is false', function () {
-        putenv('APP_V2_ENABLED=false');
+        $_ENV['APP_V2_ENABLED'] = 'false';
+        $_SERVER['APP_V2_ENABLED'] = 'false';
         $this->refreshApplication();
         refreshDbAfterAppRefresh();
 
@@ -99,7 +104,8 @@ describe('Permanent V2 route — always active regardless of flag', function () 
     });
 
     it('/v2/product/{id}/redirect/{password} routes to V2 when flag is true', function () {
-        putenv('APP_V2_ENABLED=true');
+        $_ENV['APP_V2_ENABLED'] = 'true';
+        $_SERVER['APP_V2_ENABLED'] = 'true';
         $this->refreshApplication();
         refreshDbAfterAppRefresh();
 

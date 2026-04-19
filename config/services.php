@@ -48,12 +48,39 @@ return [
 	],
 
 	'google' => [
-		'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+		'places_api_key'        => env('GOOGLE_PLACES_API_KEY'),
+		'client_id'             => env('GOOGLE_CLIENT_ID'),              // Google Business OAuth only (BE-11a)
+		'sign_in_client_id'     => env('GOOGLE_SIGN_IN_CLIENT_ID'),     // Social login — used by GoogleOAuthAdapter for aud verification
+		'client_secret'         => env('GOOGLE_CLIENT_SECRET'),          // new — BE-11a
+		'business_redirect_uri' => env('GOOGLE_BUSINESS_REDIRECT_URI', 'http://localhost:8000/google-business/callback'),  // new — BE-11a
+	],
+
+	'meta' => [
+		'app_id'            => env('META_APP_ID'),
+		'app_secret'        => env('META_APP_SECRET'),
+		'redirect_uri'      => env('INSTAGRAM_REDIRECT_URI', 'http://localhost:8000/instagram/callback'),
+		'graph_api_version' => env('META_GRAPH_API_VERSION', 'v22.0'),
+	],
+
+	'gemini' => [
+		'api_key'                                  => env('GEMINI_API_KEY'),
+		'model'                                    => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+		'timeout_seconds'                          => (int) env('GEMINI_TIMEOUT_SECONDS', 30),
+		'rate_limit_per_minute'                    => (int) env('AI_RATE_LIMIT_PER_MINUTE', 2),
+		'rate_limit_window_seconds'                => (int) env('AI_RATE_LIMIT_WINDOW_SECONDS', 60),
+		'ai_free_google_review_requests_per_month' => (int) env('AI_FREE_GOOGLE_REVIEW_REQUESTS_PER_MONTH', 5),
+		'ai_free_instagram_requests_per_month'     => (int) env('AI_FREE_INSTAGRAM_REQUESTS_PER_MONTH', 5),
 	],
 
 	'products' => [
-		'front_url' => env('FRONT_URL', 'https://app.msgns.local'),
-		'v2_front_url' => env('FRONT_V2_URL', 'https://app.msgns.local'),
+		'front_url' => env('FRONT_URL', 'http://localhost:5173'),
+		'v2_front_url' => env('FRONT_V2_URL', 'http://localhost:5173'),
 		'default_password_length' => (int) env('DEFAULT_PRODUCT_PASSWORD_LENGTH', 12),
+	],
+
+	'stripe' => [
+		'key'            => env('STRIPE_KEY'),
+		'secret'         => env('STRIPE_SECRET'),
+		'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
 	],
 ];

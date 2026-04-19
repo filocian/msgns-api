@@ -55,12 +55,12 @@ describe('GET /api/v2/identity/admin/permissions — descriptions', function () 
         expect($createRole['description'])->toBe($descriptions['create_role']);
     });
 
-    it('REQ-09-A: all 24 permissions have non-empty descriptions', function () {
+    it('REQ-09-A: all 33 permissions have non-empty descriptions', function () {
         $response = $this->getJson('/api/v2/identity/admin/permissions')
             ->assertStatus(200);
 
         $permissions = $response->json('data');
-        expect($permissions)->toHaveCount(24);
+        expect($permissions)->toHaveCount(33);
 
         foreach ($permissions as $permission) {
             expect(strlen($permission['description']))->toBeGreaterThan(0,

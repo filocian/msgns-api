@@ -15,6 +15,15 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
+ * Canonical user model for both legacy v1 and v2 Infrastructure.
+ *
+ * Intentional architecture decision: this single model is shared across
+ * the app/ (legacy) and src/ (v2) layers. V2 Domain and Application layers
+ * never import this class directly — they receive primitive user IDs and
+ * interact through Port interfaces. V2 Infrastructure layers may use it.
+ *
+ * A parallel EloquentUser in src/ will NOT be created. See filocian/msgns-api#88.
+ *
  * @property string|null $user_agent
  */
 final class User extends Authenticatable implements MustVerifyEmail

@@ -114,7 +114,7 @@ describe('POST /api/v2/products/{id}/business', function () {
             'name' => 'Missing Types',
         ])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 404 when product does not exist', function () {

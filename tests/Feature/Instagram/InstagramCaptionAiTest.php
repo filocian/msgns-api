@@ -96,7 +96,7 @@ describe('POST /api/v2/ai/instagram/generate', function () use ($SMALL_B64): voi
         $this->actingAs($user, 'stateful-api')
             ->postJson('/api/v2/ai/instagram/generate', [])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 when product_id is not found', function (): void {
@@ -106,7 +106,7 @@ describe('POST /api/v2/ai/instagram/generate', function () use ($SMALL_B64): voi
         $this->actingAs($user, 'stateful-api')
             ->postJson('/api/v2/ai/instagram/generate', ['product_id' => 999_999])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 when image_base64 is provided without image_mime_type', function () use ($SMALL_B64): void {
@@ -120,7 +120,7 @@ describe('POST /api/v2/ai/instagram/generate', function () use ($SMALL_B64): voi
                 'image_base64' => $SMALL_B64,
             ])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 for an unsupported image_mime_type', function () use ($SMALL_B64): void {
@@ -135,7 +135,7 @@ describe('POST /api/v2/ai/instagram/generate', function () use ($SMALL_B64): voi
                 'image_mime_type' => 'image/gif',
             ])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 403 when the product is owned by another user', function (): void {

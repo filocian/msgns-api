@@ -21,7 +21,7 @@ describe('Product Registration', function () {
 		$this->actingAs($user);
 		$response = $this->postWithHeaders('/api/products/1/register/123456');
 
-		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
+		$response->assertStatus(Response::HTTP_FORBIDDEN);
 	});
 
 	it('Already registered product cannot be registered', function () {
@@ -32,7 +32,7 @@ describe('Product Registration', function () {
 		$this->actingAs($user);
 		$response = $this->postWithHeaders('/api/products/1/register/123456');
 
-		$response->assertStatus(Response::HTTP_UNAUTHORIZED);
+		$response->assertStatus(Response::HTTP_CONFLICT);
 	})->group('legacy');
 
 	it('Non existent product cannot be registered', function () {

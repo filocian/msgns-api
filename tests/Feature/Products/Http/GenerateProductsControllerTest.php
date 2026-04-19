@@ -258,7 +258,7 @@ describe('POST /api/v2/products/generate', function () {
         $response = $this->postJson('/api/v2/products/generate', []);
 
         $response->assertStatus(400)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 400 when quantity is zero', function () {
@@ -269,7 +269,7 @@ describe('POST /api/v2/products/generate', function () {
         ]);
 
         $response->assertStatus(400)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     // ─── 401 unauthenticated (NFR-001) ────────────────────────────────────────

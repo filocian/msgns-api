@@ -45,9 +45,10 @@ describe('Legacy FormRequest authorization after rbac:reconcile', function () {
         $user->assignRole(StaticRoles::USER_ROLE);
         $this->actingAs($user, 'stateful-api');
 
-        // ActionNotAllowedException maps to 401 in bootstrap/app.php
+        // ActionNotAllowedException maps to 403 auth.forbidden in bootstrap/app.php
         $this->getJson('/api/users/list-roles')
-            ->assertStatus(401);
+            ->assertStatus(403)
+            ->assertJsonPath('error.code', 'auth.forbidden');
     })->group('legacy');
 
     it('denies designer role from accessing legacy list-roles endpoint after reconciliation', function () {
@@ -55,9 +56,10 @@ describe('Legacy FormRequest authorization after rbac:reconcile', function () {
         $user->assignRole(StaticRoles::DESIGNER_ROLE);
         $this->actingAs($user, 'stateful-api');
 
-        // ActionNotAllowedException maps to 401 in bootstrap/app.php
+        // ActionNotAllowedException maps to 403 auth.forbidden in bootstrap/app.php
         $this->getJson('/api/users/list-roles')
-            ->assertStatus(401);
+            ->assertStatus(403)
+            ->assertJsonPath('error.code', 'auth.forbidden');
     })->group('legacy');
 
     it('backoffice hasAnyRole check resolves correctly after running reconciliation twice (idempotent parity)', function () {

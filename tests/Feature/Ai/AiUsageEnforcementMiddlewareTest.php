@@ -51,7 +51,8 @@ describe('AiUsageEnforcementMiddleware', function (): void {
         $this->actingAs($user, 'stateful-api')
             ->getJson('/_test/ai/enforce/google-reviews')
             ->assertStatus(429)
-            ->assertJson(['message' => 'AI quota exhausted.']);
+            ->assertJsonPath('error.code', 'ai.quota_exhausted')
+            ->assertJsonPath('error.context.product_type', 'google_reviews');
     });
 
     it('returns 401 when request is unauthenticated', function (): void {
@@ -66,7 +67,7 @@ describe('AiUsageEnforcementMiddleware', function (): void {
         $this->actingAs($user, 'stateful-api')
             ->getJson('/_test/ai/enforce/google-reviews')
             ->assertStatus(403)
-            ->assertJson(['message' => 'Forbidden.']);
+            ->assertJsonPath('error.code', 'auth.forbidden');
     });
 
 });

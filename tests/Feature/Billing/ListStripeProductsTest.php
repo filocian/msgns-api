@@ -7,6 +7,8 @@ use Mockery\MockInterface;
 use Spatie\Permission\Models\Permission;
 use Src\Billing\Domain\DataTransferObjects\StripeCatalogPrice;
 use Src\Billing\Domain\DataTransferObjects\StripeCatalogProduct;
+use Src\Billing\Domain\Errors\StripeCatalogMisconfigured;
+use Src\Billing\Domain\Errors\StripeCatalogUpstreamUnavailable;
 use Src\Billing\Domain\Ports\StripeCatalogPort;
 use Src\Identity\Domain\Permissions\DomainPermissions;
 use Src\Identity\Domain\Permissions\DomainRoles;
@@ -20,7 +22,8 @@ beforeEach(function () {
 
 it('returns 401 for unauthenticated request on stripe products list', function () {
     $this->getJson('/api/v2/billing/stripe/products')
-        ->assertStatus(401);
+        ->assertStatus(401)
+        ->assertJsonPath('error.code', 'auth.unauthenticated');
 });
 
 it('returns 403 for authenticated user without manage_subscription_types permission', function () {
@@ -28,7 +31,36 @@ it('returns 403 for authenticated user without manage_subscription_types permiss
 
     $this->actingAs($user, 'stateful-api')
         ->getJson('/api/v2/billing/stripe/products')
-        ->assertStatus(403);
+        ->assertStatus(403)
+        ->assertJsonPath('error.code', 'http.forbidden');
+});
+
+it('returns 500 canonical envelope when stripe catalog is misconfigured', function () {
+    $this->mock(StripeCatalogPort::class, function (MockInterface $mock) {
+        $mock->shouldReceive('listProducts')
+            ->once()
+            ->andThrow(StripeCatalogMisconfigured::withoutContext());
+    });
+
+    $this->actingAs($this->admin, 'stateful-api')
+        ->getJson('/api/v2/billing/stripe/products')
+        ->assertStatus(500)
+        ->assertJsonPath('error.code', 'stripe_catalog.misconfigured')
+        ->assertJsonPath('error.context', []);
+});
+
+it('returns 502 canonical envelope when stripe catalog upstream is unavailable', function () {
+    $this->mock(StripeCatalogPort::class, function (MockInterface $mock) {
+        $mock->shouldReceive('listProducts')
+            ->once()
+            ->andThrow(StripeCatalogUpstreamUnavailable::withReason('stripe_unreachable'));
+    });
+
+    $this->actingAs($this->admin, 'stateful-api')
+        ->getJson('/api/v2/billing/stripe/products')
+        ->assertStatus(502)
+        ->assertJsonPath('error.code', 'stripe_catalog.upstream_unavailable')
+        ->assertJsonPath('error.context.reason', 'stripe_unreachable');
 });
 
 it('returns 200 with list of StripeProductResource for admin', function () {

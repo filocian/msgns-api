@@ -31,13 +31,13 @@ it('returns 400 validation error with invalid default_locale', function () {
         'default_locale' => 'xx',
     ]);
     $response->assertStatus(400)
-             ->assertJsonPath('error.code', 'validation_error');
+             ->assertJsonPath('error.code', 'validation_failed');
 });
 
 it('returns 400 validation error with empty body', function () {
     $response = $this->patchJson('/api/v2/identity/me', []);
     $response->assertStatus(400)
-             ->assertJsonPath('error.code', 'validation_error');
+             ->assertJsonPath('error.code', 'validation_failed');
 });
 
 it('response shape matches UserResource with defaultLocale', function () {

@@ -99,7 +99,7 @@ describe('PUT /api/v2/products/{id}/configure', function () {
 
         $this->putJson("/api/v2/products/{$productId}/configure", ['target_url' => 'not-a-url'])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 404 when product does not exist', function () {

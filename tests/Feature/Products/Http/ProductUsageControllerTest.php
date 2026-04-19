@@ -186,7 +186,7 @@ describe('POST /api/v2/products/{id}/usage', function () {
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 when productName is missing', function () {
@@ -198,7 +198,7 @@ describe('POST /api/v2/products/{id}/usage', function () {
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 when scannedAt is missing', function () {
@@ -210,7 +210,7 @@ describe('POST /api/v2/products/{id}/usage', function () {
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 when scannedAt is not a valid ISO-8601 datetime', function () {
@@ -223,7 +223,7 @@ describe('POST /api/v2/products/{id}/usage', function () {
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 when scannedAt is a valid date but not ISO-8601 (no T separator or no offset)', function () {
@@ -236,7 +236,7 @@ describe('POST /api/v2/products/{id}/usage', function () {
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 when userId is not an integer', function () {
@@ -249,7 +249,7 @@ describe('POST /api/v2/products/{id}/usage', function () {
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('accepts ISO-8601 datetime with UTC Z shorthand', function () {

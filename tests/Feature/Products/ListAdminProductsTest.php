@@ -651,7 +651,8 @@ describe('GET /api/v2/products/admin/', function (): void {
         $test = $this;
         $test->getJson('/api/v2/products/admin/?sort_by=unknown')
             ->assertStatus(422)
-            ->assertJsonStructure(['message', 'errors' => ['sort_by']]);
+            ->assertJsonPath('error.code', 'validation_failed')
+            ->assertJsonStructure(['error' => ['context' => ['errors' => ['sort_by']]]]);
     });
 
     it('invalid sort_dir returns 422', function (): void {
@@ -659,7 +660,8 @@ describe('GET /api/v2/products/admin/', function (): void {
         $test = $this;
         $test->getJson('/api/v2/products/admin/?sort_by=name&sort_dir=sideways')
             ->assertStatus(422)
-            ->assertJsonStructure(['message', 'errors' => ['sort_dir']]);
+            ->assertJsonPath('error.code', 'validation_failed')
+            ->assertJsonStructure(['error' => ['context' => ['errors' => ['sort_dir']]]]);
     });
 
     it('invalid timezone returns 422', function (): void {
@@ -668,7 +670,8 @@ describe('GET /api/v2/products/admin/', function (): void {
 
         $test->getJson('/api/v2/products/admin/?timezone=Not/ATimezone')
             ->assertStatus(422)
-            ->assertJsonStructure(['message', 'errors' => ['timezone']]);
+            ->assertJsonPath('error.code', 'validation_failed')
+            ->assertJsonStructure(['error' => ['context' => ['errors' => ['timezone']]]]);
     });
 
     it('returns 422 when assigned_at_to is before assigned_at_from', function (): void {
@@ -677,7 +680,8 @@ describe('GET /api/v2/products/admin/', function (): void {
 
         $test->getJson('/api/v2/products/admin/?assigned_at_from=2025-06-10&assigned_at_to=2025-06-01')
             ->assertStatus(422)
-            ->assertJsonStructure(['message', 'errors' => ['assigned_at_to']]);
+            ->assertJsonPath('error.code', 'validation_failed')
+            ->assertJsonStructure(['error' => ['context' => ['errors' => ['assigned_at_to']]]]);
     });
 
     it('clamps per_page between 1 and 100', function (): void {

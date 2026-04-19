@@ -87,7 +87,7 @@ describe('PATCH /api/v2/products/{id}/assign', function () {
 
         $this->patchJson("/api/v2/products/{$productId}/assign", [])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 });
 
@@ -119,7 +119,7 @@ describe('PATCH /api/v2/products/{id}/target-url', function () {
 
         $this->patchJson("/api/v2/products/{$productId}/target-url", ['target_url' => 'not-a-url'])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 });
 
@@ -215,7 +215,7 @@ describe('PATCH /api/v2/products/{id}/config-status', function () {
 
         $this->patchJson("/api/v2/products/{$productId}/config-status", [])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 422 for an invalid status string', function () {

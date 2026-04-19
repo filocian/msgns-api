@@ -169,7 +169,7 @@ describe('POST /api/v2/products/{id}/whatsapp/messages', function () {
 
         $this->postJson("/api/v2/products/{$productId}/whatsapp/messages", [])
             ->assertStatus(422)
-            ->assertJsonPath('error.code', 'validation_error');
+            ->assertJsonPath('error.code', 'validation_failed');
     });
 
     it('returns 401 when unauthenticated', function () {

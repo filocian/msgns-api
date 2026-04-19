@@ -6,10 +6,16 @@ namespace Src\Billing\Infrastructure\Services;
 
 use Src\Billing\Domain\DataTransferObjects\StripeCatalogPrice;
 use Src\Billing\Domain\DataTransferObjects\StripeCatalogProduct;
+use Src\Billing\Domain\Errors\StripeCatalogMisconfigured;
+use Src\Billing\Domain\Errors\StripeCatalogUpstreamUnavailable;
 use Src\Billing\Domain\Errors\StripeProductUnavailable;
 use Src\Billing\Domain\Ports\StripeCatalogPort;
 use Src\Shared\Core\Ports\CachePort;
+use Stripe\Exception\ApiConnectionException;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Exception\AuthenticationException;
 use Stripe\Exception\InvalidRequestException;
+use Stripe\Exception\RateLimitException;
 use Stripe\Price;
 use Stripe\Product;
 use Stripe\StripeClient;
@@ -39,13 +45,19 @@ final class StripeCatalogService implements StripeCatalogPort
         return $result;
     }
 
-    public function getProduct(string $productId): StripeCatalogProduct
-    {
-        try {
-            $product = $this->stripe->products->retrieve($productId, []);
-        } catch (InvalidRequestException) {
-            throw StripeProductUnavailable::withProductId($productId);
-        }
+	public function getProduct(string $productId): StripeCatalogProduct
+	{
+		try {
+			$product = $this->stripe->products->retrieve($productId, []);
+		} catch (InvalidRequestException) {
+			throw StripeProductUnavailable::withProductId($productId);
+		} catch (AuthenticationException) {
+			throw StripeCatalogMisconfigured::withoutContext();
+		} catch (ApiConnectionException|RateLimitException) {
+			throw StripeCatalogUpstreamUnavailable::withReason('stripe_unreachable');
+		} catch (ApiErrorException) {
+			throw StripeCatalogUpstreamUnavailable::withReason('stripe_api_error');
+		}
 
         if ($product->active !== true) {
             throw StripeProductUnavailable::withProductId($productId);
@@ -57,13 +69,23 @@ final class StripeCatalogService implements StripeCatalogPort
     /**
      * @return list<StripeCatalogPrice>
      */
-    public function listPricesForProduct(string $productId): array
-    {
-        $collection = $this->stripe->prices->all([
-            'product' => $productId,
-            'active'  => true,
-            'limit'   => 100,
-        ]);
+	public function listPricesForProduct(string $productId): array
+	{
+		try {
+			$collection = $this->stripe->prices->all([
+				'product' => $productId,
+				'active'  => true,
+				'limit'   => 100,
+			]);
+		} catch (InvalidRequestException) {
+			throw StripeProductUnavailable::withProductId($productId);
+		} catch (AuthenticationException) {
+			throw StripeCatalogMisconfigured::withoutContext();
+		} catch (ApiConnectionException|RateLimitException) {
+			throw StripeCatalogUpstreamUnavailable::withReason('stripe_unreachable');
+		} catch (ApiErrorException) {
+			throw StripeCatalogUpstreamUnavailable::withReason('stripe_api_error');
+		}
 
         $prices = [];
         foreach ($collection->data as $price) {
@@ -76,12 +98,20 @@ final class StripeCatalogService implements StripeCatalogPort
     /**
      * @return list<StripeCatalogProduct>
      */
-    private function fetchActiveProducts(): array
-    {
-        $collection = $this->stripe->products->all([
-            'active' => true,
-            'limit'  => 100,
-        ]);
+	private function fetchActiveProducts(): array
+	{
+		try {
+			$collection = $this->stripe->products->all([
+				'active' => true,
+				'limit'  => 100,
+			]);
+		} catch (AuthenticationException) {
+			throw StripeCatalogMisconfigured::withoutContext();
+		} catch (ApiConnectionException|RateLimitException) {
+			throw StripeCatalogUpstreamUnavailable::withReason('stripe_unreachable');
+		} catch (ApiErrorException) {
+			throw StripeCatalogUpstreamUnavailable::withReason('stripe_api_error');
+		}
 
         $products = [];
         foreach ($collection->data as $product) {

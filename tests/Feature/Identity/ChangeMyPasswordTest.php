@@ -40,7 +40,7 @@ it('returns 400 validation error with new_password too short', function () {
         'new_password_confirmation' => 'short',
     ]);
     $response->assertStatus(400)
-             ->assertJsonPath('error.code', 'validation_error');
+             ->assertJsonPath('error.code', 'validation_failed');
 });
 
 it('returns 400 validation error with mismatched confirmation', function () {
@@ -50,7 +50,7 @@ it('returns 400 validation error with mismatched confirmation', function () {
         'new_password_confirmation' => 'DifferentPass!',
     ]);
     $response->assertStatus(400)
-             ->assertJsonPath('error.code', 'validation_error');
+             ->assertJsonPath('error.code', 'validation_failed');
 });
 
 it('has rate limiting middleware (throttle:5,1) on PATCH /me/password', function () {

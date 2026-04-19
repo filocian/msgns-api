@@ -74,7 +74,7 @@ it('returns 400 validation envelope for missing required fields', function () {
     $response = $this->postWithHeaders('/api/v2/identity/login', []);
 
     $response->assertStatus(400)
-        ->assertJsonPath('error.code', 'validation_error');
+        ->assertJsonPath('error.code', 'validation_failed');
     AuthContractAssertions::assertAuthErrorContract($response->json(), 'login-validation-error.json');
 });
 
